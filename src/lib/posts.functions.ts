@@ -67,6 +67,7 @@ export const listPosts = createServerFn({ method: "GET" })
       .eq("status", "publicado")
       .lte("publicado_em", new Date().toISOString())
       .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
@@ -83,7 +84,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const sb = publicClient();
   const now = new Date().toISOString();
 
-  const [{ data: destaque }, { data: naoPerca }, { data: recentes }, { data: temasMenu }, { data: config }] =
+  const [{ data: fixado }, { data: naoPerca }, { data: recentes }, { data: temasMenu }, { data: config }] =
     await Promise.all([
       sb
         .from("posts")
@@ -92,6 +93,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("destaque", true)
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(1),
       sb
         .from("posts")
@@ -100,6 +102,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("nao_perca", true)
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(6),
       sb
         .from("posts")
@@ -107,6 +110,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("status", "publicado")
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(18),
       sb
         .from("temas")
@@ -118,13 +122,19 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const configMap: Record<string, any> = {};
   (config ?? []).forEach((c: any) => { configMap[c.chave] = c.valor; });
 
-  const destaqueList = await attachTemas(sb, destaque ?? []);
+  const fixadoList = await attachTemas(sb, fixado ?? []);
   const recentesList = await attachTemas(sb, recentes ?? []);
 
+  // Se há uma matéria fixada, ela é a manchete; senão, a mais recente.
+  const manchete = (fixadoList[0] ?? recentesList[0] ?? null) as PostListItem | null;
+  const restantes = manchete
+    ? recentesList.filter((p: any) => p.id !== manchete.id)
+    : recentesList.slice(1);
+
   return {
-    destaque: (destaqueList[0] ?? recentesList[0] ?? null) as PostListItem | null,
-    leiaAgora: (recentesList.slice(1, 6)) as PostListItem[],
-    ultimas: (recentesList.slice(1)) as PostListItem[],
+    destaque: manchete,
+    leiaAgora: restantes.slice(0, 5) as PostListItem[],
+    ultimas: restantes as PostListItem[],
     naoPerca: (naoPerca ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
     config: configMap,
@@ -147,7 +157,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
     if (!post) return null;
     const [withTemas] = await attachTemas(sb, [post]);
 
-    // Leia também: 3 posts do mesmo tema
+    // Leia também: 3 posts do mesmo tema, mais recentes primeiro
     let relacionados: PostListItem[] = [];
     if (withTemas.temas && withTemas.temas.length > 0) {
       const slugs = withTemas.temas.map((t: any) => t.slug);
@@ -156,13 +166,17 @@ export const getPostBySlug = createServerFn({ method: "GET" })
       if (ids.length > 0) {
         const { data: rel } = await sb
           .from("post_temas")
-          .select("post_id, posts(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
+          .select("post_id, posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
           .in("tema_id", ids)
-          .limit(20);
+          .eq("posts.status", "publicado")
+          .lte("posts.publicado_em", now)
+          .order("posts(publicado_em)", { ascending: false })
+          .order("posts(id)", { ascending: false })
+          .limit(30);
         const seen = new Set<string>([post.id]);
         const items: any[] = [];
         (rel ?? []).forEach((r: any) => {
-          if (r.posts && r.posts.status === "publicado" && !seen.has(r.posts.id)) {
+          if (r.posts && !seen.has(r.posts.id)) {
             seen.add(r.posts.id);
             items.push(r.posts);
           }
@@ -195,18 +209,22 @@ export const getPostsByTema = createServerFn({ method: "GET" })
 
     const from = (data.page - 1) * perPage;
     const to = from + perPage - 1;
+    const nowIso = new Date().toISOString();
     const { data: rels, count } = await sb
       .from("post_temas")
       .select("posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)", {
         count: "exact",
       })
       .eq("tema_id", tema.id)
+      .eq("posts.status", "publicado")
+      .lte("posts.publicado_em", nowIso)
       .order("posts(publicado_em)", { ascending: false })
+      .order("posts(id)", { ascending: false })
       .range(from, to);
 
     const posts = (rels ?? [])
       .map((r: any) => r.posts)
-      .filter((p: any) => p && p.status === "publicado");
+      .filter((p: any) => !!p);
     const withTemas = await attachTemas(sb, posts);
     return {
       tema,
@@ -233,6 +251,7 @@ export const searchPosts = createServerFn({ method: "GET" })
       .lte("publicado_em", new Date().toISOString())
       .or(`titulo.ilike.${q},resumo.ilike.${q}`)
       .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
@@ -286,6 +305,7 @@ export const listAllPublishedSlugs = createServerFn({ method: "GET" }).handler(a
     .eq("status", "publicado")
     .lte("publicado_em", new Date().toISOString())
     .order("publicado_em", { ascending: false })
+    .order("id", { ascending: false })
     .limit(5000);
   return data ?? [];
 });
@@ -298,6 +318,7 @@ export const listRecentForFeed = createServerFn({ method: "GET" }).handler(async
     .eq("status", "publicado")
     .lte("publicado_em", new Date().toISOString())
     .order("publicado_em", { ascending: false })
+    .order("id", { ascending: false })
     .limit(30);
   return data ?? [];
 });
