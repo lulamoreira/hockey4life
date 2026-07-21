@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getAdminPost, listTemas, savePost, criarUploadUrl } from "@/lib/admin.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 export const Route = createFileRoute("/admin/posts/$id")({
   component: EditorPage,
