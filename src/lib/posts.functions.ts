@@ -38,6 +38,16 @@ export type CarrosselSettings = {
   resumoPx: number;        // tamanho do resumo 12..24 padrão 16
 };
 
+export type TimesDirecao = "rtl" | "ltr" | "up" | "down";
+export type TimesCarrosselSettings = {
+  ativo: boolean;
+  direcao: TimesDirecao;
+  velocidade: number;      // segundos por volta completa (10..120)
+  quantidadeVisivel: number; // 2..12
+  alturaPx: number;        // 60..200 altura do item
+  pausarNoHover: boolean;
+};
+
 export type HomeSettings = {
   ordem: OrdemListagem;
   manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
@@ -53,6 +63,7 @@ export type HomeSettings = {
   // "nao_perca" mantido para compat retroativa (ativo/modo)
   nao_perca: { ativo: boolean; modo: "recentes" | "manual" };
   letreiro: LetreiroSettings;
+  times: TimesCarrosselSettings;
 };
 
 export const LETREIRO_PADRAO: LetreiroSettings = {
@@ -78,6 +89,15 @@ export const CARROSSEL_PADRAO: CarrosselSettings = {
   resumoPx: 16,
 };
 
+export const TIMES_CARROSSEL_PADRAO: TimesCarrosselSettings = {
+  ativo: true,
+  direcao: "rtl",
+  velocidade: 40,
+  quantidadeVisivel: 8,
+  alturaPx: 120,
+  pausarNoHover: true,
+};
+
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
   ordem: "desc",
   manchete: { modo: "auto", post_id: null, fixada_em: null },
@@ -85,7 +105,9 @@ export const HOME_SETTINGS_PADRAO: HomeSettings = {
   quantidades: { home_grade: 12, leia_agora: 5, arquivo: 12, tema: 12, leia_tambem: 3, nao_perca: 6 },
   nao_perca: { ativo: true, modo: "recentes" },
   letreiro: LETREIRO_PADRAO,
+  times: TIMES_CARROSSEL_PADRAO,
 };
+
 
 function clamp(n: unknown, min: number, max: number, def: number): number {
   const v = Number.isFinite(Number(n)) ? Math.floor(Number(n)) : def;
@@ -123,6 +145,19 @@ function normalizeCarrossel(raw: any): CarrosselSettings {
   };
 }
 
+function normalizeTimes(raw: any): TimesCarrosselSettings {
+  const t = raw ?? {};
+  const dir = ["rtl","ltr","up","down"].includes(t.direcao) ? t.direcao : TIMES_CARROSSEL_PADRAO.direcao;
+  return {
+    ativo: t.ativo !== false,
+    direcao: dir as TimesDirecao,
+    velocidade: clamp(t.velocidade, 10, 120, TIMES_CARROSSEL_PADRAO.velocidade),
+    quantidadeVisivel: clamp(t.quantidadeVisivel, 2, 12, TIMES_CARROSSEL_PADRAO.quantidadeVisivel),
+    alturaPx: clamp(t.alturaPx, 60, 200, TIMES_CARROSSEL_PADRAO.alturaPx),
+    pausarNoHover: t.pausarNoHover !== false,
+  };
+}
+
 function normalizeHomeSettings(raw: any): HomeSettings {
   const s = raw ?? {};
   const q = s.quantidades ?? {};
@@ -155,8 +190,10 @@ function normalizeHomeSettings(raw: any): HomeSettings {
       modo: naoPercaModo,
     },
     letreiro: normalizeLetreiro(letreiroRaw, naoPercaModo),
+    times: normalizeTimes(s.times),
   };
 }
+
 
 async function readHomeSettings(sb: ReturnType<typeof publicClient>): Promise<HomeSettings> {
   const { data } = await sb.from("configuracoes").select("valor").eq("chave", "home_ordenacao").maybeSingle();
@@ -335,7 +372,9 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
     naoPerca: (letreiroData ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
     letreiro,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
+    times: settings.times,
     config: configMap,
+
   };
 });
 

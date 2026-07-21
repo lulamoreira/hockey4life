@@ -3,8 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { listConfig, saveConfig, searchAdminPostsByTitle, getAdminPostSimple } from "@/lib/admin.functions";
-import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, CARROSSEL_PADRAO, type HomeSettings, type LetreiroDirecao, type TransicaoManchete, type CarrosselSettings } from "@/lib/posts.functions";
+import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, CARROSSEL_PADRAO, TIMES_CARROSSEL_PADRAO, type HomeSettings, type LetreiroDirecao, type TransicaoManchete, type CarrosselSettings, type TimesCarrosselSettings, type TimesDirecao } from "@/lib/posts.functions";
 import { Letreiro } from "@/components/site/Letreiro";
+import { TimesCarrossel } from "@/components/site/TimesCarrossel";
+
 import { formatDataBR } from "@/lib/slugify";
 
 export const Route = createFileRoute("/admin/configuracoes")({
@@ -137,6 +139,8 @@ function HomeTab() {
       quantidades: { ...HOME_SETTINGS_PADRAO.quantidades, ...(raw.quantidades ?? {}) },
       nao_perca: { ...HOME_SETTINGS_PADRAO.nao_perca, ...(raw.nao_perca ?? {}) },
       letreiro: { ...HOME_SETTINGS_PADRAO.letreiro, ...(raw.letreiro ?? {}) },
+      times: { ...HOME_SETTINGS_PADRAO.times, ...(raw.times ?? {}) },
+
     });
   }, [data]);
 
@@ -229,6 +233,16 @@ function HomeTab() {
           onChange={(l) => setS({ ...s, letreiro: l, nao_perca: { ativo: l.ativo, modo: l.origem } })}
         />
       </Section>
+
+      {/* Carrossel de logos dos times da NHL */}
+      <Section
+        title="Carrossel de logos dos times (NHL)"
+        onReset={() => setS({ ...s, times: TIMES_CARROSSEL_PADRAO })}
+      >
+        <TimesEditor value={s.times} onChange={(t) => setS({ ...s, times: t })} />
+      </Section>
+
+
 
 
       {msg && (
@@ -774,6 +788,97 @@ function CarrosselEditor({
     </div>
   );
 }
+
+function TimesEditor({
+  value,
+  onChange,
+}: {
+  value: TimesCarrosselSettings;
+  onChange: (v: TimesCarrosselSettings) => void;
+}) {
+  const t = value;
+  const set = (patch: Partial<TimesCarrosselSettings>) => onChange({ ...t, ...patch });
+  // Times de exemplo para prévia ao vivo
+  const exemplo = [
+    { slug: "boston-bruins", nome: "Boston Bruins" },
+    { slug: "toronto-maple-leafs", nome: "Toronto Maple Leafs" },
+    { slug: "montreal-canadiens", nome: "Montreal Canadiens" },
+    { slug: "new-york-rangers", nome: "New York Rangers" },
+    { slug: "chicago-blackhawks", nome: "Chicago Blackhawks" },
+    { slug: "detroit-red-wings", nome: "Detroit Red Wings" },
+    { slug: "pittsburgh-penguins", nome: "Pittsburgh Penguins" },
+    { slug: "edmonton-oilers", nome: "Edmonton Oilers" },
+    { slug: "vegas-golden-knights", nome: "Vegas Golden Knights" },
+    { slug: "colorado-avalanche", nome: "Colorado Avalanche" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={t.ativo} onChange={(e) => set({ ativo: e.target.checked })} />
+        <span>Mostrar carrossel de times na home</span>
+      </label>
+
+      <div className={t.ativo ? "space-y-4" : "space-y-4 opacity-50 pointer-events-none"}>
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Direção</div>
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+            {([
+              { v: "rtl", l: "→ para ←" },
+              { v: "ltr", l: "← para →" },
+              { v: "up", l: "↑ (baixo→cima)" },
+              { v: "down", l: "↓ (cima→baixo)" },
+            ] as const).map((o) => (
+              <button
+                key={o.v}
+                onClick={() => set({ direcao: o.v as TimesDirecao })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  t.direcao === o.v ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <NumField
+            label={`Segundos por volta (${t.velocidade}s)`}
+            value={t.velocidade} min={10} max={120} def={40}
+            onChange={(v) => set({ velocidade: v })}
+          />
+          <NumField
+            label={`Logos visíveis (${t.quantidadeVisivel})`}
+            value={t.quantidadeVisivel} min={2} max={12} def={8}
+            onChange={(v) => set({ quantidadeVisivel: v })}
+          />
+          <NumField
+            label={`Altura do item (${t.alturaPx}px)`}
+            value={t.alturaPx} min={60} max={200} def={120}
+            onChange={(v) => set({ alturaPx: v })}
+          />
+        </div>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={t.pausarNoHover} onChange={(e) => set({ pausarNoHover: e.target.checked })} />
+          <span>Pausar ao passar o mouse</span>
+        </label>
+      </div>
+
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pré-visualização</div>
+        <div className="overflow-hidden rounded-md border border-border bg-background">
+          <TimesCarrossel times={exemplo} settings={t} standalone />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          O carrossel exibe apenas os logos, sem título nem setas de navegação.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 
 /* ============================================================
  * ABA 3 — Aparência (fundo de arena)
