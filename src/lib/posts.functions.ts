@@ -157,7 +157,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
     if (!post) return null;
     const [withTemas] = await attachTemas(sb, [post]);
 
-    // Leia também: 3 posts do mesmo tema
+    // Leia também: 3 posts do mesmo tema, mais recentes primeiro
     let relacionados: PostListItem[] = [];
     if (withTemas.temas && withTemas.temas.length > 0) {
       const slugs = withTemas.temas.map((t: any) => t.slug);
@@ -166,13 +166,17 @@ export const getPostBySlug = createServerFn({ method: "GET" })
       if (ids.length > 0) {
         const { data: rel } = await sb
           .from("post_temas")
-          .select("post_id, posts(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
+          .select("post_id, posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
           .in("tema_id", ids)
-          .limit(20);
+          .eq("posts.status", "publicado")
+          .lte("posts.publicado_em", now)
+          .order("posts(publicado_em)", { ascending: false })
+          .order("posts(id)", { ascending: false })
+          .limit(30);
         const seen = new Set<string>([post.id]);
         const items: any[] = [];
         (rel ?? []).forEach((r: any) => {
-          if (r.posts && r.posts.status === "publicado" && !seen.has(r.posts.id)) {
+          if (r.posts && !seen.has(r.posts.id)) {
             seen.add(r.posts.id);
             items.push(r.posts);
           }
