@@ -63,7 +63,10 @@ function PostPage() {
   const { data } = useSuspenseQuery(postQuery(slug));
   const { data: siteData } = useSuspenseQuery(configQuery());
   if (!data) return null;
-  const { post, relacionados } = data;
+  const { post, relacionados, anterior, proximo } = data;
+  const dataObj = post.publicado_em ? new Date(post.publicado_em) : null;
+  const ano = dataObj?.getFullYear();
+  const mes = dataObj ? dataObj.getMonth() + 1 : null;
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
 
   return (
