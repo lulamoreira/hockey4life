@@ -221,6 +221,42 @@ export type Database = {
         }
         Relationships: []
       }
+      restauracao_log: {
+        Row: {
+          apagadas: number
+          atualizadas: number
+          criadas: number
+          criado_em: string
+          id: string
+          modo: string
+          observacao: string | null
+          usuario_email: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          apagadas?: number
+          atualizadas?: number
+          criadas?: number
+          criado_em?: string
+          id?: string
+          modo: string
+          observacao?: string | null
+          usuario_email?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          apagadas?: number
+          atualizadas?: number
+          criadas?: number
+          criado_em?: string
+          id?: string
+          modo?: string
+          observacao?: string | null
+          usuario_email?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
       temas: {
         Row: {
           criado_em: string
