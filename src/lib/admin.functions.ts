@@ -113,6 +113,11 @@ export const savePost = createServerFn({ method: "POST" })
       if (error) throw error;
       postId = created.id;
     }
+    // Só uma matéria pode estar fixada. Solta as demais.
+    if (data.destaque) {
+      await context.supabase.from("posts").update({ destaque: false })
+        .eq("destaque", true).neq("id", postId!);
+    }
     // Reset temas
     await context.supabase.from("post_temas").delete().eq("post_id", postId!);
     if (data.temaIds.length > 0) {
@@ -128,6 +133,31 @@ export const deletePost = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("posts").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+// Retorna a matéria fixada atualmente (destaque = true), se houver.
+export const getPostFixado = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("posts")
+      .select("id,titulo,slug,status,publicado_em")
+      .eq("destaque", true)
+      .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data ?? null;
+  });
+
+// Solta a matéria fixada (destaque = false).
+export const desafixarPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.from("posts").update({ destaque: false }).eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
