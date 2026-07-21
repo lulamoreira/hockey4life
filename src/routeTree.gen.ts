@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemasRouteImport } from './routes/temas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
@@ -20,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TimeSlugRouteImport } from './routes/time.$slug'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
+import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
 import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
@@ -27,8 +29,14 @@ import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
 import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
 
+const TemasRoute = TemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -84,6 +92,11 @@ const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
   path: '/assunto/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArquivoAnoRoute = ArquivoAnoRouteImport.update({
+  id: '/$ano',
+  path: '/$ano',
+  getParentRoute: () => ArquivoRoute,
+} as any)
 const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
   id: '/admin_/criar-conta',
   path: '/admin/criar-conta',
@@ -119,6 +132,11 @@ const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const ArquivoAnoMesRoute = ArquivoAnoMesRouteImport.update({
+  id: '/$mes',
+  path: '/$mes',
+  getParentRoute: () => ArquivoAnoRoute,
+} as any)
 const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -129,11 +147,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
-  '/arquivo': typeof ArquivoRoute
+  '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/temas': typeof TemasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -141,19 +160,22 @@ export interface FileRoutesByFullPath {
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
+  '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
-  '/arquivo': typeof ArquivoRoute
+  '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/temas': typeof TemasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -161,21 +183,24 @@ export interface FileRoutesByTo {
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
+  '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
-  '/arquivo': typeof ArquivoRoute
+  '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/temas': typeof TemasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -183,10 +208,12 @@ export interface FileRoutesById {
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin_/criar-conta': typeof AdminCriarContaRoute
+  '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -199,6 +226,7 @@ export interface FileRouteTypes {
     | '/fale-conosco'
     | '/feed'
     | '/sitemap.xml'
+    | '/temas'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -206,10 +234,12 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/criar-conta'
+    | '/arquivo/$ano'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
     | '/admin/posts/$id'
+    | '/arquivo/$ano/$mes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +249,7 @@ export interface FileRouteTypes {
     | '/fale-conosco'
     | '/feed'
     | '/sitemap.xml'
+    | '/temas'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -226,10 +257,12 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/criar-conta'
+    | '/arquivo/$ano'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin'
     | '/admin/posts/$id'
+    | '/arquivo/$ano/$mes'
   id:
     | '__root__'
     | '/'
@@ -240,6 +273,7 @@ export interface FileRouteTypes {
     | '/fale-conosco'
     | '/feed'
     | '/sitemap.xml'
+    | '/temas'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -247,21 +281,24 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/temas'
     | '/admin_/criar-conta'
+    | '/arquivo/$ano'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
     | '/admin/posts/$id'
+    | '/arquivo/$ano/$mes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRouteWithChildren
-  ArquivoRoute: typeof ArquivoRoute
+  ArquivoRoute: typeof ArquivoRouteWithChildren
   BuscaRoute: typeof BuscaRoute
   FaleConoscoRoute: typeof FaleConoscoRoute
   FeedRoute: typeof FeedRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TemasRoute: typeof TemasRoute
   AdminCriarContaRoute: typeof AdminCriarContaRoute
   AssuntoSlugRoute: typeof AssuntoSlugRoute
   TimeSlugRoute: typeof TimeSlugRoute
@@ -269,6 +306,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/temas': {
+      id: '/temas'
+      path: '/temas'
+      fullPath: '/temas'
+      preLoaderRoute: typeof TemasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -346,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssuntoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/arquivo/$ano': {
+      id: '/arquivo/$ano'
+      path: '/$ano'
+      fullPath: '/arquivo/$ano'
+      preLoaderRoute: typeof ArquivoAnoRouteImport
+      parentRoute: typeof ArquivoRoute
+    }
     '/admin_/criar-conta': {
       id: '/admin_/criar-conta'
       path: '/admin/criar-conta'
@@ -395,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/arquivo/$ano/$mes': {
+      id: '/arquivo/$ano/$mes'
+      path: '/$mes'
+      fullPath: '/arquivo/$ano/$mes'
+      preLoaderRoute: typeof ArquivoAnoMesRouteImport
+      parentRoute: typeof ArquivoAnoRoute
+    }
     '/admin/posts/$id': {
       id: '/admin/posts/$id'
       path: '/$id'
@@ -439,15 +497,39 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ArquivoAnoRouteChildren {
+  ArquivoAnoMesRoute: typeof ArquivoAnoMesRoute
+}
+
+const ArquivoAnoRouteChildren: ArquivoAnoRouteChildren = {
+  ArquivoAnoMesRoute: ArquivoAnoMesRoute,
+}
+
+const ArquivoAnoRouteWithChildren = ArquivoAnoRoute._addFileChildren(
+  ArquivoAnoRouteChildren,
+)
+
+interface ArquivoRouteChildren {
+  ArquivoAnoRoute: typeof ArquivoAnoRouteWithChildren
+}
+
+const ArquivoRouteChildren: ArquivoRouteChildren = {
+  ArquivoAnoRoute: ArquivoAnoRouteWithChildren,
+}
+
+const ArquivoRouteWithChildren =
+  ArquivoRoute._addFileChildren(ArquivoRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
   AdminRoute: AdminRouteWithChildren,
-  ArquivoRoute: ArquivoRoute,
+  ArquivoRoute: ArquivoRouteWithChildren,
   BuscaRoute: BuscaRoute,
   FaleConoscoRoute: FaleConoscoRoute,
   FeedRoute: FeedRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TemasRoute: TemasRoute,
   AdminCriarContaRoute: AdminCriarContaRoute,
   AssuntoSlugRoute: AssuntoSlugRoute,
   TimeSlugRoute: TimeSlugRoute,
