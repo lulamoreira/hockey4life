@@ -329,6 +329,29 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      listar_arquivo: {
+        Args: {
+          _ano?: number
+          _mes?: number
+          _ordem?: string
+          _page?: number
+          _per_page?: number
+          _q?: string
+          _tema_ids?: string[]
+        }
+        Returns: {
+          credito_imagem: string
+          id: string
+          imagem_capa: string
+          publicado_em: string
+          rank: number
+          resumo: string
+          slug: string
+          titulo: string
+          total: number
+          trecho: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       unaccent: { Args: { "": string }; Returns: string }
