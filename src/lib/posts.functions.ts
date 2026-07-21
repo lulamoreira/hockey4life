@@ -33,6 +33,9 @@ export type CarrosselSettings = {
   intervalo: number;       // segundos por slide (3..30)
   duracaoMs: number;       // duração da transição (200..1500)
   fixadaComRodizio: boolean; // se há manchete fixa: participa ou fica sozinha
+  tituloPx: number;        // tamanho do título (mobile) 16..48 padrão 20
+  tituloPxLg: number;      // tamanho do título (desktop) 20..72 padrão 30
+  resumoPx: number;        // tamanho do resumo 12..24 padrão 16
 };
 
 export type HomeSettings = {
@@ -70,6 +73,9 @@ export const CARROSSEL_PADRAO: CarrosselSettings = {
   intervalo: 7,
   duracaoMs: 600,
   fixadaComRodizio: true,
+  tituloPx: 20,
+  tituloPxLg: 30,
+  resumoPx: 16,
 };
 
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
@@ -111,6 +117,9 @@ function normalizeCarrossel(raw: any): CarrosselSettings {
     intervalo: clamp(c.intervalo, 3, 30, CARROSSEL_PADRAO.intervalo),
     duracaoMs: clamp(c.duracaoMs, 200, 1500, CARROSSEL_PADRAO.duracaoMs),
     fixadaComRodizio: c.fixadaComRodizio !== false,
+    tituloPx: clamp(c.tituloPx, 16, 48, CARROSSEL_PADRAO.tituloPx),
+    tituloPxLg: clamp(c.tituloPxLg, 20, 72, CARROSSEL_PADRAO.tituloPxLg),
+    resumoPx: clamp(c.resumoPx, 12, 24, CARROSSEL_PADRAO.resumoPx),
   };
 }
 

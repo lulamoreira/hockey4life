@@ -689,6 +689,64 @@ function CarrosselEditor({
             onChange={(v) => set({ duracaoMs: v })}
           />
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <NumField
+            label="Título (mobile) px"
+            value={c.tituloPx}
+            min={16}
+            max={48}
+            def={20}
+            onChange={(v) => set({ tituloPx: v })}
+          />
+          <NumField
+            label="Título (desktop) px"
+            value={c.tituloPxLg}
+            min={20}
+            max={72}
+            def={30}
+            onChange={(v) => set({ tituloPxLg: v })}
+          />
+          <NumField
+            label="Resumo px"
+            value={c.resumoPx}
+            min={12}
+            max={24}
+            def={16}
+            onChange={(v) => set({ resumoPx: v })}
+          />
+        </div>
+
+        {/* Prévia ao vivo */}
+        <div className="rounded-md border border-border bg-background/60 p-4">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Prévia dos títulos
+          </div>
+          <div className="rounded-md bg-muted/40 p-4">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
+                Exemplo
+              </span>
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                Hoje
+              </span>
+            </div>
+            <h1
+              className="h4l-title leading-tight text-foreground"
+              style={{
+                fontSize: `clamp(${c.tituloPx}px, ${c.tituloPx + (c.tituloPxLg - c.tituloPx) * 0.5}px, ${c.tituloPxLg}px)`,
+              }}
+            >
+              Título da matéria em destaque no carrossel
+            </h1>
+            <p
+              className="mt-2 line-clamp-2 max-w-2xl text-muted-foreground"
+              style={{ fontSize: `${c.resumoPx}px` }}
+            >
+              Resumo curto que aparece abaixo do título — ajuste os controles acima e veja a prévia atualizar em tempo real.
+            </p>
+          </div>
+        </div>
       </div>
 
       {temFixa && (
