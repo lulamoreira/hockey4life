@@ -9,38 +9,148 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
+import { Route as BuscaRouteImport } from './routes/busca'
+import { Route as ArquivoRouteImport } from './routes/arquivo'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TimeSlugRouteImport } from './routes/time.$slug'
+import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
 
+const FaleConoscoRoute = FaleConoscoRouteImport.update({
+  id: '/fale-conosco',
+  path: '/fale-conosco',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscaRoute = BuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArquivoRoute = ArquivoRouteImport.update({
+  id: '/arquivo',
+  path: '/arquivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimeSlugRoute = TimeSlugRouteImport.update({
+  id: '/time/$slug',
+  path: '/time/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
+  id: '/assunto/$slug',
+  path: '/assunto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$slug'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/assunto/$slug'
+    | '/time/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$slug'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/assunto/$slug'
+    | '/time/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/$slug'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/assunto/$slug'
+    | '/time/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
+  ArquivoRoute: typeof ArquivoRoute
+  BuscaRoute: typeof BuscaRoute
+  FaleConoscoRoute: typeof FaleConoscoRoute
+  AssuntoSlugRoute: typeof AssuntoSlugRoute
+  TimeSlugRoute: typeof TimeSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/fale-conosco': {
+      id: '/fale-conosco'
+      path: '/fale-conosco'
+      fullPath: '/fale-conosco'
+      preLoaderRoute: typeof FaleConoscoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/busca': {
+      id: '/busca'
+      path: '/busca'
+      fullPath: '/busca'
+      preLoaderRoute: typeof BuscaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arquivo': {
+      id: '/arquivo'
+      path: '/arquivo'
+      fullPath: '/arquivo'
+      preLoaderRoute: typeof ArquivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/time/$slug': {
+      id: '/time/$slug'
+      path: '/time/$slug'
+      fullPath: '/time/$slug'
+      preLoaderRoute: typeof TimeSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assunto/$slug': {
+      id: '/assunto/$slug'
+      path: '/assunto/$slug'
+      fullPath: '/assunto/$slug'
+      preLoaderRoute: typeof AssuntoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
+  ArquivoRoute: ArquivoRoute,
+  BuscaRoute: BuscaRoute,
+  FaleConoscoRoute: FaleConoscoRoute,
+  AssuntoSlugRoute: AssuntoSlugRoute,
+  TimeSlugRoute: TimeSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
