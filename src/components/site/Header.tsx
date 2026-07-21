@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
+import { Logo } from "./Logo";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
@@ -12,10 +13,7 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="h4l-title text-2xl leading-none text-primary">HOCKEY</span>
-          <span className="h4l-title text-2xl leading-none text-foreground">4LIFE</span>
-        </Link>
+        <Logo />
 
         <nav className="hidden items-center gap-6 md:flex">
           {times.slice(0, 5).map((t) => (

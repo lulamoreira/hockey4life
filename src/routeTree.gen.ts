@@ -20,9 +20,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TimeSlugRouteImport } from './routes/time.$slug'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
+import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
-import { Route as AdminCriarContaRouteImport } from './routes/admin.criar-conta'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
@@ -82,6 +82,11 @@ const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
   path: '/assunto/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
+  id: '/admin_/criar-conta',
+  path: '/admin/criar-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTemasRoute = AdminTemasRouteImport.update({
   id: '/temas',
   path: '/temas',
@@ -90,11 +95,6 @@ const AdminTemasRoute = AdminTemasRouteImport.update({
 const AdminPostsRoute = AdminPostsRouteImport.update({
   id: '/posts',
   path: '/posts',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
-  id: '/criar-conta',
-  path: '/criar-conta',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminContatosRoute = AdminContatosRouteImport.update({
@@ -124,9 +124,9 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
-  '/admin/criar-conta': typeof AdminCriarContaRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
+  '/admin/criar-conta': typeof AdminCriarContaRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -142,9 +142,9 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
-  '/admin/criar-conta': typeof AdminCriarContaRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
+  '/admin/criar-conta': typeof AdminCriarContaRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -162,9 +162,9 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
-  '/admin/criar-conta': typeof AdminCriarContaRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
+  '/admin_/criar-conta': typeof AdminCriarContaRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -183,9 +183,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/configuracoes'
     | '/admin/contatos'
-    | '/admin/criar-conta'
     | '/admin/posts'
     | '/admin/temas'
+    | '/admin/criar-conta'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
@@ -201,9 +201,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/configuracoes'
     | '/admin/contatos'
-    | '/admin/criar-conta'
     | '/admin/posts'
     | '/admin/temas'
+    | '/admin/criar-conta'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin'
@@ -220,9 +220,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/configuracoes'
     | '/admin/contatos'
-    | '/admin/criar-conta'
     | '/admin/posts'
     | '/admin/temas'
+    | '/admin_/criar-conta'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
@@ -238,6 +238,7 @@ export interface RootRouteChildren {
   FaleConoscoRoute: typeof FaleConoscoRoute
   FeedRoute: typeof FeedRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AdminCriarContaRoute: typeof AdminCriarContaRoute
   AssuntoSlugRoute: typeof AssuntoSlugRoute
   TimeSlugRoute: typeof TimeSlugRoute
 }
@@ -321,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssuntoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/criar-conta': {
+      id: '/admin_/criar-conta'
+      path: '/admin/criar-conta'
+      fullPath: '/admin/criar-conta'
+      preLoaderRoute: typeof AdminCriarContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/temas': {
       id: '/admin/temas'
       path: '/temas'
@@ -333,13 +341,6 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/admin/posts'
       preLoaderRoute: typeof AdminPostsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/criar-conta': {
-      id: '/admin/criar-conta'
-      path: '/criar-conta'
-      fullPath: '/admin/criar-conta'
-      preLoaderRoute: typeof AdminCriarContaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/contatos': {
@@ -381,7 +382,6 @@ const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
-  AdminCriarContaRoute: typeof AdminCriarContaRoute
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -390,7 +390,6 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
-  AdminCriarContaRoute: AdminCriarContaRoute,
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -407,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaleConoscoRoute: FaleConoscoRoute,
   FeedRoute: FeedRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AdminCriarContaRoute: AdminCriarContaRoute,
   AssuntoSlugRoute: AssuntoSlugRoute,
   TimeSlugRoute: TimeSlugRoute,
 }

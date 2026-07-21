@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/admin/criar-conta")({
+export const Route = createFileRoute("/admin_/criar-conta")({
   head: () => ({
     meta: [
       { title: "Criar primeira conta — Hockey4Life" },
