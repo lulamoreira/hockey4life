@@ -4,21 +4,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listAdminPosts, deletePost, getPostFixado, desafixarPost } from "@/lib/admin.functions";
 import { formatDataBR } from "@/lib/slugify";
-import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock } from "lucide-react";
+import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock, ArrowDown, ArrowUp } from "lucide-react";
 
 export function PostsListPage() {
   const [status, setStatus] = useState<"todos" | "rascunho" | "publicado">("todos");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
+  const [ordem, setOrdem] = useState<"desc" | "asc">("desc");
   const del = useServerFn(deletePost);
   const unpin = useServerFn(desafixarPost);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-posts", status, q, page],
-    queryFn: () => listAdminPosts({ data: { status, q, page } }),
+    queryKey: ["admin-posts", status, q, page, ordem],
+    queryFn: () => listAdminPosts({ data: { status, q, page, ordem } }),
   });
   const fixadoQ = useQuery({ queryKey: ["admin-fixado"], queryFn: () => getPostFixado() });
+
 
   const onDelete = async (id: string) => {
     if (!confirm("Excluir esta matéria?")) return;
