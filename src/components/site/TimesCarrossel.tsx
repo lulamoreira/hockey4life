@@ -27,7 +27,7 @@ export function TimesCarrossel({
   // Duplicamos a lista para loop contínuo
   const loop = [...items, ...items];
   const visiveis = Math.max(2, Math.min(12, s.quantidadeVisivel));
-  const itemBasis = `${100 / visiveis}%`;
+  
 
   const trackStyle: React.CSSProperties = vertical
     ? {
