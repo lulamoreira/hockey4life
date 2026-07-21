@@ -41,6 +41,7 @@ function HomePage() {
 
   return (
     <SiteLayout config={config} temasMenu={temasMenu}>
+      {times.length > 0 && <TimesCarrossel times={times} />}
       <Letreiro items={naoPerca} settings={letreiro} />
 
       <section className="mx-auto max-w-7xl px-4 py-8">
@@ -90,8 +91,8 @@ function HomePage() {
         </section>
       )}
 
-      {/* Times — carrossel com logos oficiais da NHL */}
-      {times.length > 0 && <TimesCarrossel times={times} />}
+
+
 
       {/* Hockey Fights Cancer */}
       {hfc.video_url && (
