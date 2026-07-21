@@ -60,16 +60,6 @@ function ImportarPage() {
     refetchInterval: rodando ? 2000 : false,
   });
 
-  const imgBucket = useQuery({
-    queryKey: ["import-imagens-bucket"],
-    queryFn: async () => {
-      // storage.list é limitado; contamos via lote na tabela? Sem acesso: usamos limite pela API list.
-      const { data, error } = await supabase.storage.from("midia").list("wp", { limit: 1 });
-      if (error) return null;
-      // list de "wp" retorna as pastas por ano; contagem exata exigiria recursão — mostra placeholder
-      return data ? data.length : 0;
-    },
-  });
 
   const erros = useQuery({
     queryKey: ["import-erros"],
