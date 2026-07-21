@@ -464,7 +464,7 @@ export const searchPosts = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await sb.rpc("buscar_posts", {
       _q: data.q,
-      _tema_ids: null,
+      _tema_ids: undefined,
       _ordem: data.ordem,
       _page: data.page,
       _per_page: perPage,
@@ -520,9 +520,9 @@ export const listArchive = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await sb.rpc("listar_arquivo", {
       _q: data.q,
-      _tema_ids: data.temas.length > 0 ? data.temas : null,
-      _ano: data.ano ?? null,
-      _mes: data.mes ?? null,
+      _tema_ids: data.temas.length > 0 ? data.temas : undefined,
+      _ano: data.ano ?? undefined,
+      _mes: data.mes ?? undefined,
       _ordem: ordem,
       _page: data.page,
       _per_page: perPage,
