@@ -2,27 +2,38 @@ import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { listAdminPosts, deletePost } from "@/lib/admin.functions";
+import { listAdminPosts, deletePost, getPostFixado, desafixarPost } from "@/lib/admin.functions";
 import { formatDataBR } from "@/lib/slugify";
-import { ExternalLink, Plus, Trash2, Edit3 } from "lucide-react";
+import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock } from "lucide-react";
 
 export function PostsListPage() {
   const [status, setStatus] = useState<"todos" | "rascunho" | "publicado">("todos");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const del = useServerFn(deletePost);
+  const unpin = useServerFn(desafixarPost);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-posts", status, q, page],
     queryFn: () => listAdminPosts({ data: { status, q, page } }),
   });
+  const fixadoQ = useQuery({ queryKey: ["admin-fixado"], queryFn: () => getPostFixado() });
 
   const onDelete = async (id: string) => {
     if (!confirm("Excluir esta matéria?")) return;
     await del({ data: { id } });
     qc.invalidateQueries({ queryKey: ["admin-posts"] });
+    qc.invalidateQueries({ queryKey: ["admin-fixado"] });
   };
+
+  const onUnpin = async (id: string) => {
+    await unpin({ data: { id } });
+    qc.invalidateQueries({ queryKey: ["admin-posts"] });
+    qc.invalidateQueries({ queryKey: ["admin-fixado"] });
+  };
+
+  const now = Date.now();
 
   return (
     <div>
@@ -38,6 +49,31 @@ export function PostsListPage() {
           <Plus className="h-4 w-4" /> Nova matéria
         </Link>
       </div>
+
+      {fixadoQ.data && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm">
+          <div className="flex items-center gap-2 text-foreground">
+            <Pin className="h-4 w-4 text-primary" />
+            <span>
+              <span className="font-semibold uppercase tracking-wide text-primary">Fixada na home:</span>{" "}
+              {fixadoQ.data.status === "publicado" ? (
+                <a href={`/${fixadoQ.data.slug}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+                  {fixadoQ.data.titulo}
+                </a>
+              ) : (
+                <span>{fixadoQ.data.titulo}</span>
+              )}
+            </span>
+          </div>
+          <button
+            onClick={() => onUnpin(fixadoQ.data!.id)}
+            className="inline-flex items-center gap-1 rounded border border-primary/40 bg-background px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            <PinOff className="h-3.5 w-3.5" /> Soltar
+          </button>
+        </div>
+      )}
+
 
       <div className="mt-6 flex flex-wrap gap-2">
         {(["todos","publicado","rascunho"] as const).map((s) => (
