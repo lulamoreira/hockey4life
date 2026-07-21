@@ -35,6 +35,7 @@ export function PostEditor({ id }: { id?: string }) {
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadInfo, setUploadInfo] = useState<string>("");
 
   useEffect(() => {
     if (!isNew && postQ.data?.post) {
@@ -69,7 +70,6 @@ export function PostEditor({ id }: { id?: string }) {
     );
   }
 
-  const [uploadInfo, setUploadInfo] = useState<string>("");
   const onUpload = async (file: File) => {
     setUploading(true);
     setUploadInfo("");
