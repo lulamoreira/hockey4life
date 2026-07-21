@@ -128,7 +128,12 @@ export function PostsListPage() {
                   <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${p.status==='publicado'?'bg-primary/20 text-primary':'bg-muted text-muted-foreground'}`}>
                     {p.status}
                   </span>
-                  {p.destaque && <span className="ml-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Destaque</span>}
+                  {p.status === "publicado" && p.publicado_em && new Date(p.publicado_em).getTime() > now && (
+                    <span className="ml-1 inline-flex items-center gap-1 rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-accent-foreground">
+                      <Clock className="h-3 w-3" /> Agendada
+                    </span>
+                  )}
+                  {p.destaque && <span className="ml-1 inline-flex items-center gap-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground"><Pin className="h-3 w-3" /> Fixada</span>}
                   {p.nao_perca && <span className="ml-1 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold uppercase text-destructive-foreground">Não perca</span>}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{formatDataBR(p.publicado_em)}</td>
