@@ -9,38 +9,278 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
+import { Route as BuscaRouteImport } from './routes/busca'
+import { Route as ArquivoRouteImport } from './routes/arquivo'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TimeSlugRouteImport } from './routes/time.$slug'
+import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
+import { Route as AdminTemasRouteImport } from './routes/admin.temas'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
+import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
+import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaleConoscoRoute = FaleConoscoRouteImport.update({
+  id: '/fale-conosco',
+  path: '/fale-conosco',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscaRoute = BuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArquivoRoute = ArquivoRouteImport.update({
+  id: '/arquivo',
+  path: '/arquivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const TimeSlugRoute = TimeSlugRouteImport.update({
+  id: '/time/$slug',
+  path: '/time/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
+  id: '/assunto/$slug',
+  path: '/assunto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTemasRoute = AdminTemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContatosRoute = AdminContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/contatos': typeof AdminContatosRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
+  '/admin/temas': typeof AdminTemasRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/posts/$id': typeof AdminPostsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/contatos': typeof AdminContatosRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
+  '/admin/temas': typeof AdminTemasRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/posts/$id': typeof AdminPostsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/arquivo': typeof ArquivoRoute
+  '/busca': typeof BuscaRoute
+  '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/contatos': typeof AdminContatosRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
+  '/admin/temas': typeof AdminTemasRoute
+  '/assunto/$slug': typeof AssuntoSlugRoute
+  '/time/$slug': typeof TimeSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/posts/$id': typeof AdminPostsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$slug'
+    | '/admin'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
+    | '/admin/configuracoes'
+    | '/admin/contatos'
+    | '/admin/posts'
+    | '/admin/temas'
+    | '/assunto/$slug'
+    | '/time/$slug'
+    | '/admin/'
+    | '/admin/posts/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$slug'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
+    | '/admin/configuracoes'
+    | '/admin/contatos'
+    | '/admin/posts'
+    | '/admin/temas'
+    | '/assunto/$slug'
+    | '/time/$slug'
+    | '/admin'
+    | '/admin/posts/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/$slug'
+    | '/admin'
+    | '/arquivo'
+    | '/busca'
+    | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
+    | '/admin/configuracoes'
+    | '/admin/contatos'
+    | '/admin/posts'
+    | '/admin/temas'
+    | '/assunto/$slug'
+    | '/time/$slug'
+    | '/admin/'
+    | '/admin/posts/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  ArquivoRoute: typeof ArquivoRoute
+  BuscaRoute: typeof BuscaRoute
+  FaleConoscoRoute: typeof FaleConoscoRoute
+  FeedRoute: typeof FeedRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AssuntoSlugRoute: typeof AssuntoSlugRoute
+  TimeSlugRoute: typeof TimeSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fale-conosco': {
+      id: '/fale-conosco'
+      path: '/fale-conosco'
+      fullPath: '/fale-conosco'
+      preLoaderRoute: typeof FaleConoscoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/busca': {
+      id: '/busca'
+      path: '/busca'
+      fullPath: '/busca'
+      preLoaderRoute: typeof BuscaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arquivo': {
+      id: '/arquivo'
+      path: '/arquivo'
+      fullPath: '/arquivo'
+      preLoaderRoute: typeof ArquivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +288,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/time/$slug': {
+      id: '/time/$slug'
+      path: '/time/$slug'
+      fullPath: '/time/$slug'
+      preLoaderRoute: typeof TimeSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assunto/$slug': {
+      id: '/assunto/$slug'
+      path: '/assunto/$slug'
+      fullPath: '/assunto/$slug'
+      preLoaderRoute: typeof AssuntoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/temas': {
+      id: '/admin/temas'
+      path: '/temas'
+      fullPath: '/admin/temas'
+      preLoaderRoute: typeof AdminTemasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contatos': {
+      id: '/admin/contatos'
+      path: '/contatos'
+      fullPath: '/admin/contatos'
+      preLoaderRoute: typeof AdminContatosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/configuracoes': {
+      id: '/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminConfiguracoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/posts/$id': {
+      id: '/admin/posts/$id'
+      path: '/$id'
+      fullPath: '/admin/posts/$id'
+      preLoaderRoute: typeof AdminPostsIdRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
   }
 }
 
+interface AdminPostsRouteChildren {
+  AdminPostsIdRoute: typeof AdminPostsIdRoute
+}
+
+const AdminPostsRouteChildren: AdminPostsRouteChildren = {
+  AdminPostsIdRoute: AdminPostsIdRoute,
+}
+
+const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
+  AdminPostsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminContatosRoute: typeof AdminContatosRoute
+  AdminPostsRoute: typeof AdminPostsRouteWithChildren
+  AdminTemasRoute: typeof AdminTemasRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminContatosRoute: AdminContatosRoute,
+  AdminPostsRoute: AdminPostsRouteWithChildren,
+  AdminTemasRoute: AdminTemasRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
+  AdminRoute: AdminRouteWithChildren,
+  ArquivoRoute: ArquivoRoute,
+  BuscaRoute: BuscaRoute,
+  FaleConoscoRoute: FaleConoscoRoute,
+  FeedRoute: FeedRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AssuntoSlugRoute: AssuntoSlugRoute,
+  TimeSlugRoute: TimeSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
