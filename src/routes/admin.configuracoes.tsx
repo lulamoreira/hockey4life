@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { listConfig, saveConfig, searchAdminPostsByTitle, getAdminPostSimple } from "@/lib/admin.functions";
-import { HOME_SETTINGS_PADRAO, type HomeSettings } from "@/lib/posts.functions";
+import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, type HomeSettings, type LetreiroDirecao } from "@/lib/posts.functions";
+import { Letreiro } from "@/components/site/Letreiro";
 import { formatDataBR } from "@/lib/slugify";
 
 export const Route = createFileRoute("/admin/configuracoes")({
