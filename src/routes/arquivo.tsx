@@ -215,8 +215,9 @@ function FiltrosPanel({
   temasSel: Set<string>;
   update: (p: Partial<ArquivoSearch>) => void;
 }) {
+  const currentTemas: string[] = (search.temas as string[] | undefined) ?? [];
   const toggleTema = (id: string) => {
-    const next = temasSel.has(id) ? (search.temas ?? []).filter((x) => x !== id) : [...(search.temas ?? []), id];
+    const next = temasSel.has(id) ? currentTemas.filter((x: string) => x !== id) : [...currentTemas, id];
     update({ temas: next });
   };
   const mesesDoAno = search.ano ? nav.filter((r) => r.ano === search.ano) : [];
