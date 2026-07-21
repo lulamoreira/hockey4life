@@ -175,6 +175,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const pagina = Math.max(1, Number(body.pagina ?? 1));
     const tamanho = Math.min(15, Math.max(1, Number(body.tamanho ?? 10)));
+    const forcar: boolean = Boolean(body.forcar);
     const somenteErros: number[] | undefined = Array.isArray(body.reprocessar) ? body.reprocessar.map(Number) : undefined;
 
     // publicBase do bucket
@@ -211,6 +212,7 @@ Deno.serve(async (req) => {
     for (const t of temas ?? []) temaByTagId.set(t.wp_tag_id, t.id);
 
     let importados = 0;
+    let atualizados = 0;
     let pulados = 0;
     let imagensSubidas = 0;
     const erros: any[] = [];
