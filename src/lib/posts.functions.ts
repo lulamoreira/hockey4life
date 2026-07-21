@@ -93,6 +93,18 @@ function normalizeLetreiro(raw: any, fallbackModo: "recentes" | "manual" = "rece
   };
 }
 
+function normalizeCarrossel(raw: any): CarrosselSettings {
+  const c = raw ?? {};
+  const trans = ["rtl","ltr","up","down","fade"].includes(c.transicao) ? c.transicao : CARROSSEL_PADRAO.transicao;
+  return {
+    quantidade: clamp(c.quantidade, 1, 10, CARROSSEL_PADRAO.quantidade),
+    transicao: trans as TransicaoManchete,
+    intervalo: clamp(c.intervalo, 3, 30, CARROSSEL_PADRAO.intervalo),
+    duracaoMs: clamp(c.duracaoMs, 200, 1500, CARROSSEL_PADRAO.duracaoMs),
+    fixadaComRodizio: c.fixadaComRodizio !== false,
+  };
+}
+
 function normalizeHomeSettings(raw: any): HomeSettings {
   const s = raw ?? {};
   const q = s.quantidades ?? {};
@@ -111,6 +123,7 @@ function normalizeHomeSettings(raw: any): HomeSettings {
       post_id: typeof m.post_id === "string" ? m.post_id : null,
       fixada_em: typeof m.fixada_em === "string" ? m.fixada_em : null,
     },
+    carrossel: normalizeCarrossel(s.carrossel),
     quantidades: {
       home_grade: clamp(q.home_grade, 3, 48, 12),
       leia_agora: clamp(q.leia_agora, 1, 20, 5),
