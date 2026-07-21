@@ -228,8 +228,9 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const asc = settings.ordem === "asc";
   const qt = settings.quantidades;
   const letreiro = settings.letreiro;
+  const carrossel = settings.carrossel;
 
-  const totalNecessario = 1 + qt.leia_agora + qt.home_grade + 4;
+  const totalNecessario = carrossel.quantidade + qt.leia_agora + qt.home_grade + 4;
 
   const letreiroPromise = letreiro.ativo
     ? letreiro.origem === "manual"
@@ -273,7 +274,8 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const configMap: Record<string, any> = {};
   (config ?? []).forEach((c: any) => { configMap[c.chave] = c.valor; });
 
-  let manchete: any = null;
+  // Manchete fixa (opcional)
+  let fixada: any = null;
   if (settings.manchete.modo === "fixa" && settings.manchete.post_id) {
     const { data: fixado } = await sb
       .from("posts")
@@ -284,17 +286,32 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       .maybeSingle();
     if (fixado) {
       const [withTemas] = await attachTemas(sb, [fixado]);
-      manchete = withTemas;
+      fixada = withTemas;
     }
   }
 
   const recentesList = await attachTemas(sb, recentes ?? []);
-  if (!manchete) manchete = recentesList[0] ?? null;
 
-  const restantes = manchete ? recentesList.filter((p: any) => p.id !== manchete.id) : recentesList;
+  // Monta a lista do carrossel (manchetes)
+  let manchetes: any[] = [];
+  if (fixada) {
+    if (!carrossel.fixadaComRodizio || carrossel.quantidade <= 1) {
+      manchetes = [fixada];
+    } else {
+      const outras = recentesList.filter((p: any) => p.id !== fixada.id);
+      manchetes = [fixada, ...outras].slice(0, carrossel.quantidade);
+    }
+  } else {
+    manchetes = recentesList.slice(0, carrossel.quantidade);
+  }
+
+  const mancheteIds = new Set(manchetes.map((p) => p.id));
+  const restantes = recentesList.filter((p: any) => !mancheteIds.has(p.id));
 
   return {
-    destaque: manchete as PostListItem | null,
+    destaque: (manchetes[0] ?? null) as PostListItem | null,
+    manchetes: manchetes as PostListItem[],
+    carrossel,
     leiaAgora: restantes.slice(0, qt.leia_agora) as PostListItem[],
     ultimas: restantes.slice(0, qt.home_grade) as PostListItem[],
     naoPerca: (letreiroData ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
