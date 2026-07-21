@@ -236,7 +236,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
 
     const { data: post, error } = await sb
       .from("posts")
-      .select("*")
+      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,publicado_em,atualizado_em,destaque,nao_perca,status")
       .eq("slug", data.slug)
       .eq("status", "publicado")
       .lte("publicado_em", now)
