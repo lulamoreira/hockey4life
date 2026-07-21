@@ -19,7 +19,14 @@ const searchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 });
 
-type ArquivoSearch = z.infer<typeof searchSchema>;
+type ArquivoSearch = {
+  q: string;
+  temas: string[];
+  ano: number | null | undefined;
+  mes: number | null | undefined;
+  ordem: "desc" | "asc" | "rel";
+  page: number;
+};
 
 const q = (s: ArquivoSearch) =>
   queryOptions({
