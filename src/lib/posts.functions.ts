@@ -11,6 +11,66 @@ function publicClient() {
   );
 }
 
+export type OrdemListagem = "desc" | "asc";
+
+export type HomeSettings = {
+  ordem: OrdemListagem;
+  manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
+  quantidades: {
+    home_grade: number;
+    leia_agora: number;
+    arquivo: number;
+    tema: number;
+    leia_tambem: number;
+    nao_perca: number;
+  };
+  nao_perca: { ativo: boolean; modo: "recentes" | "manual" };
+};
+
+export const HOME_SETTINGS_PADRAO: HomeSettings = {
+  ordem: "desc",
+  manchete: { modo: "auto", post_id: null, fixada_em: null },
+  quantidades: { home_grade: 12, leia_agora: 5, arquivo: 12, tema: 12, leia_tambem: 3, nao_perca: 6 },
+  nao_perca: { ativo: true, modo: "manual" },
+};
+
+function clamp(n: any, min: number, max: number, def: number) {
+  const v = Number.isFinite(Number(n)) ? Math.floor(Number(n)) : def;
+  return Math.min(max, Math.max(min, v));
+}
+
+function normalizeHomeSettings(raw: any): HomeSettings {
+  const s = raw ?? {};
+  const q = s.quantidades ?? {};
+  const np = s.nao_perca ?? {};
+  const m = s.manchete ?? {};
+  return {
+    ordem: s.ordem === "asc" ? "asc" : "desc",
+    manchete: {
+      modo: m.modo === "fixa" ? "fixa" : "auto",
+      post_id: typeof m.post_id === "string" ? m.post_id : null,
+      fixada_em: typeof m.fixada_em === "string" ? m.fixada_em : null,
+    },
+    quantidades: {
+      home_grade: clamp(q.home_grade, 3, 48, 12),
+      leia_agora: clamp(q.leia_agora, 1, 20, 5),
+      arquivo: clamp(q.arquivo, 6, 48, 12),
+      tema: clamp(q.tema, 6, 48, 12),
+      leia_tambem: clamp(q.leia_tambem, 1, 12, 3),
+      nao_perca: clamp(q.nao_perca, 1, 20, 6),
+    },
+    nao_perca: {
+      ativo: np.ativo !== false,
+      modo: np.modo === "recentes" ? "recentes" : "manual",
+    },
+  };
+}
+
+async function readHomeSettings(sb: ReturnType<typeof publicClient>): Promise<HomeSettings> {
+  const { data } = await sb.from("configuracoes").select("valor").eq("chave", "home_ordenacao").maybeSingle();
+  return normalizeHomeSettings(data?.valor);
+}
+
 export type PostListItem = {
   id: string;
   titulo: string;
@@ -29,6 +89,8 @@ export type PostFull = PostListItem & {
   atualizado_em: string;
 };
 
+const POST_COLS = "id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
+
 async function attachTemas(sb: ReturnType<typeof publicClient>, posts: any[]): Promise<any[]> {
   if (posts.length === 0) return [];
   const ids = posts.map((p) => p.id);
@@ -46,28 +108,27 @@ async function attachTemas(sb: ReturnType<typeof publicClient>, posts: any[]): P
   return posts.map((p) => ({ ...p, temas: map.get(p.id) ?? [] }));
 }
 
-const listSchema = z
-  .object({
-    page: z.number().int().min(1).default(1),
-    perPage: z.number().int().min(1).max(50).default(12),
-  })
-  .default({ page: 1, perPage: 12 });
-
 export const listPosts = createServerFn({ method: "GET" })
-  .inputValidator((v) => listSchema.parse(v))
+  .inputValidator((v) =>
+    z.object({
+      page: z.number().int().min(1).default(1),
+      perPage: z.number().int().min(1).max(50).optional(),
+    }).default({ page: 1 }).parse(v ?? {}),
+  )
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const from = (data.page - 1) * data.perPage;
-    const to = from + data.perPage - 1;
+    const settings = await readHomeSettings(sb);
+    const perPage = data.perPage ?? settings.quantidades.arquivo;
+    const asc = settings.ordem === "asc";
+    const from = (data.page - 1) * perPage;
+    const to = from + perPage - 1;
     const { data: posts, count, error } = await sb
       .from("posts")
-      .select("id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca", {
-        count: "exact",
-      })
+      .select(POST_COLS, { count: "exact" })
       .eq("status", "publicado")
       .lte("publicado_em", new Date().toISOString())
-      .order("publicado_em", { ascending: false })
-      .order("id", { ascending: false })
+      .order("publicado_em", { ascending: asc })
+      .order("id", { ascending: asc })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
@@ -75,67 +136,90 @@ export const listPosts = createServerFn({ method: "GET" })
       items: items as PostListItem[],
       total: count ?? 0,
       page: data.page,
-      perPage: data.perPage,
-      totalPages: Math.max(1, Math.ceil((count ?? 0) / data.perPage)),
+      perPage,
+      totalPages: Math.max(1, Math.ceil((count ?? 0) / perPage)),
     };
   });
 
 export const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
   const now = new Date().toISOString();
+  const settings = await readHomeSettings(sb);
+  const asc = settings.ordem === "asc";
+  const qt = settings.quantidades;
 
-  const [{ data: fixado }, { data: naoPerca }, { data: recentes }, { data: temasMenu }, { data: config }] =
+  // Base: matérias publicadas mais recentes (ou mais antigas), quantidade suficiente
+  // para preencher manchete + leia_agora + grade.
+  const totalNecessario = 1 + qt.leia_agora + qt.home_grade + 4;
+
+  const naoPercaQuery = sb
+    .from("posts")
+    .select("id,titulo,slug,publicado_em")
+    .eq("status", "publicado")
+    .lte("publicado_em", now)
+    .order("publicado_em", { ascending: asc })
+    .order("id", { ascending: asc })
+    .limit(qt.nao_perca);
+
+  const [{ data: recentes }, { data: temasMenu }, { data: config }, { data: naoPercaData }] =
     await Promise.all([
       sb
         .from("posts")
-        .select("id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca")
-        .eq("status", "publicado")
-        .eq("destaque", true)
-        .lte("publicado_em", now)
-        .order("publicado_em", { ascending: false })
-        .order("id", { ascending: false })
-        .limit(1),
-      sb
-        .from("posts")
-        .select("id,titulo,slug,publicado_em")
-        .eq("status", "publicado")
-        .eq("nao_perca", true)
-        .lte("publicado_em", now)
-        .order("publicado_em", { ascending: false })
-        .order("id", { ascending: false })
-        .limit(6),
-      sb
-        .from("posts")
-        .select("id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca")
+        .select(POST_COLS)
         .eq("status", "publicado")
         .lte("publicado_em", now)
-        .order("publicado_em", { ascending: false })
-        .order("id", { ascending: false })
-        .limit(18),
+        .order("publicado_em", { ascending: asc })
+        .order("id", { ascending: asc })
+        .limit(totalNecessario),
       sb
         .from("temas")
         .select("nome,slug,tipo,destaque_menu,ordem")
         .order("ordem", { ascending: true }),
       sb.from("configuracoes").select("chave,valor"),
+      settings.nao_perca.ativo
+        ? settings.nao_perca.modo === "manual"
+          ? sb
+              .from("posts")
+              .select("id,titulo,slug,publicado_em")
+              .eq("status", "publicado")
+              .eq("nao_perca", true)
+              .lte("publicado_em", now)
+              .order("publicado_em", { ascending: false })
+              .order("id", { ascending: false })
+              .limit(qt.nao_perca)
+          : naoPercaQuery
+        : Promise.resolve({ data: [] as any[] }),
     ]);
 
   const configMap: Record<string, any> = {};
   (config ?? []).forEach((c: any) => { configMap[c.chave] = c.valor; });
 
-  const fixadoList = await attachTemas(sb, fixado ?? []);
-  const recentesList = await attachTemas(sb, recentes ?? []);
+  // Manchete
+  let manchete: any = null;
+  if (settings.manchete.modo === "fixa" && settings.manchete.post_id) {
+    const { data: fixado } = await sb
+      .from("posts")
+      .select(POST_COLS)
+      .eq("id", settings.manchete.post_id)
+      .eq("status", "publicado")
+      .lte("publicado_em", now)
+      .maybeSingle();
+    if (fixado) {
+      const [withTemas] = await attachTemas(sb, [fixado]);
+      manchete = withTemas;
+    }
+  }
 
-  // Se há uma matéria fixada, ela é a manchete; senão, a mais recente.
-  const manchete = (fixadoList[0] ?? recentesList[0] ?? null) as PostListItem | null;
-  const restantes = manchete
-    ? recentesList.filter((p: any) => p.id !== manchete.id)
-    : recentesList.slice(1);
+  const recentesList = await attachTemas(sb, recentes ?? []);
+  if (!manchete) manchete = recentesList[0] ?? null;
+
+  const restantes = manchete ? recentesList.filter((p: any) => p.id !== manchete.id) : recentesList;
 
   return {
-    destaque: manchete,
-    leiaAgora: restantes.slice(0, 5) as PostListItem[],
-    ultimas: restantes as PostListItem[],
-    naoPerca: (naoPerca ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
+    destaque: manchete as PostListItem | null,
+    leiaAgora: restantes.slice(0, qt.leia_agora) as PostListItem[],
+    ultimas: restantes.slice(0, qt.home_grade) as PostListItem[],
+    naoPerca: (naoPercaData ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
     config: configMap,
   };
@@ -146,6 +230,10 @@ export const getPostBySlug = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const now = new Date().toISOString();
+    const settings = await readHomeSettings(sb);
+    const asc = settings.ordem === "asc";
+    const limite = settings.quantidades.leia_tambem;
+
     const { data: post, error } = await sb
       .from("posts")
       .select("*")
@@ -157,7 +245,6 @@ export const getPostBySlug = createServerFn({ method: "GET" })
     if (!post) return null;
     const [withTemas] = await attachTemas(sb, [post]);
 
-    // Leia também: 3 posts do mesmo tema, mais recentes primeiro
     let relacionados: PostListItem[] = [];
     if (withTemas.temas && withTemas.temas.length > 0) {
       const slugs = withTemas.temas.map((t: any) => t.slug);
@@ -170,8 +257,8 @@ export const getPostBySlug = createServerFn({ method: "GET" })
           .in("tema_id", ids)
           .eq("posts.status", "publicado")
           .lte("posts.publicado_em", now)
-          .order("posts(publicado_em)", { ascending: false })
-          .order("posts(id)", { ascending: false })
+          .order("posts(publicado_em)", { ascending: asc })
+          .order("posts(id)", { ascending: asc })
           .limit(30);
         const seen = new Set<string>([post.id]);
         const items: any[] = [];
@@ -181,7 +268,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
             items.push(r.posts);
           }
         });
-        relacionados = (await attachTemas(sb, items.slice(0, 3))) as PostListItem[];
+        relacionados = (await attachTemas(sb, items.slice(0, limite))) as PostListItem[];
       }
     }
 
@@ -198,7 +285,9 @@ export const getPostsByTema = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const perPage = 12;
+    const settings = await readHomeSettings(sb);
+    const perPage = settings.quantidades.tema;
+    const asc = settings.ordem === "asc";
     const { data: tema } = await sb
       .from("temas")
       .select("id,nome,slug,tipo")
@@ -218,8 +307,8 @@ export const getPostsByTema = createServerFn({ method: "GET" })
       .eq("tema_id", tema.id)
       .eq("posts.status", "publicado")
       .lte("posts.publicado_em", nowIso)
-      .order("posts(publicado_em)", { ascending: false })
-      .order("posts(id)", { ascending: false })
+      .order("posts(publicado_em)", { ascending: asc })
+      .order("posts(id)", { ascending: asc })
       .range(from, to);
 
     const posts = (rels ?? [])
@@ -240,18 +329,20 @@ export const searchPosts = createServerFn({ method: "GET" })
   .inputValidator((v) => z.object({ q: z.string().min(1).max(120), page: z.number().int().min(1).default(1) }).parse(v))
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const perPage = 12;
+    const settings = await readHomeSettings(sb);
+    const perPage = settings.quantidades.arquivo;
+    const asc = settings.ordem === "asc";
     const from = (data.page - 1) * perPage;
     const to = from + perPage - 1;
     const q = `%${data.q}%`;
     const { data: posts, count, error } = await sb
       .from("posts")
-      .select("id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca", { count: "exact" })
+      .select(POST_COLS, { count: "exact" })
       .eq("status", "publicado")
       .lte("publicado_em", new Date().toISOString())
       .or(`titulo.ilike.${q},resumo.ilike.${q}`)
-      .order("publicado_em", { ascending: false })
-      .order("id", { ascending: false })
+      .order("publicado_em", { ascending: asc })
+      .order("id", { ascending: asc })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
@@ -299,26 +390,30 @@ export const enviarContato = createServerFn({ method: "POST" })
 
 export const listAllPublishedSlugs = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
+  const settings = await readHomeSettings(sb);
+  const asc = settings.ordem === "asc";
   const { data } = await sb
     .from("posts")
     .select("slug,publicado_em,atualizado_em")
     .eq("status", "publicado")
     .lte("publicado_em", new Date().toISOString())
-    .order("publicado_em", { ascending: false })
-    .order("id", { ascending: false })
+    .order("publicado_em", { ascending: asc })
+    .order("id", { ascending: asc })
     .limit(5000);
   return data ?? [];
 });
 
 export const listRecentForFeed = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
+  const settings = await readHomeSettings(sb);
+  const asc = settings.ordem === "asc";
   const { data } = await sb
     .from("posts")
     .select("titulo,slug,resumo,publicado_em,imagem_capa")
     .eq("status", "publicado")
     .lte("publicado_em", new Date().toISOString())
-    .order("publicado_em", { ascending: false })
-    .order("id", { ascending: false })
+    .order("publicado_em", { ascending: asc })
+    .order("id", { ascending: asc })
     .limit(30);
   return data ?? [];
 });
