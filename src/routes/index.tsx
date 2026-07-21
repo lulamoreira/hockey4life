@@ -76,6 +76,9 @@ function HomePage() {
         </div>
       </section>
 
+      <NhlPlacar />
+
+
       {/* Últimas histórias */}
       {ultimas.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
