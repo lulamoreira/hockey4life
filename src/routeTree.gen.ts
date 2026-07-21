@@ -31,6 +31,7 @@ import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
 import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
+import { Route as ApiPublicHooksBackupAutomaticoRouteImport } from './routes/api/public/hooks/backup-automatico'
 
 const TemasRoute = TemasRouteImport.update({
   id: '/temas',
@@ -142,6 +143,12 @@ const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminPostsRoute,
 } as any)
+const ApiPublicHooksBackupAutomaticoRoute =
+  ApiPublicHooksBackupAutomaticoRouteImport.update({
+    id: '/api/public/hooks/backup-automatico',
+    path: '/api/public/hooks/backup-automatico',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -189,6 +197,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -214,6 +223,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/posts/$id'
     | '/arquivo/$ano/$mes'
+    | '/api/public/hooks/backup-automatico'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/posts/$id'
     | '/arquivo/$ano/$mes'
+    | '/api/public/hooks/backup-automatico'
   id:
     | '__root__'
     | '/'
@@ -287,6 +299,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/posts/$id'
     | '/arquivo/$ano/$mes'
+    | '/api/public/hooks/backup-automatico'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -302,6 +315,7 @@ export interface RootRouteChildren {
   AdminCriarContaRoute: typeof AdminCriarContaRoute
   AssuntoSlugRoute: typeof AssuntoSlugRoute
   TimeSlugRoute: typeof TimeSlugRoute
+  ApiPublicHooksBackupAutomaticoRoute: typeof ApiPublicHooksBackupAutomaticoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -460,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPostsIdRouteImport
       parentRoute: typeof AdminPostsRoute
     }
+    '/api/public/hooks/backup-automatico': {
+      id: '/api/public/hooks/backup-automatico'
+      path: '/api/public/hooks/backup-automatico'
+      fullPath: '/api/public/hooks/backup-automatico'
+      preLoaderRoute: typeof ApiPublicHooksBackupAutomaticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -533,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCriarContaRoute: AdminCriarContaRoute,
   AssuntoSlugRoute: AssuntoSlugRoute,
   TimeSlugRoute: TimeSlugRoute,
+  ApiPublicHooksBackupAutomaticoRoute: ApiPublicHooksBackupAutomaticoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
