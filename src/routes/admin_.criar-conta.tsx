@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/admin_/criar-conta")({
   head: () => ({
@@ -20,6 +21,17 @@ function CriarContaPage() {
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { session } = useAuthSession();
+
+  const recarregarStatus = async () => {
+    const { data, error } = await supabase.rpc("existe_staff");
+    if (error) {
+      setErro("Não foi possível verificar o status. Recarregue a página.");
+      setStaffJaExiste(false);
+      return;
+    }
+    setStaffJaExiste(Boolean(data));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -35,6 +47,25 @@ function CriarContaPage() {
     })();
     return () => { mounted = false; };
   }, []);
+
+  const promover = async () => {
+    setErro(""); setMsg(""); setLoading(true);
+    try {
+      const { data: promoteResult, error: promoteError } = await supabase.rpc("criar_primeiro_admin");
+      if (promoteError) throw promoteError;
+      if (promoteResult === true) {
+        setMsg("Administrador criado com sucesso! Redirecionando…");
+        setTimeout(() => router.navigate({ to: "/admin" }), 800);
+      } else {
+        setErro("Já existe um administrador. Esta tela não pode mais ser usada.");
+        await recarregarStatus();
+      }
+    } catch (e: any) {
+      setErro(e?.message ?? "Erro ao promover conta.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +142,33 @@ function CriarContaPage() {
           </div>
         )}
 
-        {staffJaExiste === false && (
+        {staffJaExiste === false && session && (
+          <div className="mt-6">
+            <p className="text-sm text-muted-foreground">
+              Você já está logado como <strong className="text-foreground">{session.user.email}</strong>,
+              mas ainda não há nenhum administrador. Clique abaixo para se tornar o administrador
+              principal. A validação ocorre no servidor: só concede a permissão se realmente não
+              houver nenhum admin ainda.
+            </p>
+            {erro && <p className="mt-3 text-sm text-destructive">{erro}</p>}
+            {msg && <p className="mt-3 text-sm text-primary">{msg}</p>}
+            <button
+              onClick={promover}
+              disabled={loading}
+              className="mt-4 w-full rounded-md bg-primary py-2.5 font-semibold uppercase tracking-wide text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading ? "Promovendo…" : "Tornar-me administrador"}
+            </button>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }}
+              className="mt-2 w-full rounded-md border border-border py-2 text-xs uppercase tracking-wide text-muted-foreground hover:text-foreground"
+            >
+              Sair desta conta
+            </button>
+          </div>
+        )}
+
+        {staffJaExiste === false && !session && (
           <>
             <p className="mt-6 text-sm text-muted-foreground">
               Nenhum administrador foi configurado ainda. Crie a conta principal preenchendo os
