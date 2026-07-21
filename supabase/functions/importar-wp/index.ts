@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const pagina = Math.max(1, Number(body.pagina ?? 1));
-    const tamanho = Math.min(15, Math.max(1, Number(body.tamanho ?? 10)));
+    const tamanho = Math.min(30, Math.max(1, Number(body.tamanho ?? 20)));
     const forcar: boolean = Boolean(body.forcar);
     const somenteErros: number[] | undefined = Array.isArray(body.reprocessar) ? body.reprocessar.map(Number) : undefined;
 
