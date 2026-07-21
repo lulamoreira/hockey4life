@@ -149,6 +149,7 @@ export function MancheteCarrossel({
           key={`in-${slides[idx].id}-${idx}`}
           post={slides[idx]}
           eager={idx === 0 && prev === 0}
+          settings={settings}
           style={
             transitioning
               ? {
