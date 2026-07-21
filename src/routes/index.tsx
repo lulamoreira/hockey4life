@@ -3,8 +3,8 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getHomeData } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Letreiro } from "@/components/site/Letreiro";
+import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
-import { formatDataBR } from "@/lib/slugify";
 
 const homeQuery = () =>
   queryOptions({
