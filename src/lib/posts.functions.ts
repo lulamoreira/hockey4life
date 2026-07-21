@@ -33,6 +33,9 @@ export type CarrosselSettings = {
   intervalo: number;       // segundos por slide (3..30)
   duracaoMs: number;       // duração da transição (200..1500)
   fixadaComRodizio: boolean; // se há manchete fixa: participa ou fica sozinha
+  tituloPx: number;        // tamanho do título (mobile) 16..48 padrão 20
+  tituloPxLg: number;      // tamanho do título (desktop) 20..72 padrão 30
+  resumoPx: number;        // tamanho do resumo 12..24 padrão 16
 };
 
 export type HomeSettings = {
