@@ -214,10 +214,12 @@ function Slide({
   post,
   eager,
   style,
+  settings,
 }: {
   post: PostListItem;
   eager: boolean;
   style: React.CSSProperties;
+  settings: CarrosselSettings;
 }) {
   return (
     <div className="absolute inset-0 will-change-transform" style={style}>
@@ -249,11 +251,19 @@ function Slide({
                 {formatDataBR(post.publicado_em)}
               </span>
             </div>
-            <h1 className="h4l-title text-xl leading-tight text-foreground transition-colors group-hover:text-primary md:text-2xl lg:text-3xl">
+            <h1
+              className="h4l-title leading-tight text-foreground transition-colors group-hover:text-primary"
+              style={{
+                fontSize: `clamp(${settings.tituloPx}px, ${settings.tituloPx + (settings.tituloPxLg - settings.tituloPx) * 0.5}px, ${settings.tituloPxLg}px)`,
+              }}
+            >
               {post.titulo}
             </h1>
             {post.resumo && (
-              <p className="mt-3 line-clamp-2 max-w-2xl text-sm text-muted-foreground md:text-base">
+              <p
+                className="mt-3 line-clamp-2 max-w-2xl text-muted-foreground"
+                style={{ fontSize: `${settings.resumoPx}px` }}
+              >
                 {post.resumo}
               </p>
             )}
