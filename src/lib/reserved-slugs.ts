@@ -5,6 +5,7 @@ export const RESERVED_SLUGS = new Set<string>([
   "assunto",
   "busca",
   "arquivo",
+  "temas",
   "fale-conosco",
   "feed",
   "sitemap.xml",
