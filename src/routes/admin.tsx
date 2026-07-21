@@ -139,7 +139,10 @@ function LoginScreen() {
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <Link to="/" className="mt-4 block text-center text-xs text-muted-foreground hover:text-primary">← Voltar ao site</Link>
+        <Link to="/admin/criar-conta" className="mt-4 block text-center text-xs text-muted-foreground hover:text-primary">
+          Primeiro acesso? Criar conta de administrador
+        </Link>
+        <Link to="/" className="mt-2 block text-center text-xs text-muted-foreground hover:text-primary">← Voltar ao site</Link>
       </div>
     </div>
   );
