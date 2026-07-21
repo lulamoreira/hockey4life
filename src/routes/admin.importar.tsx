@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, Square, RefreshCw, AlertTriangle, Trash2 } from "lucide-react";
+import { Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/admin/importar")({
   component: ImportarPage,
@@ -60,6 +60,21 @@ function ImportarPage() {
     },
   });
 
+  const ultimasImportadas = useQuery({
+    queryKey: ["import-ultimas-materias"],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from("posts")
+        .select("id, titulo, slug, status, wp_id, publicado_em, atualizado_em", { count: "exact" })
+        .not("wp_id", "is", null)
+        .order("atualizado_em", { ascending: false })
+        .order("id", { ascending: false })
+        .range(0, 19);
+      if (error) throw error;
+      return { itens: data ?? [], total: count ?? 0 };
+    },
+  });
+
   const [origem, setOrigem] = useState<{ total: number; totalPaginas: number } | null>(null);
   useEffect(() => {
     (async () => {
@@ -82,6 +97,7 @@ function ImportarPage() {
     setLogMsg(`Página ${resp.pagina}/${resp.total_paginas} — importados ${resp.importados}, pulados ${resp.pulados}, imagens ${resp.imagens_subidas}, erros ${resp.erros.length} (${resp.duracao_ms}ms)`);
     await qc.invalidateQueries({ queryKey: ["import-estado"] });
     await qc.invalidateQueries({ queryKey: ["import-erros"] });
+    await qc.invalidateQueries({ queryKey: ["import-ultimas-materias"] });
     return resp;
   };
 
@@ -181,6 +197,39 @@ function ImportarPage() {
       {ultima && ultima.erros.length > 0 && (
         <p className="text-xs text-muted-foreground">Último lote: {ultima.erros.length} erro(s) — veja a lista abaixo.</p>
       )}
+
+      <div>
+        <h2 className="h4l-title text-xl text-foreground">Últimas matérias importadas ({ultimasImportadas.data?.total ?? 0})</h2>
+        <div className="mt-3 max-h-96 overflow-y-auto rounded-md border border-border bg-card">
+          {ultimasImportadas.data?.itens.length ? (
+            <ul className="divide-y divide-border">
+              {ultimasImportadas.data.itens.map((p) => (
+                <li key={p.id} className="p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    {p.status === "publicado" ? (
+                      <a
+                        href={`/${p.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary"
+                      >
+                        <span>{p.titulo}</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="font-medium text-foreground">{p.titulo}</span>
+                    )}
+                    <span className="font-mono text-xs text-muted-foreground">WP #{p.wp_id}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">/{p.slug}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="p-4 text-sm text-muted-foreground">Nenhuma matéria importada ainda.</p>
+          )}
+        </div>
+      </div>
 
       <div>
         <h2 className="h4l-title flex items-center gap-2 text-xl text-foreground">
