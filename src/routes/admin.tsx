@@ -37,6 +37,7 @@ function AdminShell() {
     { to: "/admin/posts", label: "Matérias", icon: FileText },
     { to: "/admin/temas", label: "Temas", icon: Tag },
     { to: "/admin/contatos", label: "Contatos", icon: Mail },
+    { to: "/admin/importar", label: "Importar WP", icon: Download },
     { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
   ];
   return (
