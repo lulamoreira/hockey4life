@@ -117,6 +117,9 @@ function normalizeCarrossel(raw: any): CarrosselSettings {
     intervalo: clamp(c.intervalo, 3, 30, CARROSSEL_PADRAO.intervalo),
     duracaoMs: clamp(c.duracaoMs, 200, 1500, CARROSSEL_PADRAO.duracaoMs),
     fixadaComRodizio: c.fixadaComRodizio !== false,
+    tituloPx: clamp(c.tituloPx, 16, 48, CARROSSEL_PADRAO.tituloPx),
+    tituloPxLg: clamp(c.tituloPxLg, 20, 72, CARROSSEL_PADRAO.tituloPxLg),
+    resumoPx: clamp(c.resumoPx, 12, 24, CARROSSEL_PADRAO.resumoPx),
   };
 }
 
