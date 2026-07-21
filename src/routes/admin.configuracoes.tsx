@@ -179,11 +179,23 @@ function HomeTab() {
         </div>
       </Section>
 
-      {/* Manchete */}
+      {/* Manchete (post fixo opcional) */}
       <MancheteBlock
         settings={s}
         onChange={(m) => setS({ ...s, manchete: m })}
       />
+
+      {/* Carrossel da manchete */}
+      <Section
+        title="Carrossel da manchete"
+        onReset={() => setS({ ...s, carrossel: CARROSSEL_PADRAO })}
+      >
+        <CarrosselEditor
+          value={s.carrossel}
+          temFixa={s.manchete.modo === "fixa" && !!s.manchete.post_id}
+          onChange={(c) => setS({ ...s, carrossel: c })}
+        />
+      </Section>
 
       {/* Quantidades */}
       <Section
