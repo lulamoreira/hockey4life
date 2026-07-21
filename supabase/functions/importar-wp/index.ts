@@ -221,14 +221,26 @@ Deno.serve(async (req) => {
       const wp_id: number = p.id;
       const slug: string = p.slug;
       try {
-        // idempotência: se atualizado_em > importado_em, não sobrescreve
         const { data: existente } = await admin
           .from("posts").select("id, atualizado_em").eq("wp_id", wp_id).maybeSingle();
         const { data: itemLog } = await admin
-          .from("importacao_itens").select("importado_em").eq("wp_id", wp_id).maybeSingle();
+          .from("importacao_itens").select("importado_em, status").eq("wp_id", wp_id).maybeSingle();
+
+        // Proteção: editada no admin depois da importação — nunca sobrescreve
         if (existente && itemLog && new Date(existente.atualizado_em) > new Date(itemLog.importado_em)) {
           pulados++;
           continue;
+        }
+
+        // Idempotência: já importada com status ok e não modificada na origem — pula sem baixar imagem
+        const modifiedRaw = p.modified_gmt ? p.modified_gmt + "Z" : (p.modified ?? null);
+        const modifiedAt = modifiedRaw ? new Date(modifiedRaw) : null;
+        const jaEstavaOk = existente && itemLog && itemLog.status === "ok";
+        if (!forcar && !somenteErros && jaEstavaOk) {
+          if (!modifiedAt || modifiedAt <= new Date(itemLog!.importado_em)) {
+            pulados++;
+            continue;
+          }
         }
 
         let conteudo = limparConteudo(String(p.content?.rendered ?? ""));
@@ -281,7 +293,7 @@ Deno.serve(async (req) => {
           { wp_id, slug, status: "ok", erro: null, importado_em: new Date().toISOString() },
           { onConflict: "wp_id" },
         );
-        importados++;
+        if (existente) atualizados++; else importados++;
       } catch (e: any) {
         const msg = e?.message ?? String(e);
         erros.push({ wp_id, slug, erro: msg });
@@ -294,20 +306,21 @@ Deno.serve(async (req) => {
 
     // Atualiza estado (só para importação sequencial, não para reprocessar)
     if (!somenteErros) {
-      const { data: est } = await admin.from("importacao_estado").select("total_importados").eq("id", 1).single();
-      const totalImportados = (est?.total_importados ?? 0) + importados;
+      // Fonte única de verdade: conta linhas reais em posts
+      const { count: totalReal } = await admin
+        .from("posts").select("id", { count: "exact", head: true }).not("wp_id", "is", null);
       await admin.from("importacao_estado").upsert({
         id: 1,
         ultima_pagina: pagina,
         total_paginas: totalPaginas,
-        total_importados: totalImportados,
+        total_importados: totalReal ?? 0,
         concluido: totalPaginas > 0 && pagina >= totalPaginas,
         atualizado_em: new Date().toISOString(),
       });
     }
 
     const resp = {
-      pagina, total_paginas: totalPaginas, importados, pulados,
+      pagina, total_paginas: totalPaginas, importados, atualizados, pulados,
       imagens_subidas: imagensSubidas, tags_importadas: tagsImportadas,
       erros, duracao_ms: Date.now() - t0,
     };
