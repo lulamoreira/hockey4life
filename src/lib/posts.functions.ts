@@ -190,8 +190,10 @@ function normalizeHomeSettings(raw: any): HomeSettings {
       modo: naoPercaModo,
     },
     letreiro: normalizeLetreiro(letreiroRaw, naoPercaModo),
+    times: normalizeTimes(s.times),
   };
 }
+
 
 async function readHomeSettings(sb: ReturnType<typeof publicClient>): Promise<HomeSettings> {
   const { data } = await sb.from("configuracoes").select("valor").eq("chave", "home_ordenacao").maybeSingle();
