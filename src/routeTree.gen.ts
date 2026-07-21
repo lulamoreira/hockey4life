@@ -29,6 +29,7 @@ import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
 import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
 import { Route as ApiPublicHooksBackupAutomaticoRouteImport } from './routes/api/public/hooks/backup-automatico'
@@ -133,6 +134,11 @@ const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBackupRoute = AdminBackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ArquivoAnoMesRoute = ArquivoAnoMesRouteImport.update({
   id: '/$mes',
   path: '/$mes',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -460,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/backup': {
+      id: '/admin/backup'
+      path: '/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AdminBackupRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/arquivo/$ano/$mes': {
       id: '/arquivo/$ano/$mes'
       path: '/$mes'
@@ -497,6 +516,7 @@ const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminBackupRoute: typeof AdminBackupRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
   AdminImportarRoute: typeof AdminImportarRoute
@@ -507,6 +527,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBackupRoute: AdminBackupRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
   AdminImportarRoute: AdminImportarRoute,
