@@ -50,7 +50,7 @@ function TemaAssuntoPage() {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="text-xs font-bold uppercase tracking-widest text-primary">ASSUNTO</div>
         <h1 className="mt-1 h4l-title text-4xl text-foreground md:text-6xl">{data.tema?.nome}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{data.total} matéria(s)</p>
+        <p className="mt-2 text-sm text-muted-foreground">{data.total} matéria(s){data.ultimaData ? ` · última em ${new Date(data.ultimaData).toLocaleDateString("pt-BR")}` : ""}</p>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((p) => <PostCard key={p.id} post={p} />)}
