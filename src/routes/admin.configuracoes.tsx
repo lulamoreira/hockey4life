@@ -234,6 +234,16 @@ function HomeTab() {
         />
       </Section>
 
+      {/* Carrossel de logos dos times da NHL */}
+      <Section
+        title="Carrossel de logos dos times (NHL)"
+        onReset={() => setS({ ...s, times: TIMES_CARROSSEL_PADRAO })}
+      >
+        <TimesEditor value={s.times} onChange={(t) => setS({ ...s, times: t })} />
+      </Section>
+
+
+
 
       {msg && (
         <div className="flex items-center gap-3 rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
