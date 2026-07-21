@@ -46,9 +46,9 @@ export function Letreiro({
           {reducedMotion ? (
             <FadeTicker items={items} intervalMs={Math.max(2000, settings.velocidade * 1000)} running={running} />
           ) : horizontal ? (
-            <MarqueeHorizontal items={items} direcao={settings.direcao} segundos={settings.velocidade} running={running} />
+            <MarqueeHorizontal items={items} direcao={settings.direcao as "rtl" | "ltr"} segundos={settings.velocidade} running={running} />
           ) : (
-            <MarqueeVertical items={items} direcao={settings.direcao} segundos={settings.velocidade} running={running} />
+            <MarqueeVertical items={items} direcao={settings.direcao as "up" | "down"} segundos={settings.velocidade} running={running} />
           )}
         </div>
       </div>
