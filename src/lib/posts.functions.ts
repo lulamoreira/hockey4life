@@ -67,6 +67,7 @@ export const listPosts = createServerFn({ method: "GET" })
       .eq("status", "publicado")
       .lte("publicado_em", new Date().toISOString())
       .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
