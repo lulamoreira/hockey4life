@@ -109,7 +109,12 @@ function PostPage() {
           <div
             className="prose-h4l mt-8"
             // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: post.conteudo }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.conteudo, {
+                ADD_TAGS: ["iframe"],
+                ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
+              }),
+            }}
           />
         )}
 
