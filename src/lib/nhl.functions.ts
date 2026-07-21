@@ -56,7 +56,7 @@ function toJogo(raw: any): NhlJogo {
     periodo = per.periodType === "SO" ? "FINAL (PÊN)" : "FINAL (PRORR)";
   }
   const tvs: string[] = Array.isArray(raw?.tvBroadcasts)
-    ? [...new Set(raw.tvBroadcasts.map((t: any) => t?.network).filter(Boolean))]
+    ? Array.from(new Set(raw.tvBroadcasts.map((t: any) => String(t?.network ?? "")).filter((s: string) => s.length > 0)))
     : [];
   return {
     id: raw?.id,
