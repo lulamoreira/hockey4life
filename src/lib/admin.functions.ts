@@ -286,3 +286,32 @@ export const criarUploadUrl = createServerFn({ method: "POST" })
     const publicUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/midia/${key}`;
     return { key, uploadUrl: signed.signedUrl, token: signed.token, publicUrl };
   });
+
+// ============ BUSCA DE POSTS (para picker da manchete) ============
+export const searchAdminPostsByTitle = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ q: z.string().max(200).default("") }).parse(v ?? {}))
+  .handler(async ({ context, data }) => {
+    let query = context.supabase
+      .from("posts")
+      .select("id,titulo,slug,imagem_capa,publicado_em,status")
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false })
+      .limit(20);
+    if (data.q.trim()) query = query.ilike("titulo", `%${data.q.trim()}%`);
+    const { data: items, error } = await query;
+    if (error) throw error;
+    return items ?? [];
+  });
+
+export const getAdminPostSimple = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ context, data }) => {
+    const { data: p } = await context.supabase
+      .from("posts")
+      .select("id,titulo,slug,imagem_capa,publicado_em,status")
+      .eq("id", data.id)
+      .maybeSingle();
+    return p ?? null;
+  });
