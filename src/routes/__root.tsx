@@ -78,13 +78,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo.",
+          "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC.",
       },
       { name: "author", content: "Hockey4Life" },
       { property: "og:site_name", content: "Hockey4Life" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#0d0d0f" },
+      { property: "og:title", content: "Hockey4Life — histórias de vida, superação e gentileza" },
+      { name: "twitter:title", content: "Hockey4Life — histórias de vida, superação e gentileza" },
+      { property: "og:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
+      { name: "twitter:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ef252f66-5922-4a80-8074-488fbf50210a" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ef252f66-5922-4a80-8074-488fbf50210a" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

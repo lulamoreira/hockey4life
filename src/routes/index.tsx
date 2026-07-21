@@ -22,8 +22,8 @@ export const Route = createFileRoute("/")({
         content:
           "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC.",
       },
-      { property: "og:title", content: "Hockey4Life" },
-      { property: "og:description", content: "Histórias de vida, superação e gentileza no hóquei no gelo." },
+      { property: "og:title", content: "Hockey4Life — histórias de vida, superação e gentileza" },
+      { property: "og:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
