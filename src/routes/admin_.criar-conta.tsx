@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/admin_/criar-conta")({
   head: () => ({
@@ -20,6 +21,17 @@ function CriarContaPage() {
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { session } = useAuthSession();
+
+  const recarregarStatus = async () => {
+    const { data, error } = await supabase.rpc("existe_staff");
+    if (error) {
+      setErro("Não foi possível verificar o status. Recarregue a página.");
+      setStaffJaExiste(false);
+      return;
+    }
+    setStaffJaExiste(Boolean(data));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -35,6 +47,25 @@ function CriarContaPage() {
     })();
     return () => { mounted = false; };
   }, []);
+
+  const promover = async () => {
+    setErro(""); setMsg(""); setLoading(true);
+    try {
+      const { data: promoteResult, error: promoteError } = await supabase.rpc("criar_primeiro_admin");
+      if (promoteError) throw promoteError;
+      if (promoteResult === true) {
+        setMsg("Administrador criado com sucesso! Redirecionando…");
+        setTimeout(() => router.navigate({ to: "/admin" }), 800);
+      } else {
+        setErro("Já existe um administrador. Esta tela não pode mais ser usada.");
+        await recarregarStatus();
+      }
+    } catch (e: any) {
+      setErro(e?.message ?? "Erro ao promover conta.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
