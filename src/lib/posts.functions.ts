@@ -22,6 +22,9 @@ export type LetreiroSettings = {
   origem: "recentes" | "manual";
   direcao: LetreiroDirecao;
   velocidade: number; // segundos (por volta em horizontal; por manchete em vertical)
+  alturaPx: number;         // altura da faixa (24..80, padrão 36)
+  fonteTitulosPx: number;   // tamanho da fonte dos títulos (11..22, padrão 14)
+  rotuloTamanhoPx: number;  // tamanho da fonte do rótulo "NÃO PERCA" (10..18, padrão 12)
 };
 
 export type CarrosselSettings = {
@@ -56,6 +59,9 @@ export const LETREIRO_PADRAO: LetreiroSettings = {
   origem: "recentes",
   direcao: "rtl",
   velocidade: 30,
+  alturaPx: 36,
+  fonteTitulosPx: 14,
+  rotuloTamanhoPx: 12,
 };
 
 export const CARROSSEL_PADRAO: CarrosselSettings = {
@@ -90,6 +96,9 @@ function normalizeLetreiro(raw: any, fallbackModo: "recentes" | "manual" = "rece
     origem: l.origem === "manual" ? "manual" : (l.origem === "recentes" ? "recentes" : fallbackModo),
     direcao: dir as LetreiroDirecao,
     velocidade: clamp(l.velocidade, 3, 60, LETREIRO_PADRAO.velocidade),
+    alturaPx: clamp(l.alturaPx, 24, 80, LETREIRO_PADRAO.alturaPx),
+    fonteTitulosPx: clamp(l.fonteTitulosPx, 11, 22, LETREIRO_PADRAO.fonteTitulosPx),
+    rotuloTamanhoPx: clamp(l.rotuloTamanhoPx, 10, 18, LETREIRO_PADRAO.rotuloTamanhoPx),
   };
 }
 

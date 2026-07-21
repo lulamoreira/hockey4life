@@ -22,6 +22,10 @@ export function Letreiro({
   const horizontal = settings.direcao === "rtl" || settings.direcao === "ltr";
   const running = !paused;
 
+  const altura = settings.alturaPx ?? 36;
+  const fonteTitulos = settings.fonteTitulosPx ?? 14;
+  const rotuloTam = settings.rotuloTamanhoPx ?? 12;
+
   return (
     <div
       className="bg-destructive text-destructive-foreground"
@@ -30,11 +34,14 @@ export function Letreiro({
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className="mx-auto flex h-9 max-w-7xl items-stretch overflow-hidden px-0">
-        <div className="flex shrink-0 items-center gap-2 bg-destructive/90 px-4 text-xs font-black uppercase tracking-widest">
+      <div className="mx-auto flex max-w-7xl items-stretch overflow-hidden px-0" style={{ height: `${altura}px` }}>
+        <div
+          className="flex shrink-0 items-center gap-2 bg-destructive/90 px-4 font-black uppercase tracking-widest"
+          style={{ fontSize: `${rotuloTam}px` }}
+        >
           <span className="h4l-title">{rotulo}</span>
         </div>
-        <div className="relative flex-1 overflow-hidden">
+        <div className="relative flex-1 overflow-hidden" style={{ fontSize: `${fonteTitulos}px` }}>
           {reducedMotion ? (
             <FadeTicker items={items} intervalMs={Math.max(2000, settings.velocidade * 1000)} running={running} />
           ) : horizontal ? (
@@ -82,7 +89,7 @@ function MarqueeHorizontal({
             <Link
               to="/$slug"
               params={{ slug: it.slug }}
-              className="px-4 text-sm font-medium hover:underline"
+              className="px-4 font-medium hover:underline"
               tabIndex={idx >= items.length ? -1 : 0}
             >
               {it.titulo}
@@ -133,7 +140,7 @@ function MarqueeVertical({
           <Link
             to="/$slug"
             params={{ slug: current.slug }}
-            className="line-clamp-1 px-4 text-sm font-medium hover:underline"
+            className="line-clamp-1 px-4 font-medium hover:underline"
           >
             {current.titulo}
           </Link>
@@ -156,7 +163,7 @@ function FadeTicker({ items, intervalMs, running }: { items: Item[]; intervalMs:
   const it = items[idx];
   return (
     <div key={it?.id} className="animate-in fade-in flex h-full items-center">
-      <Link to="/$slug" params={{ slug: it.slug }} className="line-clamp-1 px-4 text-sm font-medium hover:underline">
+      <Link to="/$slug" params={{ slug: it.slug }} className="line-clamp-1 px-4 font-medium hover:underline">
         {it.titulo}
       </Link>
     </div>

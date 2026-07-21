@@ -247,7 +247,7 @@ function Slide({
                 {formatDataBR(post.publicado_em)}
               </span>
             </div>
-            <h1 className="h4l-title text-3xl leading-tight text-foreground transition-colors group-hover:text-primary md:text-5xl lg:text-6xl">
+            <h1 className="h4l-title text-xl leading-tight text-foreground transition-colors group-hover:text-primary md:text-2xl lg:text-3xl">
               {post.titulo}
             </h1>
             {post.resumo && (

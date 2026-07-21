@@ -587,6 +587,24 @@ function LetreiroEditor({
           def={horizontal ? 30 : 5}
           onChange={(v) => set({ velocidade: v })}
         />
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <NumField
+            label={`Altura da faixa (${l.alturaPx}px)`}
+            value={l.alturaPx} min={24} max={80} def={36}
+            onChange={(v) => set({ alturaPx: v })}
+          />
+          <NumField
+            label={`Fonte dos títulos (${l.fonteTitulosPx}px)`}
+            value={l.fonteTitulosPx} min={11} max={22} def={14}
+            onChange={(v) => set({ fonteTitulosPx: v })}
+          />
+          <NumField
+            label={`Fonte do rótulo (${l.rotuloTamanhoPx}px)`}
+            value={l.rotuloTamanhoPx} min={10} max={18} def={12}
+            onChange={(v) => set({ rotuloTamanhoPx: v })}
+          />
+        </div>
       </div>
 
       {/* Pré-visualização ao vivo */}
