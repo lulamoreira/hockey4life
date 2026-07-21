@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getAdminPost, listTemas, savePost, criarUploadUrl } from "@/lib/admin.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 export const Route = createFileRoute("/admin/posts/$id")({
   component: EditorPage,
@@ -129,12 +130,11 @@ function EditorPage() {
             <textarea value={resumo} onChange={(e) => setResumo(e.target.value)} rows={3} maxLength={1000}
               className="w-full rounded-md border border-border bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none" />
           </Field>
-          <Field label="Conteúdo (HTML)">
-            <textarea value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows={20}
-              placeholder="<p>Escreva a matéria em HTML. Use &lt;h2&gt;, &lt;p&gt;, &lt;img&gt;, etc.</p>"
-              className="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none" />
+          <Field label="Conteúdo">
+            <RichTextEditor value={conteudo} onChange={setConteudo} />
             <p className="mt-1 text-xs text-muted-foreground">
-              Aceita HTML. As tags básicas (p, h2, h3, img, a, blockquote, ul, ol, iframe) já são estilizadas.
+              Editor visual com negrito, itálico, listas, títulos, links e imagens.
+              Use o botão &lt;/&gt; para editar o HTML diretamente quando necessário.
             </p>
           </Field>
         </div>
