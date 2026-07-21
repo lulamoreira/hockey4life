@@ -85,7 +85,8 @@ function ArquivoPage() {
   };
   const goPage = (p: number) => navigate({ to: "/arquivo", search: { ...search, page: p } as any });
 
-  const temasSel = new Set(search.temas ?? []);
+  const temasArr: string[] = (search.temas as string[] | undefined) ?? [];
+  const temasSel = new Set<string>(temasArr);
   const times = (todosTemas ?? []).filter((t) => t.tipo === "time");
   const assuntos = (todosTemas ?? []).filter((t) => t.tipo === "assunto");
   const temasById = new Map(todosTemas.map((t) => [t.id, t]));
@@ -94,9 +95,9 @@ function ArquivoPage() {
 
   const chips: Array<{ label: string; onRemove: () => void }> = [];
   if (search.q) chips.push({ label: `“${search.q}”`, onRemove: () => update({ q: "" }) });
-  (search.temas ?? []).forEach((id) => {
+  temasArr.forEach((id: string) => {
     const t = temasById.get(id);
-    if (t) chips.push({ label: t.nome, onRemove: () => update({ temas: (search.temas ?? []).filter((x) => x !== id) }) });
+    if (t) chips.push({ label: t.nome, onRemove: () => update({ temas: temasArr.filter((x: string) => x !== id) }) });
   });
   if (search.ano) chips.push({ label: `${search.ano}${search.mes ? `/${String(search.mes).padStart(2, "0")}` : ""}`, onRemove: () => update({ ano: null, mes: null }) });
 
