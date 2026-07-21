@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
-  const { destaque, leiaAgora, ultimas, naoPerca, letreiro, temasMenu, config } = data;
+  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
 
@@ -44,45 +44,10 @@ function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Destaque */}
+          {/* Manchete — carrossel */}
           <div className="lg:col-span-2">
-            {destaque ? (
-              <Link to="/$slug" params={{ slug: destaque.slug }} className="group block">
-                <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-muted">
-                  {destaque.imagem_capa ? (
-                    <img
-                      src={destaque.imagem_capa}
-                      alt={destaque.titulo}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <span className="h4l-title text-6xl text-muted-foreground/30">H4L</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-                    <div className="mb-3 flex flex-wrap items-center gap-2">
-                      {destaque.temas.slice(0, 2).map((t) => (
-                        <span key={t.slug} className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
-                          {t.nome}
-                        </span>
-                      ))}
-                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        {formatDataBR(destaque.publicado_em)}
-                      </span>
-                    </div>
-                    <h1 className="h4l-title text-3xl leading-tight text-foreground transition-colors group-hover:text-primary md:text-5xl lg:text-6xl">
-                      {destaque.titulo}
-                    </h1>
-                    {destaque.resumo && (
-                      <p className="mt-3 line-clamp-2 max-w-2xl text-sm text-muted-foreground md:text-base">
-                        {destaque.resumo}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Link>
+            {manchetes.length > 0 ? (
+              <MancheteCarrossel slides={manchetes} settings={carrossel} />
             ) : (
               <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
                 Ainda não há matérias publicadas. Acesse <Link to="/admin" className="text-primary underline">/admin</Link> para criar a primeira.
