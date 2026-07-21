@@ -185,6 +185,7 @@ function EditorPage() {
               {uploading ? "Enviando…" : "Ou envie um arquivo"}
               <input type="file" accept="image/*" className="hidden" onChange={(e)=>{const f=e.target.files?.[0]; if(f) onUpload(f);}} />
             </label>
+            {uploadInfo && <p className="mt-1 text-[11px] text-muted-foreground">Otimização: {uploadInfo}</p>}
             <input value={creditoImagem} onChange={(e)=>setCreditoImagem(e.target.value)} placeholder="Crédito da imagem"
               className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground" />
           </div>
