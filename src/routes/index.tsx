@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
+import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 
 const homeQuery = () =>
   queryOptions({
@@ -89,26 +90,8 @@ function HomePage() {
         </section>
       )}
 
-      {/* Times */}
-      {times.length > 0 && (
-        <section className="border-y border-border bg-card">
-          <div className="mx-auto max-w-7xl px-4 py-8">
-            <div className="mb-4 h4l-title text-sm text-muted-foreground">NAVEGUE POR TIME</div>
-            <div className="flex flex-wrap gap-2">
-              {times.map((t) => (
-                <Link
-                  key={t.slug}
-                  to="/time/$slug"
-                  params={{ slug: t.slug }}
-                  className="rounded-md border border-border px-4 py-2 text-sm font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary"
-                >
-                  {t.nome}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Times — carrossel com logos oficiais da NHL */}
+      {times.length > 0 && <TimesCarrossel times={times} />}
 
       {/* Hockey Fights Cancer */}
       {hfc.video_url && (
