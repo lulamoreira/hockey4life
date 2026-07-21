@@ -84,7 +84,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const sb = publicClient();
   const now = new Date().toISOString();
 
-  const [{ data: destaque }, { data: naoPerca }, { data: recentes }, { data: temasMenu }, { data: config }] =
+  const [{ data: fixado }, { data: naoPerca }, { data: recentes }, { data: temasMenu }, { data: config }] =
     await Promise.all([
       sb
         .from("posts")
@@ -93,6 +93,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("destaque", true)
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(1),
       sb
         .from("posts")
@@ -101,6 +102,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("nao_perca", true)
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(6),
       sb
         .from("posts")
@@ -108,6 +110,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         .eq("status", "publicado")
         .lte("publicado_em", now)
         .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
         .limit(18),
       sb
         .from("temas")
@@ -119,13 +122,19 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const configMap: Record<string, any> = {};
   (config ?? []).forEach((c: any) => { configMap[c.chave] = c.valor; });
 
-  const destaqueList = await attachTemas(sb, destaque ?? []);
+  const fixadoList = await attachTemas(sb, fixado ?? []);
   const recentesList = await attachTemas(sb, recentes ?? []);
 
+  // Se há uma matéria fixada, ela é a manchete; senão, a mais recente.
+  const manchete = (fixadoList[0] ?? recentesList[0] ?? null) as PostListItem | null;
+  const restantes = manchete
+    ? recentesList.filter((p: any) => p.id !== manchete.id)
+    : recentesList.slice(1);
+
   return {
-    destaque: (destaqueList[0] ?? recentesList[0] ?? null) as PostListItem | null,
-    leiaAgora: (recentesList.slice(1, 6)) as PostListItem[],
-    ultimas: (recentesList.slice(1)) as PostListItem[],
+    destaque: manchete,
+    leiaAgora: restantes.slice(0, 5) as PostListItem[],
+    ultimas: restantes as PostListItem[],
     naoPerca: (naoPerca ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
     config: configMap,
