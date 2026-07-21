@@ -251,6 +251,7 @@ export const searchPosts = createServerFn({ method: "GET" })
       .lte("publicado_em", new Date().toISOString())
       .or(`titulo.ilike.${q},resumo.ilike.${q}`)
       .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, to);
     if (error) throw error;
     const items = await attachTemas(sb, posts ?? []);
