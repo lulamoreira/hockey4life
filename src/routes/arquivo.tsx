@@ -22,8 +22,8 @@ const searchSchema = z.object({
 type ArquivoSearch = {
   q: string;
   temas: string[];
-  ano: number | null | undefined;
-  mes: number | null | undefined;
+  ano?: number | null;
+  mes?: number | null;
   ordem: "desc" | "asc" | "rel";
   page: number;
 };
