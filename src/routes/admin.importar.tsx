@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink } from "lucide-react";
+import { Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink, RotateCw } from "lucide-react";
 
 export const Route = createFileRoute("/admin/importar")({
   component: ImportarPage,
@@ -12,6 +12,7 @@ type LoteResp = {
   pagina: number;
   total_paginas: number;
   importados: number;
+  atualizados: number;
   pulados: number;
   imagens_subidas: number;
   tags_importadas?: number;
@@ -34,6 +35,7 @@ function ImportarPage() {
   const [ultima, setUltima] = useState<LoteResp | null>(null);
   const [logMsg, setLogMsg] = useState<string>("");
   const [erroGlobal, setErroGlobal] = useState<string>("");
+  const [forcar, setForcar] = useState(false);
   const stopRef = useRef(false);
 
   const estado = useQuery({
@@ -45,6 +47,19 @@ function ImportarPage() {
     },
     refetchInterval: rodando ? 2000 : false,
   });
+
+  // Fonte única de verdade: conta linhas reais em posts
+  const matBanco = useQuery({
+    queryKey: ["import-materias-banco"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("posts").select("id", { count: "exact", head: true }).not("wp_id", "is", null);
+      if (error) throw error;
+      return count ?? 0;
+    },
+    refetchInterval: rodando ? 2000 : false,
+  });
+
 
   const erros = useQuery({
     queryKey: ["import-erros"],
@@ -88,16 +103,26 @@ function ImportarPage() {
     })();
   }, []);
 
+  const invalidarTudo = async () => {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["import-estado"] }),
+      qc.invalidateQueries({ queryKey: ["import-erros"] }),
+      qc.invalidateQueries({ queryKey: ["import-ultimas-materias"] }),
+      qc.invalidateQueries({ queryKey: ["import-materias-banco"] }),
+      
+    ]);
+  };
+
   const rodarLote = async (extra: Record<string, unknown> = {}) => {
     setErroGlobal("");
     setLogMsg("Chamando função…");
     const pagina = (estado.data?.ultima_pagina ?? 0) + 1;
-    const resp = await chamarLote({ pagina, tamanho: 10, ...extra });
+    const resp = await chamarLote({ pagina, tamanho: 10, forcar, ...extra });
     setUltima(resp);
-    setLogMsg(`Página ${resp.pagina}/${resp.total_paginas} — importados ${resp.importados}, pulados ${resp.pulados}, imagens ${resp.imagens_subidas}, erros ${resp.erros.length} (${resp.duracao_ms}ms)`);
-    await qc.invalidateQueries({ queryKey: ["import-estado"] });
-    await qc.invalidateQueries({ queryKey: ["import-erros"] });
-    await qc.invalidateQueries({ queryKey: ["import-ultimas-materias"] });
+    setLogMsg(
+      `Página ${resp.pagina}/${resp.total_paginas} — importadas ${resp.importados}, atualizadas ${resp.atualizados}, puladas ${resp.pulados}, imagens ${resp.imagens_subidas}, erros ${resp.erros.length} (${resp.duracao_ms}ms)`,
+    );
+    await invalidarTudo();
     return resp;
   };
 
@@ -110,14 +135,28 @@ function ImportarPage() {
   const importarTudo = async () => {
     if (rodando) return;
     stopRef.current = false; setRodando(true);
+    let falhasSeguidas = 0;
     try {
       while (!stopRef.current) {
-        const r = await rodarLote();
+        let r: LoteResp;
+        try {
+          r = await rodarLote();
+          falhasSeguidas = 0;
+        } catch (e: any) {
+          falhasSeguidas++;
+          setErroGlobal(`Falha no lote (${falhasSeguidas}/3): ${e.message}`);
+          if (falhasSeguidas >= 3) break;
+          continue;
+        }
+        // Parada 1: chegou ao fim de verdade
         if (r.total_paginas > 0 && r.pagina >= r.total_paginas) break;
-        if (r.importados === 0 && r.pulados === 0 && r.erros.length === 0) break;
+        // Parada 2: lote sem qualquer atividade — algo mudou na origem
+        if (r.importados === 0 && r.atualizados === 0 && r.pulados === 0 && r.erros.length === 0) {
+          setErroGlobal("Lote voltou vazio (nada importado, atualizado, pulado ou com erro). Verifique a origem.");
+          break;
+        }
       }
-    } catch (e: any) { setErroGlobal(e.message); }
-    finally { setRodando(false); stopRef.current = false; }
+    } finally { setRodando(false); stopRef.current = false; }
   };
 
   const parar = () => { stopRef.current = true; setLogMsg("Parando após o lote atual…"); };
@@ -128,10 +167,12 @@ function ImportarPage() {
     try {
       const ids = erros.data.itens.map((i) => i.wp_id).slice(0, 10);
       setErroGlobal("");
-      const resp = await chamarLote({ reprocessar: ids, tamanho: ids.length });
+      const resp = await chamarLote({ reprocessar: ids, tamanho: ids.length, forcar: true });
       setUltima(resp);
-      setLogMsg(`Reprocessados ${ids.length} — ok ${resp.importados}, erros ${resp.erros.length}`);
-      await qc.invalidateQueries({ queryKey: ["import-erros"] });
+      setLogMsg(
+        `Reprocessados ${ids.length} — importadas ${resp.importados}, atualizadas ${resp.atualizados}, erros ${resp.erros.length}`,
+      );
+      await invalidarTudo();
     } catch (e: any) { setErroGlobal(e.message); }
     finally { setRodando(false); }
   };
@@ -140,28 +181,40 @@ function ImportarPage() {
     if (!confirm("Remover matérias de exemplo (posts sem wp_id)?")) return;
     const { error } = await supabase.from("posts").delete().is("wp_id", null);
     if (error) setErroGlobal(error.message);
-    else setLogMsg("Matérias de exemplo removidas.");
+    else { setLogMsg("Matérias de exemplo removidas."); await invalidarTudo(); }
   };
 
-  const total = origem?.total ?? 0;
-  const feito = estado.data?.total_importados ?? 0;
-  const pct = total > 0 ? Math.min(100, Math.round((feito / total) * 100)) : 0;
+  const totalOrigem = origem?.total ?? 0;
+  const totalPaginas = estado.data?.total_paginas ?? origem?.totalPaginas ?? 0;
+  const ultimaPagina = estado.data?.ultima_pagina ?? 0;
+  const feito = matBanco.data ?? 0;
+  const pct = totalPaginas > 0 ? Math.min(100, Math.round((ultimaPagina / totalPaginas) * 100)) : 0;
+  const excede = totalOrigem > 0 && feito > totalOrigem;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="h4l-title text-3xl text-foreground md:text-4xl">Importar do WordPress</h1>
         <p className="text-sm text-muted-foreground">
-          Fonte: hockey4life.com.br. Aproximadamente 330 MB de imagens — a importação leva um tempo e
-          pode ser feita em várias sessões. O estado fica salvo no banco: se você fechar a aba,
-          basta voltar e continuar do ponto onde parou.
+          Fonte: hockey4life.com.br. O progresso é medido por página processada. A contagem de matérias
+          vem direto da tabela de posts — a fonte única de verdade.
         </p>
       </div>
 
+      {excede && (
+        <div className="flex items-start gap-3 rounded-md border border-destructive/60 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <span>
+            Há <strong>{feito.toLocaleString("pt-BR")}</strong> matérias no banco, mas a origem tem apenas{" "}
+            <strong>{totalOrigem.toLocaleString("pt-BR")}</strong>. Isso é sintoma de bug — investigue antes de continuar.
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-4">
-        <Card label="Na origem" value={total.toLocaleString("pt-BR")} />
-        <Card label="Já importadas" value={feito.toLocaleString("pt-BR")} />
-        <Card label="Página" value={`${estado.data?.ultima_pagina ?? 0} / ${estado.data?.total_paginas ?? origem?.totalPaginas ?? "—"}`} />
+        <Card label="Matérias no banco" value={feito.toLocaleString("pt-BR")} />
+        <Card label="Na origem" value={totalOrigem.toLocaleString("pt-BR")} />
+        <Card label="Página" value={`${ultimaPagina} / ${totalPaginas || "—"}`} />
         <Card label="Progresso" value={`${pct}%`} />
       </div>
 
@@ -169,7 +222,7 @@ function ImportarPage() {
         <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button onClick={importarProximo} disabled={rodando}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground disabled:opacity-50">
           <Play className="h-4 w-4" /> Importar próximo lote
@@ -186,6 +239,14 @@ function ImportarPage() {
           className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase text-foreground disabled:opacity-50">
           <RefreshCw className="h-4 w-4" /> Reprocessar erros
         </button>
+        <button onClick={invalidarTudo}
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase text-foreground">
+          <RotateCw className="h-4 w-4" /> Recontar
+        </button>
+        <label className="ml-2 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <input type="checkbox" checked={forcar} onChange={(e) => setForcar(e.target.checked)} />
+          Forçar reimportação
+        </label>
         <button onClick={removerSeed}
           className="ml-auto inline-flex items-center gap-2 rounded-md border border-destructive/60 px-4 py-2 text-sm uppercase text-destructive">
           <Trash2 className="h-4 w-4" /> Remover matérias de exemplo
@@ -194,8 +255,10 @@ function ImportarPage() {
 
       {logMsg && <pre className="whitespace-pre-wrap rounded-md border border-border bg-card p-3 text-xs text-muted-foreground">{logMsg}</pre>}
       {erroGlobal && <p className="text-sm text-destructive">{erroGlobal}</p>}
-      {ultima && ultima.erros.length > 0 && (
-        <p className="text-xs text-muted-foreground">Último lote: {ultima.erros.length} erro(s) — veja a lista abaixo.</p>
+      {ultima && (
+        <p className="text-xs text-muted-foreground">
+          Último lote — importadas: <strong>{ultima.importados}</strong> · atualizadas: <strong>{ultima.atualizados}</strong> · puladas: <strong>{ultima.pulados}</strong> · imagens: <strong>{ultima.imagens_subidas}</strong> · erros: <strong>{ultima.erros.length}</strong>
+        </p>
       )}
 
       <div>
