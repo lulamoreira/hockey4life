@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/posts")({
   component: PostsListPage,
 });
 
-function PostsListPage() {
+export function PostsListPage() {
   const [status, setStatus] = useState<"todos" | "rascunho" | "publicado">("todos");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
