@@ -132,6 +132,7 @@ function HomeTab() {
         post_id: raw.manchete?.post_id ?? null,
         fixada_em: raw.manchete?.fixada_em ?? null,
       },
+      carrossel: { ...HOME_SETTINGS_PADRAO.carrossel, ...(raw.carrossel ?? {}) },
       quantidades: { ...HOME_SETTINGS_PADRAO.quantidades, ...(raw.quantidades ?? {}) },
       nao_perca: { ...HOME_SETTINGS_PADRAO.nao_perca, ...(raw.nao_perca ?? {}) },
       letreiro: { ...HOME_SETTINGS_PADRAO.letreiro, ...(raw.letreiro ?? {}) },
