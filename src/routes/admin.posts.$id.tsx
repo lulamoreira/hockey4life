@@ -148,15 +148,23 @@ function EditorPage() {
               <option value="publicado">Publicado</option>
             </select>
             <label className="mt-3 flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={destaque} onChange={(e) => setDestaque(e.target.checked)} /> Destaque principal
+              <input type="checkbox" checked={destaque} onChange={(e) => setDestaque(e.target.checked)} /> Fixar no topo da home
             </label>
-            <label className="mt-1 flex items-center gap-2 text-sm">
+            <p className="ml-6 text-[11px] text-muted-foreground">
+              Só uma matéria pode estar fixada. Sem fixar, a manchete é sempre a mais recente.
+            </p>
+            <label className="mt-2 flex items-center gap-2 text-sm">
               <input type="checkbox" checked={naoPerca} onChange={(e) => setNaoPerca(e.target.checked)} /> Não perca (faixa vermelha)
             </label>
             <div className="mt-3">
               <label className="text-xs uppercase text-muted-foreground">Publicação</label>
               <input type="datetime-local" value={publicadoEm} onChange={(e)=>setPublicadoEm(e.target.value)}
                 className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground" />
+              {publicadoEm && new Date(publicadoEm).getTime() > Date.now() && status === "publicado" && (
+                <p className="mt-1 text-[11px] text-accent-foreground">
+                  Agendada — só aparece no site público a partir dessa data/hora.
+                </p>
+              )}
             </div>
           </div>
 
