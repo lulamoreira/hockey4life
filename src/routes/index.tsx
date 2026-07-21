@@ -35,13 +35,14 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
-  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, config } = data;
+  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
 
   return (
     <SiteLayout config={config} temasMenu={temasMenu}>
-      {times.length > 0 && <TimesCarrossel times={times} />}
+      {times.length > 0 && <TimesCarrossel times={times} settings={timesSettings} />}
+
       <Letreiro items={naoPerca} settings={letreiro} />
 
       <section className="mx-auto max-w-7xl px-4 py-8">
