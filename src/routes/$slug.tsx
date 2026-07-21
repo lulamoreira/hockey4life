@@ -6,6 +6,7 @@ import { PostCard } from "@/components/site/PostCard";
 import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
+import DOMPurify from "isomorphic-dompurify";
 
 const postQuery = (slug: string) =>
   queryOptions({
