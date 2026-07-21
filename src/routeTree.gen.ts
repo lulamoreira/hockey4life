@@ -24,6 +24,7 @@ import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
 import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
 import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
@@ -106,6 +107,11 @@ const AdminTemasRoute = AdminTemasRouteImport.update({
   path: '/temas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminImportarRoute = AdminImportarRouteImport.update({
   id: '/importar',
   path: '/importar',
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin_/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/posts'
     | '/admin/temas'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/posts'
     | '/admin/temas'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/posts'
     | '/admin/temas'
     | '/admin_/criar-conta'
     | '/arquivo/$ano'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTemasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/importar': {
       id: '/admin/importar'
       path: '/importar'
@@ -451,6 +470,7 @@ interface AdminRouteChildren {
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
   AdminImportarRoute: typeof AdminImportarRoute
+  AdminPostsRoute: typeof AdminPostsRoute
   AdminTemasRoute: typeof AdminTemasRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -460,6 +480,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
   AdminImportarRoute: AdminImportarRoute,
+  AdminPostsRoute: AdminPostsRoute,
   AdminTemasRoute: AdminTemasRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
