@@ -109,7 +109,7 @@ function ImportarPage() {
       qc.invalidateQueries({ queryKey: ["import-erros"] }),
       qc.invalidateQueries({ queryKey: ["import-ultimas-materias"] }),
       qc.invalidateQueries({ queryKey: ["import-materias-banco"] }),
-      qc.invalidateQueries({ queryKey: ["import-imagens-bucket"] }),
+      
     ]);
   };
 
