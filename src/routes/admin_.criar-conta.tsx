@@ -142,7 +142,33 @@ function CriarContaPage() {
           </div>
         )}
 
-        {staffJaExiste === false && (
+        {staffJaExiste === false && session && (
+          <div className="mt-6">
+            <p className="text-sm text-muted-foreground">
+              Você já está logado como <strong className="text-foreground">{session.user.email}</strong>,
+              mas ainda não há nenhum administrador. Clique abaixo para se tornar o administrador
+              principal. A validação ocorre no servidor: só concede a permissão se realmente não
+              houver nenhum admin ainda.
+            </p>
+            {erro && <p className="mt-3 text-sm text-destructive">{erro}</p>}
+            {msg && <p className="mt-3 text-sm text-primary">{msg}</p>}
+            <button
+              onClick={promover}
+              disabled={loading}
+              className="mt-4 w-full rounded-md bg-primary py-2.5 font-semibold uppercase tracking-wide text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading ? "Promovendo…" : "Tornar-me administrador"}
+            </button>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }}
+              className="mt-2 w-full rounded-md border border-border py-2 text-xs uppercase tracking-wide text-muted-foreground hover:text-foreground"
+            >
+              Sair desta conta
+            </button>
+          </div>
+        )}
+
+        {staffJaExiste === false && !session && (
           <>
             <p className="mt-6 text-sm text-muted-foreground">
               Nenhum administrador foi configurado ainda. Crie a conta principal preenchendo os
