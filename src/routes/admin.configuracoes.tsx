@@ -598,3 +598,102 @@ function LetreiroEditor({
     </div>
   );
 }
+
+function CarrosselEditor({
+  value,
+  temFixa,
+  onChange,
+}: {
+  value: CarrosselSettings;
+  temFixa: boolean;
+  onChange: (v: CarrosselSettings) => void;
+}) {
+  const c = value;
+  const set = (patch: Partial<CarrosselSettings>) => onChange({ ...c, ...patch });
+  const estatico = c.quantidade <= 1;
+
+  return (
+    <div className="space-y-4">
+      <NumField
+        label="Quantas matérias entram no rodízio"
+        value={c.quantidade}
+        min={1}
+        max={10}
+        def={5}
+        onChange={(v) => set({ quantidade: v })}
+      />
+      {estatico && (
+        <p className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary">
+          Modo estático: só uma matéria aparece, sem rodízio automático.
+        </p>
+      )}
+
+      <div className={estatico ? "space-y-4 opacity-50 pointer-events-none" : "space-y-4"}>
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modo de transição</div>
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-5">
+            {([
+              { v: "rtl", l: "→ para ←" },
+              { v: "ltr", l: "← para →" },
+              { v: "up", l: "↑ (baixo→cima)" },
+              { v: "down", l: "↓ (cima→baixo)" },
+              { v: "fade", l: "sem movimento" },
+            ] as const).map((o) => (
+              <button
+                key={o.v}
+                onClick={() => set({ transicao: o.v as TransicaoManchete })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  c.transicao === o.v ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <NumField
+            label="Segundos parada em cada manchete"
+            value={c.intervalo}
+            min={3}
+            max={30}
+            def={7}
+            onChange={(v) => set({ intervalo: v })}
+          />
+          <NumField
+            label="Duração da transição (ms)"
+            value={c.duracaoMs}
+            min={200}
+            max={1500}
+            def={600}
+            onChange={(v) => set({ duracaoMs: v })}
+          />
+        </div>
+      </div>
+
+      {temFixa && (
+        <div className="rounded-md border border-border bg-background/50 p-3">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Manchete fixa</div>
+          <div className="space-y-2">
+            <RadioRow
+              name="fixadaComRodizio"
+              value="sim"
+              checked={c.fixadaComRodizio}
+              onChange={() => set({ fixadaComRodizio: true })}
+              label="Fixada participa do rodízio"
+              hint="Ela é sempre o primeiro slide, seguida das mais recentes."
+            />
+            <RadioRow
+              name="fixadaComRodizio"
+              value="nao"
+              checked={!c.fixadaComRodizio}
+              onChange={() => set({ fixadaComRodizio: false })}
+              label="Fixada fica sozinha, sem rodízio"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
