@@ -209,18 +209,22 @@ export const getPostsByTema = createServerFn({ method: "GET" })
 
     const from = (data.page - 1) * perPage;
     const to = from + perPage - 1;
+    const nowIso = new Date().toISOString();
     const { data: rels, count } = await sb
       .from("post_temas")
       .select("posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)", {
         count: "exact",
       })
       .eq("tema_id", tema.id)
+      .eq("posts.status", "publicado")
+      .lte("posts.publicado_em", nowIso)
       .order("posts(publicado_em)", { ascending: false })
+      .order("posts(id)", { ascending: false })
       .range(from, to);
 
     const posts = (rels ?? [])
       .map((r: any) => r.posts)
-      .filter((p: any) => p && p.status === "publicado");
+      .filter((p: any) => !!p);
     const withTemas = await attachTemas(sb, posts);
     return {
       tema,
