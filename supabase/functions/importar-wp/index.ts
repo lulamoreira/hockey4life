@@ -211,13 +211,8 @@ Deno.serve(async (req) => {
     const temaByTagId = new Map<number, string>();
     for (const t of temas ?? []) temaByTagId.set(t.wp_tag_id, t.id);
 
-    let importados = 0;
-    let atualizados = 0;
-    let pulados = 0;
-    let imagensSubidas = 0;
-    const erros: any[] = [];
-
     // Processa posts em paralelo (concorrência limitada) para reduzir tempo total.
+
     const CONCORRENCIA_POSTS = 4;
     const CONCORRENCIA_IMG = 4;
 
