@@ -145,6 +145,19 @@ function normalizeCarrossel(raw: any): CarrosselSettings {
   };
 }
 
+function normalizeTimes(raw: any): TimesCarrosselSettings {
+  const t = raw ?? {};
+  const dir = ["rtl","ltr","up","down"].includes(t.direcao) ? t.direcao : TIMES_CARROSSEL_PADRAO.direcao;
+  return {
+    ativo: t.ativo !== false,
+    direcao: dir as TimesDirecao,
+    velocidade: clamp(t.velocidade, 10, 120, TIMES_CARROSSEL_PADRAO.velocidade),
+    quantidadeVisivel: clamp(t.quantidadeVisivel, 2, 12, TIMES_CARROSSEL_PADRAO.quantidadeVisivel),
+    alturaPx: clamp(t.alturaPx, 60, 200, TIMES_CARROSSEL_PADRAO.alturaPx),
+    pausarNoHover: t.pausarNoHover !== false,
+  };
+}
+
 function normalizeHomeSettings(raw: any): HomeSettings {
   const s = raw ?? {};
   const q = s.quantidades ?? {};
