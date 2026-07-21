@@ -87,6 +87,11 @@ function PostPage() {
         <h1 className="h4l-title text-4xl leading-tight text-foreground md:text-6xl">{post.titulo}</h1>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span>{formatDataBR(post.publicado_em)}</span>
+          {ano && mes && (
+            <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
+              ver mês
+            </Link>
+          )}
           <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
           <span>{tempoLeitura(post.conteudo)} min de leitura</span>
         </div>
