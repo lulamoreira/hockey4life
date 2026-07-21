@@ -72,7 +72,10 @@ export function TimesCarrossel({
       <div className={`mx-auto max-w-7xl px-4 ${standalone ? "py-2" : "py-6"} ${s.pausarNoHover ? "h4l-times-pause" : ""}`}>
         <div
           className={wrapperClass}
-          style={vertical ? { height: `${s.alturaPx * 2 + 24}px` } : undefined}
+          style={{
+            containerType: "inline-size",
+            height: vertical ? `${s.alturaPx * visiveis}px` : undefined,
+          } as React.CSSProperties}
         >
           <ul
             className={`${trackClass} h4l-times-track gap-3`}
@@ -83,16 +86,15 @@ export function TimesCarrossel({
           >
             {loop.map((t, i) => {
               const logo = nhlLogoUrl(t.slug)!;
+              const itemStyle: React.CSSProperties = vertical
+                ? { height: `${s.alturaPx}px`, width: "100%" }
+                : {
+                    width: `calc(100cqw / ${visiveis} - 0.75rem)`,
+                    height: `${s.alturaPx}px`,
+                  };
               return (
-                <li
-                  key={`${t.slug}-${i}`}
-                  className="shrink-0"
-                  style={
-                    vertical
-                      ? { height: `${s.alturaPx}px`, width: "100%" }
-                      : { flexBasis: itemBasis, minWidth: `${100 / visiveis}%` }
-                  }
-                >
+                <li key={`${t.slug}-${i}`} className="shrink-0" style={itemStyle}>
+
                   <Link
                     to="/time/$slug"
                     params={{ slug: t.slug }}
