@@ -205,36 +205,17 @@ function HomeTab() {
         </div>
       </Section>
 
-      {/* Não perca */}
+      {/* Letreiro (faixa "Não perca") */}
       <Section
-        title='Faixa "Não perca"'
-        onReset={() => setS({ ...s, nao_perca: HOME_SETTINGS_PADRAO.nao_perca })}
+        title='Letreiro (faixa "NÃO PERCA")'
+        onReset={() => setS({ ...s, letreiro: LETREIRO_PADRAO, nao_perca: HOME_SETTINGS_PADRAO.nao_perca })}
       >
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={s.nao_perca.ativo}
-            onChange={(e) => setS({ ...s, nao_perca: { ...s.nao_perca, ativo: e.target.checked } })}
-          />
-          <span>Mostrar a faixa vermelha no topo da home</span>
-        </label>
-        <div className={`mt-3 space-y-2 ${s.nao_perca.ativo ? "" : "opacity-50 pointer-events-none"}`}>
-          <RadioRow
-            name="np"
-            value="recentes"
-            checked={s.nao_perca.modo === "recentes"}
-            onChange={(v) => setS({ ...s, nao_perca: { ...s.nao_perca, modo: v as any } })}
-            label={`As ${s.quantidades.nao_perca} matérias mais recentes`}
-          />
-          <RadioRow
-            name="np"
-            value="manual"
-            checked={s.nao_perca.modo === "manual"}
-            onChange={(v) => setS({ ...s, nao_perca: { ...s.nao_perca, modo: v as any } })}
-            label='Só as marcadas manualmente (campo "Não perca" na matéria)'
-          />
-        </div>
+        <LetreiroEditor
+          value={s.letreiro}
+          onChange={(l) => setS({ ...s, letreiro: l, nao_perca: { ativo: l.ativo, modo: l.origem } })}
+        />
       </Section>
+
 
       {msg && (
         <div className="flex items-center gap-3 rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
