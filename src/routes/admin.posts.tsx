@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listAdminPosts, deletePost } from "@/lib/admin.functions";
 import { formatDataBR } from "@/lib/slugify";
-import { Plus, Trash2, Edit3 } from "lucide-react";
+import { ExternalLink, Plus, Trash2, Edit3 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/posts")({
   component: PostsListPage,
@@ -72,9 +72,24 @@ function PostsListPage() {
             {data?.items.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
                 <td className="px-4 py-3">
-                  <Link to="/admin/posts/$id" params={{ id: p.id }} className="font-medium text-foreground hover:text-primary">
-                    {p.titulo}
-                  </Link>
+                  {p.status === "publicado" ? (
+                    <a
+                      href={`/${p.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary"
+                    >
+                      <span>{p.titulo}</span>
+                      <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-foreground">{p.titulo}</span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+                        sem página pública ainda
+                      </span>
+                    </div>
+                  )}
                   <div className="text-xs text-muted-foreground">/{p.slug}</div>
                 </td>
                 <td className="px-4 py-3">
