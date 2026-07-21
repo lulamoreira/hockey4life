@@ -3,8 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { listConfig, saveConfig, searchAdminPostsByTitle, getAdminPostSimple } from "@/lib/admin.functions";
-import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, CARROSSEL_PADRAO, type HomeSettings, type LetreiroDirecao, type TransicaoManchete, type CarrosselSettings } from "@/lib/posts.functions";
+import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, CARROSSEL_PADRAO, TIMES_CARROSSEL_PADRAO, type HomeSettings, type LetreiroDirecao, type TransicaoManchete, type CarrosselSettings, type TimesCarrosselSettings, type TimesDirecao } from "@/lib/posts.functions";
 import { Letreiro } from "@/components/site/Letreiro";
+import { TimesCarrossel } from "@/components/site/TimesCarrossel";
+
 import { formatDataBR } from "@/lib/slugify";
 
 export const Route = createFileRoute("/admin/configuracoes")({
