@@ -372,7 +372,9 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
     naoPerca: (letreiroData ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
     letreiro,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
+    times: settings.times,
     config: configMap,
+
   };
 });
 
