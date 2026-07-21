@@ -53,15 +53,15 @@
   --popover: oklch(0.185 0.005 260);
   --popover-foreground: oklch(0.97 0.005 90);
 
-  /* Dourado H4L */
-  --primary: oklch(0.79 0.14 85);
+  /* Amarelo oficial H4L #EDD91B */
+  --primary: oklch(0.881 0.169 96.5);
   --primary-foreground: oklch(0.15 0.01 260);
 
   --secondary: oklch(0.24 0.008 260);
   --secondary-foreground: oklch(0.97 0.005 90);
   --muted: oklch(0.22 0.008 260);
   --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.79 0.14 85);
+  --accent: oklch(0.881 0.169 96.5);
   --accent-foreground: oklch(0.15 0.01 260);
 
   /* Vermelho "última hora" */
@@ -70,7 +70,7 @@
 
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.79 0.14 85 / 0.6);
+  --ring: oklch(0.881 0.169 96.5 / 0.6);
 }
 
 .dark {
