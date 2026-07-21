@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
 import { Route as BuscaRouteImport } from './routes/busca'
 import { Route as ArquivoRouteImport } from './routes/arquivo'
@@ -17,6 +19,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimeSlugRouteImport } from './routes/time.$slug'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaleConoscoRoute = FaleConoscoRouteImport.update({
   id: '/fale-conosco',
   path: '/fale-conosco',
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/arquivo': typeof ArquivoRoute
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
 }
@@ -68,6 +82,8 @@ export interface FileRoutesByTo {
   '/arquivo': typeof ArquivoRoute
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
 }
@@ -78,6 +94,8 @@ export interface FileRoutesById {
   '/arquivo': typeof ArquivoRoute
   '/busca': typeof BuscaRoute
   '/fale-conosco': typeof FaleConoscoRoute
+  '/feed': typeof FeedRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
 }
@@ -89,6 +107,8 @@ export interface FileRouteTypes {
     | '/arquivo'
     | '/busca'
     | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
     | '/assunto/$slug'
     | '/time/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/arquivo'
     | '/busca'
     | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
     | '/assunto/$slug'
     | '/time/$slug'
   id:
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/arquivo'
     | '/busca'
     | '/fale-conosco'
+    | '/feed'
+    | '/sitemap.xml'
     | '/assunto/$slug'
     | '/time/$slug'
   fileRoutesById: FileRoutesById
@@ -117,12 +141,28 @@ export interface RootRouteChildren {
   ArquivoRoute: typeof ArquivoRoute
   BuscaRoute: typeof BuscaRoute
   FaleConoscoRoute: typeof FaleConoscoRoute
+  FeedRoute: typeof FeedRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AssuntoSlugRoute: typeof AssuntoSlugRoute
   TimeSlugRoute: typeof TimeSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fale-conosco': {
       id: '/fale-conosco'
       path: '/fale-conosco'
@@ -181,6 +221,8 @@ const rootRouteChildren: RootRouteChildren = {
   ArquivoRoute: ArquivoRoute,
   BuscaRoute: BuscaRoute,
   FaleConoscoRoute: FaleConoscoRoute,
+  FeedRoute: FeedRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AssuntoSlugRoute: AssuntoSlugRoute,
   TimeSlugRoute: TimeSlugRoute,
 }
