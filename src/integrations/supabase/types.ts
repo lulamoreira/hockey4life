@@ -62,6 +62,60 @@ export type Database = {
         }
         Relationships: []
       }
+      importacao_estado: {
+        Row: {
+          atualizado_em: string
+          concluido: boolean
+          id: number
+          total_importados: number
+          total_paginas: number
+          ultima_pagina: number
+        }
+        Insert: {
+          atualizado_em?: string
+          concluido?: boolean
+          id?: number
+          total_importados?: number
+          total_paginas?: number
+          ultima_pagina?: number
+        }
+        Update: {
+          atualizado_em?: string
+          concluido?: boolean
+          id?: number
+          total_importados?: number
+          total_paginas?: number
+          ultima_pagina?: number
+        }
+        Relationships: []
+      }
+      importacao_itens: {
+        Row: {
+          erro: string | null
+          id: string
+          importado_em: string
+          slug: string | null
+          status: Database["public"]["Enums"]["importacao_status"]
+          wp_id: number
+        }
+        Insert: {
+          erro?: string | null
+          id?: string
+          importado_em?: string
+          slug?: string | null
+          status: Database["public"]["Enums"]["importacao_status"]
+          wp_id: number
+        }
+        Update: {
+          erro?: string | null
+          id?: string
+          importado_em?: string
+          slug?: string | null
+          status?: Database["public"]["Enums"]["importacao_status"]
+          wp_id?: number
+        }
+        Relationships: []
+      }
       post_temas: {
         Row: {
           post_id: string
@@ -238,6 +292,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor"
+      importacao_status: "ok" | "erro"
       post_status: "rascunho" | "publicado"
       tema_tipo: "time" | "assunto"
     }
@@ -368,6 +423,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor"],
+      importacao_status: ["ok", "erro"],
       post_status: ["rascunho", "publicado"],
       tema_tipo: ["time", "assunto"],
     },
