@@ -150,6 +150,7 @@ export type Database = {
         Row: {
           atualizado_em: string
           autor_id: string | null
+          busca_tsv: unknown
           conteudo: string | null
           credito_imagem: string | null
           criado_em: string
@@ -167,6 +168,7 @@ export type Database = {
         Insert: {
           atualizado_em?: string
           autor_id?: string | null
+          busca_tsv?: unknown
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
@@ -184,6 +186,7 @@ export type Database = {
         Update: {
           atualizado_em?: string
           autor_id?: string | null
+          busca_tsv?: unknown
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
@@ -277,6 +280,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      buscar_posts: {
+        Args: {
+          _ordem?: string
+          _page?: number
+          _per_page?: number
+          _q: string
+          _tema_ids?: string[]
+        }
+        Returns: {
+          credito_imagem: string
+          id: string
+          imagem_capa: string
+          publicado_em: string
+          rank: number
+          resumo: string
+          slug: string
+          titulo: string
+          total: number
+          trecho: string
+        }[]
+      }
+      contagem_arquivo: {
+        Args: never
+        Returns: {
+          ano: number
+          mes: number
+          total: number
+        }[]
+      }
+      contagem_temas: {
+        Args: never
+        Returns: {
+          id: string
+          nome: string
+          slug: string
+          tipo: string
+          total: number
+        }[]
+      }
       criar_primeiro_admin: { Args: never; Returns: boolean }
       existe_staff: { Args: never; Returns: boolean }
       has_role: {
@@ -289,6 +331,7 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "editor"
