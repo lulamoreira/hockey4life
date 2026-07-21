@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const pagina = Math.max(1, Number(body.pagina ?? 1));
-    const tamanho = Math.min(15, Math.max(1, Number(body.tamanho ?? 10)));
+    const tamanho = Math.min(30, Math.max(1, Number(body.tamanho ?? 20)));
     const forcar: boolean = Boolean(body.forcar);
     const somenteErros: number[] | undefined = Array.isArray(body.reprocessar) ? body.reprocessar.map(Number) : undefined;
 
@@ -211,13 +211,33 @@ Deno.serve(async (req) => {
     const temaByTagId = new Map<number, string>();
     for (const t of temas ?? []) temaByTagId.set(t.wp_tag_id, t.id);
 
+    // Processa posts em paralelo (concorrência limitada) para reduzir tempo total.
+
+    const CONCORRENCIA_POSTS = 4;
+    const CONCORRENCIA_IMG = 4;
+
+    async function paralelo<T, R>(itens: T[], limite: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+      const out: R[] = new Array(itens.length);
+      let i = 0;
+      const workers = Array.from({ length: Math.min(limite, itens.length) }, async () => {
+        while (true) {
+          const idx = i++;
+          if (idx >= itens.length) return;
+          out[idx] = await fn(itens[idx]);
+        }
+      });
+      await Promise.all(workers);
+      return out;
+    }
+
+    // Contadores compartilhados (mutação segura em JS single-thread)
     let importados = 0;
     let atualizados = 0;
     let pulados = 0;
     let imagensSubidas = 0;
     const erros: any[] = [];
 
-    for (const p of posts) {
+    await paralelo(posts, CONCORRENCIA_POSTS, async (p: any) => {
       const wp_id: number = p.id;
       const slug: string = p.slug;
       try {
@@ -229,7 +249,7 @@ Deno.serve(async (req) => {
         // Proteção: editada no admin depois da importação — nunca sobrescreve
         if (existente && itemLog && new Date(existente.atualizado_em) > new Date(itemLog.importado_em)) {
           pulados++;
-          continue;
+          return;
         }
 
         // Idempotência: já importada com status ok e não modificada na origem — pula sem baixar imagem
@@ -239,22 +259,22 @@ Deno.serve(async (req) => {
         if (!forcar && !somenteErros && jaEstavaOk) {
           if (!modifiedAt || modifiedAt <= new Date(itemLog!.importado_em)) {
             pulados++;
-            continue;
+            return;
           }
         }
 
         let conteudo = limparConteudo(String(p.content?.rendered ?? ""));
-        const srcs = extractImgSrcs(conteudo);
-        for (const src of srcs) {
-          if (!src.includes("/wp-content/")) continue;
-          const r = await baixarESubir(admin, publicBase, src);
+        const srcs = extractImgSrcs(conteudo).filter((s) => s.includes("/wp-content/"));
+        const resultados = await paralelo(srcs, CONCORRENCIA_IMG, (src) => baixarESubir(admin, publicBase, src));
+        srcs.forEach((src, idx) => {
+          const r = resultados[idx];
           if ("nova" in r) {
             conteudo = conteudo.split(src).join(r.nova);
             imagensSubidas++;
           } else {
             erros.push({ wp_id, imagem: src, erro: r.erro });
           }
-        }
+        });
 
         // capa
         let imagem_capa: string | null = null;
@@ -302,7 +322,7 @@ Deno.serve(async (req) => {
           { onConflict: "wp_id" },
         );
       }
-    }
+    });
 
     // Atualiza estado (só para importação sequencial, não para reprocessar)
     if (!somenteErros) {
