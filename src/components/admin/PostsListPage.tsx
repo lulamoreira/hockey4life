@@ -4,21 +4,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listAdminPosts, deletePost, getPostFixado, desafixarPost } from "@/lib/admin.functions";
 import { formatDataBR } from "@/lib/slugify";
-import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock } from "lucide-react";
+import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock, ArrowDown, ArrowUp } from "lucide-react";
 
 export function PostsListPage() {
   const [status, setStatus] = useState<"todos" | "rascunho" | "publicado">("todos");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
+  const [ordem, setOrdem] = useState<"desc" | "asc">("desc");
   const del = useServerFn(deletePost);
   const unpin = useServerFn(desafixarPost);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-posts", status, q, page],
-    queryFn: () => listAdminPosts({ data: { status, q, page } }),
+    queryKey: ["admin-posts", status, q, page, ordem],
+    queryFn: () => listAdminPosts({ data: { status, q, page, ordem } }),
   });
   const fixadoQ = useQuery({ queryKey: ["admin-fixado"], queryFn: () => getPostFixado() });
+
 
   const onDelete = async (id: string) => {
     if (!confirm("Excluir esta matéria?")) return;
@@ -43,7 +45,7 @@ export function PostsListPage() {
           <p className="text-sm text-muted-foreground">Gerencie o conteúdo do portal.</p>
         </div>
         <Link
-          to="/admin/posts/$id" params={{ id: "novo" }}
+          to="/admin/posts/novo"
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" /> Nova matéria
@@ -95,7 +97,17 @@ export function PostsListPage() {
             <tr>
               <th className="px-4 py-3 text-left">Título</th>
               <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-left">Publicação</th>
+              <th className="px-4 py-3 text-left">
+                <button
+                  type="button"
+                  onClick={() => { setOrdem((o) => (o === "desc" ? "asc" : "desc")); setPage(1); }}
+                  aria-label={`Ordenar por publicação — atualmente ${ordem === "desc" ? "mais recentes primeiro" : "mais antigas primeiro"}`}
+                  className="inline-flex items-center gap-1 uppercase tracking-wider text-primary hover:underline"
+                >
+                  Publicação
+                  {ordem === "desc" ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
+                </button>
+              </th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>

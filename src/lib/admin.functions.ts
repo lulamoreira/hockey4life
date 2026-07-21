@@ -44,16 +44,19 @@ export const listAdminPosts = createServerFn({ method: "GET" })
       status: z.enum(["todos", "rascunho", "publicado"]).default("todos"),
       q: z.string().default(""),
       page: z.number().int().min(1).default(1),
+      ordem: z.enum(["desc", "asc"]).default("desc"),
     }).parse(v ?? {}),
   )
   .handler(async ({ context, data }) => {
     const perPage = 25;
     const from = (data.page - 1) * perPage;
     const to = from + perPage - 1;
+    const asc = data.ordem === "asc";
     let q = context.supabase
       .from("posts")
       .select("id,titulo,slug,status,destaque,nao_perca,publicado_em,atualizado_em", { count: "exact" })
-      .order("atualizado_em", { ascending: false })
+      .order("publicado_em", { ascending: asc, nullsFirst: asc })
+      .order("id", { ascending: asc })
       .range(from, to);
     if (data.status !== "todos") q = q.eq("status", data.status);
     if (data.q) q = q.ilike("titulo", `%${data.q}%`);

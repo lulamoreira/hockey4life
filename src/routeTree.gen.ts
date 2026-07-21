@@ -30,8 +30,13 @@ import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
+import { Route as AdminPostsIndexRouteImport } from './routes/admin.posts.index'
+import { Route as AdminMateriasIndexRouteImport } from './routes/admin.materias.index'
 import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
+import { Route as AdminPostsNovoRouteImport } from './routes/admin.posts.novo'
 import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
+import { Route as AdminMateriasNovaRouteImport } from './routes/admin.materias.nova'
+import { Route as AdminMateriasIdRouteImport } from './routes/admin.materias.$id'
 import { Route as ApiPublicHooksBackupAutomaticoRouteImport } from './routes/api/public/hooks/backup-automatico'
 
 const TemasRoute = TemasRouteImport.update({
@@ -139,15 +144,40 @@ const AdminBackupRoute = AdminBackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPostsIndexRoute = AdminPostsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
+const AdminMateriasIndexRoute = AdminMateriasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminMateriasRoute,
+} as any)
 const ArquivoAnoMesRoute = ArquivoAnoMesRouteImport.update({
   id: '/$mes',
   path: '/$mes',
   getParentRoute: () => ArquivoAnoRoute,
 } as any)
+const AdminPostsNovoRoute = AdminPostsNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
 const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminPostsRoute,
+} as any)
+const AdminMateriasNovaRoute = AdminMateriasNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => AdminMateriasRoute,
+} as any)
+const AdminMateriasIdRoute = AdminMateriasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminMateriasRoute,
 } as any)
 const ApiPublicHooksBackupAutomaticoRoute =
   ApiPublicHooksBackupAutomaticoRouteImport.update({
@@ -170,7 +200,7 @@ export interface FileRoutesByFullPath {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
-  '/admin/materias': typeof AdminMateriasRoute
+  '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
@@ -178,8 +208,13 @@ export interface FileRoutesByFullPath {
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/materias/$id': typeof AdminMateriasIdRoute
+  '/admin/materias/nova': typeof AdminMateriasNovaRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/admin/posts/novo': typeof AdminPostsNovoRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/admin/materias/': typeof AdminMateriasIndexRoute
+  '/admin/posts/': typeof AdminPostsIndexRoute
   '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRoutesByTo {
@@ -195,16 +230,19 @@ export interface FileRoutesByTo {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
-  '/admin/materias': typeof AdminMateriasRoute
-  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/materias/$id': typeof AdminMateriasIdRoute
+  '/admin/materias/nova': typeof AdminMateriasNovaRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/admin/posts/novo': typeof AdminPostsNovoRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/admin/materias': typeof AdminMateriasIndexRoute
+  '/admin/posts': typeof AdminPostsIndexRoute
   '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRoutesById {
@@ -222,7 +260,7 @@ export interface FileRoutesById {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
-  '/admin/materias': typeof AdminMateriasRoute
+  '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin_/criar-conta': typeof AdminCriarContaRoute
@@ -230,8 +268,13 @@ export interface FileRoutesById {
   '/assunto/$slug': typeof AssuntoSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/materias/$id': typeof AdminMateriasIdRoute
+  '/admin/materias/nova': typeof AdminMateriasNovaRoute
   '/admin/posts/$id': typeof AdminPostsIdRoute
+  '/admin/posts/novo': typeof AdminPostsNovoRoute
   '/arquivo/$ano/$mes': typeof ArquivoAnoMesRoute
+  '/admin/materias/': typeof AdminMateriasIndexRoute
+  '/admin/posts/': typeof AdminPostsIndexRoute
   '/api/public/hooks/backup-automatico': typeof ApiPublicHooksBackupAutomaticoRoute
 }
 export interface FileRouteTypes {
@@ -258,8 +301,13 @@ export interface FileRouteTypes {
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
+    | '/admin/materias/$id'
+    | '/admin/materias/nova'
     | '/admin/posts/$id'
+    | '/admin/posts/novo'
     | '/arquivo/$ano/$mes'
+    | '/admin/materias/'
+    | '/admin/posts/'
     | '/api/public/hooks/backup-automatico'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -275,16 +323,19 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
-    | '/admin/materias'
-    | '/admin/posts'
     | '/admin/temas'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin'
+    | '/admin/materias/$id'
+    | '/admin/materias/nova'
     | '/admin/posts/$id'
+    | '/admin/posts/novo'
     | '/arquivo/$ano/$mes'
+    | '/admin/materias'
+    | '/admin/posts'
     | '/api/public/hooks/backup-automatico'
   id:
     | '__root__'
@@ -309,8 +360,13 @@ export interface FileRouteTypes {
     | '/assunto/$slug'
     | '/time/$slug'
     | '/admin/'
+    | '/admin/materias/$id'
+    | '/admin/materias/nova'
     | '/admin/posts/$id'
+    | '/admin/posts/novo'
     | '/arquivo/$ano/$mes'
+    | '/admin/materias/'
+    | '/admin/posts/'
     | '/api/public/hooks/backup-automatico'
   fileRoutesById: FileRoutesById
 }
@@ -479,6 +535,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBackupRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/posts/': {
+      id: '/admin/posts/'
+      path: '/'
+      fullPath: '/admin/posts/'
+      preLoaderRoute: typeof AdminPostsIndexRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
+    '/admin/materias/': {
+      id: '/admin/materias/'
+      path: '/'
+      fullPath: '/admin/materias/'
+      preLoaderRoute: typeof AdminMateriasIndexRouteImport
+      parentRoute: typeof AdminMateriasRoute
+    }
     '/arquivo/$ano/$mes': {
       id: '/arquivo/$ano/$mes'
       path: '/$mes'
@@ -486,12 +556,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArquivoAnoMesRouteImport
       parentRoute: typeof ArquivoAnoRoute
     }
+    '/admin/posts/novo': {
+      id: '/admin/posts/novo'
+      path: '/novo'
+      fullPath: '/admin/posts/novo'
+      preLoaderRoute: typeof AdminPostsNovoRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
     '/admin/posts/$id': {
       id: '/admin/posts/$id'
       path: '/$id'
       fullPath: '/admin/posts/$id'
       preLoaderRoute: typeof AdminPostsIdRouteImport
       parentRoute: typeof AdminPostsRoute
+    }
+    '/admin/materias/nova': {
+      id: '/admin/materias/nova'
+      path: '/nova'
+      fullPath: '/admin/materias/nova'
+      preLoaderRoute: typeof AdminMateriasNovaRouteImport
+      parentRoute: typeof AdminMateriasRoute
+    }
+    '/admin/materias/$id': {
+      id: '/admin/materias/$id'
+      path: '/$id'
+      fullPath: '/admin/materias/$id'
+      preLoaderRoute: typeof AdminMateriasIdRouteImport
+      parentRoute: typeof AdminMateriasRoute
     }
     '/api/public/hooks/backup-automatico': {
       id: '/api/public/hooks/backup-automatico'
@@ -503,12 +594,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminMateriasRouteChildren {
+  AdminMateriasIdRoute: typeof AdminMateriasIdRoute
+  AdminMateriasNovaRoute: typeof AdminMateriasNovaRoute
+  AdminMateriasIndexRoute: typeof AdminMateriasIndexRoute
+}
+
+const AdminMateriasRouteChildren: AdminMateriasRouteChildren = {
+  AdminMateriasIdRoute: AdminMateriasIdRoute,
+  AdminMateriasNovaRoute: AdminMateriasNovaRoute,
+  AdminMateriasIndexRoute: AdminMateriasIndexRoute,
+}
+
+const AdminMateriasRouteWithChildren = AdminMateriasRoute._addFileChildren(
+  AdminMateriasRouteChildren,
+)
+
 interface AdminPostsRouteChildren {
   AdminPostsIdRoute: typeof AdminPostsIdRoute
+  AdminPostsNovoRoute: typeof AdminPostsNovoRoute
+  AdminPostsIndexRoute: typeof AdminPostsIndexRoute
 }
 
 const AdminPostsRouteChildren: AdminPostsRouteChildren = {
   AdminPostsIdRoute: AdminPostsIdRoute,
+  AdminPostsNovoRoute: AdminPostsNovoRoute,
+  AdminPostsIndexRoute: AdminPostsIndexRoute,
 }
 
 const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
@@ -520,7 +631,7 @@ interface AdminRouteChildren {
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
   AdminImportarRoute: typeof AdminImportarRoute
-  AdminMateriasRoute: typeof AdminMateriasRoute
+  AdminMateriasRoute: typeof AdminMateriasRouteWithChildren
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -531,7 +642,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
   AdminImportarRoute: AdminImportarRoute,
-  AdminMateriasRoute: AdminMateriasRoute,
+  AdminMateriasRoute: AdminMateriasRouteWithChildren,
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
   AdminIndexRoute: AdminIndexRoute,
