@@ -138,6 +138,7 @@ export function MancheteCarrossel({
             key={`out-${slides[prev].id}`}
             post={slides[prev]}
             eager={false}
+            settings={settings}
             style={{
               animation: `h4l-${transicao === "fade" ? "fade" : "slide"}-out-${transicao === "fade" ? "" : transicao} ${duracaoMs}ms ease-in-out both`,
               zIndex: 1,
