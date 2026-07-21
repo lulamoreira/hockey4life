@@ -117,7 +117,7 @@ function ImportarPage() {
     setErroGlobal("");
     setLogMsg("Chamando função…");
     const pagina = (estado.data?.ultima_pagina ?? 0) + 1;
-    const resp = await chamarLote({ pagina, tamanho: 10, forcar, ...extra });
+    const resp = await chamarLote({ pagina, tamanho: 20, forcar, ...extra });
     setUltima(resp);
     setLogMsg(
       `Página ${resp.pagina}/${resp.total_paginas} — importadas ${resp.importados}, atualizadas ${resp.atualizados}, puladas ${resp.pulados}, imagens ${resp.imagens_subidas}, erros ${resp.erros.length} (${resp.duracao_ms}ms)`,
