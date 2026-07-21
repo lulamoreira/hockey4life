@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getHomeData } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { NaoPercaTicker } from "@/components/site/NaoPercaTicker";
+import { Letreiro } from "@/components/site/Letreiro";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { formatDataBR } from "@/lib/slugify";
 
@@ -34,13 +34,13 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
-  const { destaque, leiaAgora, ultimas, naoPerca, temasMenu, config } = data;
+  const { destaque, leiaAgora, ultimas, naoPerca, letreiro, temasMenu, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
 
   return (
     <SiteLayout config={config} temasMenu={temasMenu}>
-      <NaoPercaTicker items={naoPerca} />
+      <Letreiro items={naoPerca} settings={letreiro} />
 
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-3">

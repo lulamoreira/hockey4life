@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { listConfig, saveConfig, searchAdminPostsByTitle, getAdminPostSimple } from "@/lib/admin.functions";
-import { HOME_SETTINGS_PADRAO, type HomeSettings } from "@/lib/posts.functions";
+import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, type HomeSettings, type LetreiroDirecao } from "@/lib/posts.functions";
+import { Letreiro } from "@/components/site/Letreiro";
 import { formatDataBR } from "@/lib/slugify";
 
 export const Route = createFileRoute("/admin/configuracoes")({
@@ -133,6 +134,7 @@ function HomeTab() {
       },
       quantidades: { ...HOME_SETTINGS_PADRAO.quantidades, ...(raw.quantidades ?? {}) },
       nao_perca: { ...HOME_SETTINGS_PADRAO.nao_perca, ...(raw.nao_perca ?? {}) },
+      letreiro: { ...HOME_SETTINGS_PADRAO.letreiro, ...(raw.letreiro ?? {}) },
     });
   }, [data]);
 
@@ -203,36 +205,17 @@ function HomeTab() {
         </div>
       </Section>
 
-      {/* Não perca */}
+      {/* Letreiro (faixa "Não perca") */}
       <Section
-        title='Faixa "Não perca"'
-        onReset={() => setS({ ...s, nao_perca: HOME_SETTINGS_PADRAO.nao_perca })}
+        title='Letreiro (faixa "NÃO PERCA")'
+        onReset={() => setS({ ...s, letreiro: LETREIRO_PADRAO, nao_perca: HOME_SETTINGS_PADRAO.nao_perca })}
       >
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={s.nao_perca.ativo}
-            onChange={(e) => setS({ ...s, nao_perca: { ...s.nao_perca, ativo: e.target.checked } })}
-          />
-          <span>Mostrar a faixa vermelha no topo da home</span>
-        </label>
-        <div className={`mt-3 space-y-2 ${s.nao_perca.ativo ? "" : "opacity-50 pointer-events-none"}`}>
-          <RadioRow
-            name="np"
-            value="recentes"
-            checked={s.nao_perca.modo === "recentes"}
-            onChange={(v) => setS({ ...s, nao_perca: { ...s.nao_perca, modo: v as any } })}
-            label={`As ${s.quantidades.nao_perca} matérias mais recentes`}
-          />
-          <RadioRow
-            name="np"
-            value="manual"
-            checked={s.nao_perca.modo === "manual"}
-            onChange={(v) => setS({ ...s, nao_perca: { ...s.nao_perca, modo: v as any } })}
-            label='Só as marcadas manualmente (campo "Não perca" na matéria)'
-          />
-        </div>
+        <LetreiroEditor
+          value={s.letreiro}
+          onChange={(l) => setS({ ...s, letreiro: l, nao_perca: { ativo: l.ativo, modo: l.origem } })}
+        />
       </Section>
+
 
       {msg && (
         <div className="flex items-center gap-3 rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
@@ -510,6 +493,95 @@ function TextArea({ label, value, onChange }: { label: string; value: string; on
       <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
       <textarea value={value ?? ""} rows={3} onChange={(e)=>onChange(e.target.value)}
         className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none" />
+    </div>
+  );
+}
+
+function LetreiroEditor({
+  value,
+  onChange,
+}: {
+  value: import("@/lib/posts.functions").LetreiroSettings;
+  onChange: (v: import("@/lib/posts.functions").LetreiroSettings) => void;
+}) {
+  const l = value;
+  const set = (patch: Partial<typeof l>) => onChange({ ...l, ...patch });
+  const horizontal = l.direcao === "rtl" || l.direcao === "ltr";
+  const previewItems = [
+    { id: "p1", titulo: "Manchete de exemplo 1 para pré-visualização", slug: "#" },
+    { id: "p2", titulo: "Segunda manchete rolando na fita vermelha", slug: "#" },
+    { id: "p3", titulo: "E uma terceira só pra fechar o loop", slug: "#" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={l.ativo} onChange={(e) => set({ ativo: e.target.checked })} />
+        <span>Mostrar o letreiro no topo da home</span>
+      </label>
+
+      <div className={l.ativo ? "space-y-4" : "space-y-4 opacity-50 pointer-events-none"}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rótulo da etiqueta</label>
+            <input
+              value={l.rotulo}
+              maxLength={40}
+              onChange={(e) => set({ rotulo: e.target.value })}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">Padrão: NÃO PERCA</p>
+          </div>
+          <NumField label="Quantas manchetes" value={l.quantidade} min={3} max={15} def={5} onChange={(v) => set({ quantidade: v })} />
+        </div>
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Origem das manchetes</div>
+          <div className="space-y-1">
+            <RadioRow name="lo" value="recentes" checked={l.origem === "recentes"} onChange={(v) => set({ origem: v as any })} label="As mais recentes" />
+            <RadioRow name="lo" value="manual" checked={l.origem === "manual"} onChange={(v) => set({ origem: v as any })} label='Só as marcadas manualmente (campo "Não perca" na matéria)' />
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Direção</div>
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+            {([
+              { v: "rtl", l: "→ para ←" },
+              { v: "ltr", l: "← para →" },
+              { v: "up", l: "↑ (baixo→cima)" },
+              { v: "down", l: "↓ (cima→baixo)" },
+            ] as const).map((o) => (
+              <button
+                key={o.v}
+                onClick={() => set({ direcao: o.v as LetreiroDirecao })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  l.direcao === o.v ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <NumField
+          label={horizontal ? "Segundos por volta" : "Segundos por manchete"}
+          value={l.velocidade}
+          min={3}
+          max={60}
+          def={horizontal ? 30 : 5}
+          onChange={(v) => set({ velocidade: v })}
+        />
+      </div>
+
+      {/* Pré-visualização ao vivo */}
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pré-visualização</div>
+        <div className="overflow-hidden rounded-md border border-border">
+          <Letreiro items={previewItems} settings={l} standalone />
+        </div>
+      </div>
     </div>
   );
 }

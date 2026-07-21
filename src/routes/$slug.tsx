@@ -63,7 +63,10 @@ function PostPage() {
   const { data } = useSuspenseQuery(postQuery(slug));
   const { data: siteData } = useSuspenseQuery(configQuery());
   if (!data) return null;
-  const { post, relacionados } = data;
+  const { post, relacionados, anterior, proximo } = data;
+  const dataObj = post.publicado_em ? new Date(post.publicado_em) : null;
+  const ano = dataObj?.getFullYear();
+  const mes = dataObj ? dataObj.getMonth() + 1 : null;
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
 
   return (
@@ -84,6 +87,11 @@ function PostPage() {
         <h1 className="h4l-title text-4xl leading-tight text-foreground md:text-6xl">{post.titulo}</h1>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span>{formatDataBR(post.publicado_em)}</span>
+          {ano && mes && (
+            <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
+              ver mês
+            </Link>
+          )}
           <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
           <span>{tempoLeitura(post.conteudo)} min de leitura</span>
         </div>
@@ -122,6 +130,24 @@ function PostPage() {
           <ShareButtons url={url} titulo={post.titulo} />
         </div>
       </article>
+
+      {(anterior || proximo) && (
+        <nav className="mx-auto grid max-w-4xl gap-3 px-4 pb-10 sm:grid-cols-2">
+          {anterior ? (
+            <Link to="/$slug" params={{ slug: anterior.slug }} className="group rounded-lg border border-border p-4 hover:border-primary">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">← Anterior</div>
+              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{anterior.titulo}</div>
+            </Link>
+          ) : <div />}
+          {proximo ? (
+            <Link to="/$slug" params={{ slug: proximo.slug }} className="group rounded-lg border border-border p-4 text-right hover:border-primary">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Próxima →</div>
+              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{proximo.titulo}</div>
+            </Link>
+          ) : <div />}
+        </nav>
+      )}
+
 
       {relacionados.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
