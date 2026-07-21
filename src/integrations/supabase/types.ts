@@ -14,16 +14,230 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      configuracoes: {
+        Row: {
+          atualizado_em: string
+          chave: string
+          valor: Json
+        }
+        Insert: {
+          atualizado_em?: string
+          chave: string
+          valor?: Json
+        }
+        Update: {
+          atualizado_em?: string
+          chave?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
+      contatos: {
+        Row: {
+          assunto: string | null
+          criado_em: string
+          email: string
+          id: string
+          lido: boolean
+          mensagem: string
+          nome: string
+        }
+        Insert: {
+          assunto?: string | null
+          criado_em?: string
+          email: string
+          id?: string
+          lido?: boolean
+          mensagem: string
+          nome: string
+        }
+        Update: {
+          assunto?: string | null
+          criado_em?: string
+          email?: string
+          id?: string
+          lido?: boolean
+          mensagem?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      post_temas: {
+        Row: {
+          post_id: string
+          tema_id: string
+        }
+        Insert: {
+          post_id: string
+          tema_id: string
+        }
+        Update: {
+          post_id?: string
+          tema_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_temas_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_temas_tema_id_fkey"
+            columns: ["tema_id"]
+            isOneToOne: false
+            referencedRelation: "temas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          atualizado_em: string
+          autor_id: string | null
+          conteudo: string | null
+          credito_imagem: string | null
+          criado_em: string
+          destaque: boolean
+          id: string
+          imagem_capa: string | null
+          nao_perca: boolean
+          publicado_em: string | null
+          resumo: string | null
+          slug: string
+          status: Database["public"]["Enums"]["post_status"]
+          titulo: string
+          wp_id: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          autor_id?: string | null
+          conteudo?: string | null
+          credito_imagem?: string | null
+          criado_em?: string
+          destaque?: boolean
+          id?: string
+          imagem_capa?: string | null
+          nao_perca?: boolean
+          publicado_em?: string | null
+          resumo?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["post_status"]
+          titulo: string
+          wp_id?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          autor_id?: string | null
+          conteudo?: string | null
+          credito_imagem?: string | null
+          criado_em?: string
+          destaque?: boolean
+          id?: string
+          imagem_capa?: string | null
+          nao_perca?: boolean
+          publicado_em?: string | null
+          resumo?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["post_status"]
+          titulo?: string
+          wp_id?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string | null
+        }
+        Insert: {
+          criado_em?: string
+          id: string
+          nome?: string | null
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string | null
+        }
+        Relationships: []
+      }
+      temas: {
+        Row: {
+          criado_em: string
+          destaque_menu: boolean
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+          tipo: Database["public"]["Enums"]["tema_tipo"]
+          wp_tag_id: number | null
+        }
+        Insert: {
+          criado_em?: string
+          destaque_menu?: boolean
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+          tipo: Database["public"]["Enums"]["tema_tipo"]
+          wp_tag_id?: number | null
+        }
+        Update: {
+          criado_em?: string
+          destaque_menu?: boolean
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+          tipo?: Database["public"]["Enums"]["tema_tipo"]
+          wp_tag_id?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          criado_em: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
+      post_status: "rascunho" | "publicado"
+      tema_tipo: "time" | "assunto"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +364,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+      post_status: ["rascunho", "publicado"],
+      tema_tipo: ["time", "assunto"],
+    },
   },
 } as const
