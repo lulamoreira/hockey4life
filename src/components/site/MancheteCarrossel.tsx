@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostListItem, CarrosselSettings } from "@/lib/posts.functions";
 import { formatDataBR } from "@/lib/slugify";
 
