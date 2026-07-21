@@ -34,7 +34,7 @@ function AdminShell() {
   const router = useRouter();
   const nav = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/admin/posts", label: "Matérias", icon: FileText },
+    { to: "/admin/materias", label: "Matérias", icon: FileText },
     { to: "/admin/temas", label: "Temas", icon: Tag },
     { to: "/admin/contatos", label: "Contatos", icon: Mail },
     { to: "/admin/importar", label: "Importar WP", icon: Download },
