@@ -14,21 +14,13 @@ export function Letreiro({
   standalone?: boolean;
 }) {
   const [paused, setPaused] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
-
-  useEffect(() => {
-    if (standalone) return;
-    const onVis = () => setHidden(document.hidden);
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [standalone]);
 
   if (!settings.ativo || !items || items.length === 0) return null;
 
-  const rotulo = settings.rotulo || "NÃO PERCA";
+  const rotulo = settings.rotulo?.trim() ? settings.rotulo : "NÃO PERCA";
   const horizontal = settings.direcao === "rtl" || settings.direcao === "ltr";
-  const running = !paused && !hidden;
+  const running = !paused;
 
   return (
     <div
@@ -84,7 +76,7 @@ function MarqueeHorizontal({
         @keyframes letreiro-x-rtl { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
         @keyframes letreiro-x-ltr { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
       `}</style>
-      <div className="flex h-full items-center whitespace-nowrap will-change-transform" style={style}>
+      <div className="flex h-full w-max items-center whitespace-nowrap will-change-transform" style={style}>
         {dup.map((it, idx) => (
           <span key={`${it.id}-${idx}`} className="flex items-center" aria-hidden={idx >= items.length ? "true" : undefined}>
             <Link

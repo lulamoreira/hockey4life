@@ -13,6 +13,7 @@ function publicClient() {
 
 export type OrdemListagem = "desc" | "asc";
 export type LetreiroDirecao = "rtl" | "ltr" | "up" | "down";
+export type TransicaoManchete = "rtl" | "ltr" | "up" | "down" | "fade";
 
 export type LetreiroSettings = {
   ativo: boolean;
@@ -23,9 +24,18 @@ export type LetreiroSettings = {
   velocidade: number; // segundos (por volta em horizontal; por manchete em vertical)
 };
 
+export type CarrosselSettings = {
+  quantidade: number;      // 1..10 — com 1 fica estático
+  transicao: TransicaoManchete;
+  intervalo: number;       // segundos por slide (3..30)
+  duracaoMs: number;       // duração da transição (200..1500)
+  fixadaComRodizio: boolean; // se há manchete fixa: participa ou fica sozinha
+};
+
 export type HomeSettings = {
   ordem: OrdemListagem;
   manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
+  carrossel: CarrosselSettings;
   quantidades: {
     home_grade: number;
     leia_agora: number;
@@ -48,9 +58,18 @@ export const LETREIRO_PADRAO: LetreiroSettings = {
   velocidade: 30,
 };
 
+export const CARROSSEL_PADRAO: CarrosselSettings = {
+  quantidade: 5,
+  transicao: "rtl",
+  intervalo: 7,
+  duracaoMs: 600,
+  fixadaComRodizio: true,
+};
+
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
   ordem: "desc",
   manchete: { modo: "auto", post_id: null, fixada_em: null },
+  carrossel: CARROSSEL_PADRAO,
   quantidades: { home_grade: 12, leia_agora: 5, arquivo: 12, tema: 12, leia_tambem: 3, nao_perca: 6 },
   nao_perca: { ativo: true, modo: "recentes" },
   letreiro: LETREIRO_PADRAO,
@@ -74,6 +93,18 @@ function normalizeLetreiro(raw: any, fallbackModo: "recentes" | "manual" = "rece
   };
 }
 
+function normalizeCarrossel(raw: any): CarrosselSettings {
+  const c = raw ?? {};
+  const trans = ["rtl","ltr","up","down","fade"].includes(c.transicao) ? c.transicao : CARROSSEL_PADRAO.transicao;
+  return {
+    quantidade: clamp(c.quantidade, 1, 10, CARROSSEL_PADRAO.quantidade),
+    transicao: trans as TransicaoManchete,
+    intervalo: clamp(c.intervalo, 3, 30, CARROSSEL_PADRAO.intervalo),
+    duracaoMs: clamp(c.duracaoMs, 200, 1500, CARROSSEL_PADRAO.duracaoMs),
+    fixadaComRodizio: c.fixadaComRodizio !== false,
+  };
+}
+
 function normalizeHomeSettings(raw: any): HomeSettings {
   const s = raw ?? {};
   const q = s.quantidades ?? {};
@@ -92,6 +123,7 @@ function normalizeHomeSettings(raw: any): HomeSettings {
       post_id: typeof m.post_id === "string" ? m.post_id : null,
       fixada_em: typeof m.fixada_em === "string" ? m.fixada_em : null,
     },
+    carrossel: normalizeCarrossel(s.carrossel),
     quantidades: {
       home_grade: clamp(q.home_grade, 3, 48, 12),
       leia_agora: clamp(q.leia_agora, 1, 20, 5),
@@ -196,8 +228,9 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const asc = settings.ordem === "asc";
   const qt = settings.quantidades;
   const letreiro = settings.letreiro;
+  const carrossel = settings.carrossel;
 
-  const totalNecessario = 1 + qt.leia_agora + qt.home_grade + 4;
+  const totalNecessario = carrossel.quantidade + qt.leia_agora + qt.home_grade + 4;
 
   const letreiroPromise = letreiro.ativo
     ? letreiro.origem === "manual"
@@ -241,7 +274,8 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
   const configMap: Record<string, any> = {};
   (config ?? []).forEach((c: any) => { configMap[c.chave] = c.valor; });
 
-  let manchete: any = null;
+  // Manchete fixa (opcional)
+  let fixada: any = null;
   if (settings.manchete.modo === "fixa" && settings.manchete.post_id) {
     const { data: fixado } = await sb
       .from("posts")
@@ -252,17 +286,32 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       .maybeSingle();
     if (fixado) {
       const [withTemas] = await attachTemas(sb, [fixado]);
-      manchete = withTemas;
+      fixada = withTemas;
     }
   }
 
   const recentesList = await attachTemas(sb, recentes ?? []);
-  if (!manchete) manchete = recentesList[0] ?? null;
 
-  const restantes = manchete ? recentesList.filter((p: any) => p.id !== manchete.id) : recentesList;
+  // Monta a lista do carrossel (manchetes)
+  let manchetes: any[] = [];
+  if (fixada) {
+    if (!carrossel.fixadaComRodizio || carrossel.quantidade <= 1) {
+      manchetes = [fixada];
+    } else {
+      const outras = recentesList.filter((p: any) => p.id !== fixada.id);
+      manchetes = [fixada, ...outras].slice(0, carrossel.quantidade);
+    }
+  } else {
+    manchetes = recentesList.slice(0, carrossel.quantidade);
+  }
+
+  const mancheteIds = new Set(manchetes.map((p) => p.id));
+  const restantes = recentesList.filter((p: any) => !mancheteIds.has(p.id));
 
   return {
-    destaque: manchete as PostListItem | null,
+    destaque: (manchetes[0] ?? null) as PostListItem | null,
+    manchetes: manchetes as PostListItem[],
+    carrossel,
     leiaAgora: restantes.slice(0, qt.leia_agora) as PostListItem[],
     ultimas: restantes.slice(0, qt.home_grade) as PostListItem[],
     naoPerca: (letreiroData ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null }>,
