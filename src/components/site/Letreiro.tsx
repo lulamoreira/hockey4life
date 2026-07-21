@@ -14,21 +14,13 @@ export function Letreiro({
   standalone?: boolean;
 }) {
   const [paused, setPaused] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
-
-  useEffect(() => {
-    if (standalone) return;
-    const onVis = () => setHidden(document.hidden);
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [standalone]);
 
   if (!settings.ativo || !items || items.length === 0) return null;
 
-  const rotulo = settings.rotulo || "NÃO PERCA";
+  const rotulo = settings.rotulo?.trim() ? settings.rotulo : "NÃO PERCA";
   const horizontal = settings.direcao === "rtl" || settings.direcao === "ltr";
-  const running = !paused && !hidden;
+  const running = !paused;
 
   return (
     <div
