@@ -9,8 +9,8 @@ import { X, Filter } from "lucide-react";
 
 const searchSchema = z.object({
   q: z.string().optional().default(""),
-  temas: z.union([z.array(z.string()), z.string()]).optional().transform((v) => {
-    if (!v) return [] as string[];
+  temas: z.union([z.array(z.string()), z.string()]).optional().transform<string[]>((v) => {
+    if (!v) return [];
     return Array.isArray(v) ? v : [v];
   }),
   ano: z.coerce.number().int().optional().nullable(),
