@@ -46,7 +46,7 @@ const temasQ = () => queryOptions({ queryKey: ["temas-filtro"], queryFn: () => l
 const navQ = () => queryOptions({ queryKey: ["arquivo-nav"], queryFn: () => getArchiveNav(), staleTime: 120_000 });
 
 export const Route = createFileRoute("/arquivo")({
-  validateSearch: (v) => searchSchema.parse(v ?? {}),
+  validateSearch: (v): ArquivoSearch => searchSchema.parse(v ?? {}) as ArquivoSearch,
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ context, deps }) => {
     await Promise.all([
