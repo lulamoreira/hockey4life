@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/configuracoes")({
   component: ConfigPage,
 });
 
-type Tab = "geral" | "home";
+type Tab = "geral" | "home" | "aparencia";
 
 function ConfigPage() {
   const [tab, setTab] = useState<Tab>("geral");
@@ -19,15 +19,16 @@ function ConfigPage() {
   return (
     <div>
       <h1 className="h4l-title text-3xl text-foreground md:text-4xl">Configurações</h1>
-      <p className="text-sm text-muted-foreground">Textos do site e regras de ordenação da home.</p>
+      <p className="text-sm text-muted-foreground">Textos do site, regras de ordenação da home e aparência.</p>
 
-      <div className="mt-6 flex gap-1 border-b border-border">
+      <div className="mt-6 flex flex-wrap gap-1 border-b border-border">
         <TabBtn active={tab === "geral"} onClick={() => setTab("geral")}>Textos e contato</TabBtn>
         <TabBtn active={tab === "home"} onClick={() => setTab("home")}>Home e ordenação</TabBtn>
+        <TabBtn active={tab === "aparencia"} onClick={() => setTab("aparencia")}>Aparência</TabBtn>
       </div>
 
       <div className="mt-6">
-        {tab === "geral" ? <GeralTab /> : <HomeTab />}
+        {tab === "geral" ? <GeralTab /> : tab === "home" ? <HomeTab /> : <AparenciaTab />}
       </div>
     </div>
   );
@@ -694,6 +695,223 @@ function CarrosselEditor({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ============================================================
+ * ABA 3 — Aparência (fundo de arena)
+ * ============================================================ */
+import { supabase as _supabaseAparencia } from "@/integrations/supabase/client";
+import { criarUploadUrl as _criarUploadUrlAparencia } from "@/lib/admin.functions";
+import {
+  APARENCIA_PADRAO,
+  ARENA_PADRAO,
+  FundoArenaPreview,
+  normalizeAparencia,
+  type AparenciaConfig,
+} from "@/components/site/FundoArena";
+
+function AparenciaTab() {
+  const qc = useQueryClient();
+  const save = useServerFn(saveConfig);
+  const uploadFn = useServerFn(_criarUploadUrlAparencia);
+  const { data, isLoading } = useQuery({ queryKey: ["admin-config"], queryFn: () => listConfig() });
+
+  const [s, setS] = useState<AparenciaConfig>(APARENCIA_PADRAO);
+  const [msg, setMsg] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadInfo, setUploadInfo] = useState("");
+
+  useEffect(() => {
+    if (!data) return;
+    setS(normalizeAparencia(data.aparencia));
+  }, [data]);
+
+  const doSave = async (patch?: Partial<AparenciaConfig>) => {
+    const next = { ...s, ...(patch ?? {}) };
+    setS(next);
+    setMsg("");
+    await save({ data: { chave: "aparencia", valor: next } });
+    qc.invalidateQueries({ queryKey: ["admin-config"] });
+    qc.invalidateQueries({ queryKey: ["site-config"] });
+    qc.invalidateQueries({ queryKey: ["home"] });
+    setMsg("Aparência salva.");
+  };
+
+  const onUploadFundo = async (file: File) => {
+    setUploading(true);
+    setUploadInfo("");
+    try {
+      const { optimizeImage, renameFor, formatBytes } = await import("@/lib/image-optim");
+      const r = await optimizeImage(file, { maxWidth: 2048, variantWidths: [1280, 1920] });
+      // Upload principal (2048) + variantes (1280/1920). Se caiu no fallback, sobe apenas a original 3x.
+      const base = file.name.replace(/\.[a-z0-9]+$/i, "");
+      const uploads: Array<{ width: number; blob: Blob; url: string }> = [];
+
+      const mainName = renameFor(file.name, r.main.ext, `${r.main.width || 2048}`);
+      const mainUp = await uploadFn({ data: { nomeArquivo: mainName } });
+      const { error: eMain } = await _supabaseAparencia.storage.from("midia").upload(mainUp.key, r.main.blob, {
+        upsert: false, contentType: r.main.blob.type || undefined,
+      });
+      if (eMain) throw eMain;
+      uploads.push({ width: r.main.width || 2048, blob: r.main.blob, url: mainUp.publicUrl });
+
+      for (const v of r.variants) {
+        const vn = renameFor(file.name, v.ext, `${v.width}`);
+        const vu = await uploadFn({ data: { nomeArquivo: vn } });
+        const { error: eV } = await _supabaseAparencia.storage.from("midia").upload(vu.key, v.blob, {
+          upsert: false, contentType: v.blob.type || undefined,
+        });
+        if (eV) throw eV;
+        uploads.push({ width: v.width, blob: v.blob, url: vu.publicUrl });
+      }
+
+      // Mapa por largura, com fallback se alguma faltar (ex.: original menor que 1280).
+      const byWidth = new Map(uploads.map((u) => [u.width, u.url]));
+      const pick = (w: number) => {
+        if (byWidth.has(w)) return byWidth.get(w)!;
+        // pega a maior disponível ≤ w, senão a menor > w
+        const sorted = [...byWidth.entries()].sort((a, b) => a[0] - b[0]);
+        const le = sorted.filter(([k]) => k <= w).pop();
+        return (le ?? sorted[sorted.length - 1])[1];
+      };
+      const atual = { url_1280: pick(1280), url_1920: pick(1920), url_2048: pick(2048) };
+      const galeria = [{ label: base.slice(0, 60) || "Fundo", ...atual }, ...s.galeria].slice(0, 20);
+      const totalOtim = uploads.reduce((a, b) => a + b.blob.size, 0);
+      setUploadInfo(`${formatBytes(r.originalSize)} → ${formatBytes(totalOtim)} (${uploads.length} arquivo${uploads.length > 1 ? "s" : ""})${r.usedOriginal ? " — original mantido" : ""}`);
+      await doSave({ atual, galeria, ativo: true });
+    } catch (e: any) {
+      alert("Erro no upload: " + (e?.message ?? "desconhecido"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (isLoading) return <p className="text-muted-foreground">Carregando…</p>;
+
+  const legibilidadeBaixa = s.escurecimento < 30;
+
+  return (
+    <div className="space-y-6">
+      <Section title="Fundo do site" onReset={() => doSave(APARENCIA_PADRAO)}>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={s.ativo} onChange={(e) => setS({ ...s, ativo: e.target.checked })} />
+          Fundo ativo
+        </label>
+
+        <div className="mt-4">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prévia ao vivo</div>
+          <FundoArenaPreview aparencia={s} />
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <NumField
+            label={`Escurecimento (${s.escurecimento}%)`}
+            value={s.escurecimento} min={0} max={90} def={55}
+            onChange={(v) => setS({ ...s, escurecimento: v })}
+          />
+          <NumField
+            label={`Desfoque (${s.desfoque}px)`}
+            value={s.desfoque} min={0} max={20} def={0}
+            onChange={(v) => setS({ ...s, desfoque: v })}
+          />
+        </div>
+        {legibilidadeBaixa && (
+          <p className="mt-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">
+            Escurecimento abaixo de 30%: o texto pode ficar ilegível sobre a imagem.
+          </p>
+        )}
+
+        <div className="mt-4">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Posição da imagem</div>
+          <div className="grid grid-cols-3 gap-1">
+            {(["top", "center", "bottom"] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => setS({ ...s, posicao: p })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  s.posicao === p ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {p === "top" ? "Topo" : p === "center" ? "Centro" : "Base"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="mt-4 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={s.mostrar_celular} onChange={(e) => setS({ ...s, mostrar_celular: e.target.checked })} />
+          Mostrar no celular (padrão: desativado, para economizar dados)
+        </label>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={() => doSave()}
+            className="rounded-md bg-primary px-6 py-2.5 text-sm font-semibold uppercase text-primary-foreground hover:bg-primary/90"
+          >
+            Salvar aparência
+          </button>
+          <button
+            onClick={() => doSave({ atual: null })}
+            className="rounded-md border border-border px-4 py-2 text-sm font-semibold uppercase text-foreground hover:border-primary hover:text-primary"
+          >
+            Restaurar fundo padrão (arena)
+          </button>
+        </div>
+        {msg && <p className="mt-2 text-sm text-primary">{msg}</p>}
+      </Section>
+
+      <Section title="Trocar imagem de fundo">
+        <p className="text-sm text-muted-foreground">
+          A imagem passa por otimização automática no seu navegador: redimensionamento (2048/1920/1280 px), conversão para WebP,
+          remoção de metadados EXIF e correção de orientação. Nada é enviado sem antes ser processado.
+        </p>
+        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary">
+          {uploading ? "Enviando…" : "Escolher imagem"}
+          <input type="file" accept="image/*" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { onUploadFundo(f); e.currentTarget.value = ""; } }}
+          />
+        </label>
+        {uploadInfo && <p className="mt-2 text-xs text-primary">Otimização: {uploadInfo}</p>}
+      </Section>
+
+      <Section title="Galeria de fundos enviados">
+        {s.galeria.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum fundo enviado ainda. O fundo padrão da arena continua ativo.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <button
+              onClick={() => doSave({ atual: null })}
+              className={`overflow-hidden rounded-md border-2 text-left ${s.atual === null ? "border-primary" : "border-border hover:border-primary/60"}`}
+            >
+              <img src={ARENA_PADRAO.url_1280} alt="" className="aspect-video w-full object-cover" />
+              <div className="p-2 text-xs">Padrão — Arena</div>
+            </button>
+            {s.galeria.map((g, i) => {
+              const ativo = s.atual?.url_1280 === g.url_1280;
+              return (
+                <div key={i} className={`overflow-hidden rounded-md border-2 ${ativo ? "border-primary" : "border-border"}`}>
+                  <button onClick={() => doSave({ atual: { url_1280: g.url_1280, url_1920: g.url_1920, url_2048: g.url_2048 } })} className="block w-full text-left">
+                    <img src={g.url_1280} alt={g.label} className="aspect-video w-full object-cover" />
+                    <div className="p-2 text-xs">{g.label}</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const galeria = s.galeria.filter((_, j) => j !== i);
+                      const atual = ativo ? null : s.atual;
+                      doSave({ galeria, atual });
+                    }}
+                    className="w-full border-t border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-destructive/20 hover:text-destructive-foreground"
+                  >
+                    Remover
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Section>
     </div>
   );
 }

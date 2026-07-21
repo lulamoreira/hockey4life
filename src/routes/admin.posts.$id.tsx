@@ -53,13 +53,21 @@ function EditorPage() {
     }
   }, [isNew, postQ.data]);
 
+  const [uploadInfo, setUploadInfo] = useState<string>("");
   const onUpload = async (file: File) => {
     setUploading(true);
+    setUploadInfo("");
     try {
-      const { key, publicUrl } = await uploadFn({ data: { nomeArquivo: file.name } });
-      const { error } = await supabase.storage.from("midia").upload(key, file, { upsert: false });
+      const { optimizeImage, renameFor, formatBytes } = await import("@/lib/image-optim");
+      const r = await optimizeImage(file, { maxWidth: 1600 });
+      const outName = renameFor(file.name, r.main.ext);
+      const { key, publicUrl } = await uploadFn({ data: { nomeArquivo: outName } });
+      const { error } = await supabase.storage.from("midia").upload(key, r.main.blob, {
+        upsert: false, contentType: r.main.blob.type || undefined,
+      });
       if (error) throw error;
       setImagemCapa(publicUrl);
+      setUploadInfo(`${formatBytes(r.originalSize)} → ${formatBytes(r.main.blob.size)}${r.usedOriginal ? " (original mantido)" : ""}`);
     } catch (e: any) {
       alert("Erro no upload: " + (e?.message ?? "desconhecido"));
     } finally {
@@ -177,6 +185,7 @@ function EditorPage() {
               {uploading ? "Enviando…" : "Ou envie um arquivo"}
               <input type="file" accept="image/*" className="hidden" onChange={(e)=>{const f=e.target.files?.[0]; if(f) onUpload(f);}} />
             </label>
+            {uploadInfo && <p className="mt-1 text-[11px] text-muted-foreground">Otimização: {uploadInfo}</p>}
             <input value={creditoImagem} onChange={(e)=>setCreditoImagem(e.target.value)} placeholder="Crédito da imagem"
               className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground" />
           </div>
