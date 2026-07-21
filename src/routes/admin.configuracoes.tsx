@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/configuracoes")({
   component: ConfigPage,
 });
 
-type Tab = "geral" | "home";
+type Tab = "geral" | "home" | "aparencia";
 
 function ConfigPage() {
   const [tab, setTab] = useState<Tab>("geral");
@@ -19,15 +19,16 @@ function ConfigPage() {
   return (
     <div>
       <h1 className="h4l-title text-3xl text-foreground md:text-4xl">Configurações</h1>
-      <p className="text-sm text-muted-foreground">Textos do site e regras de ordenação da home.</p>
+      <p className="text-sm text-muted-foreground">Textos do site, regras de ordenação da home e aparência.</p>
 
-      <div className="mt-6 flex gap-1 border-b border-border">
+      <div className="mt-6 flex flex-wrap gap-1 border-b border-border">
         <TabBtn active={tab === "geral"} onClick={() => setTab("geral")}>Textos e contato</TabBtn>
         <TabBtn active={tab === "home"} onClick={() => setTab("home")}>Home e ordenação</TabBtn>
+        <TabBtn active={tab === "aparencia"} onClick={() => setTab("aparencia")}>Aparência</TabBtn>
       </div>
 
       <div className="mt-6">
-        {tab === "geral" ? <GeralTab /> : <HomeTab />}
+        {tab === "geral" ? <GeralTab /> : tab === "home" ? <HomeTab /> : <AparenciaTab />}
       </div>
     </div>
   );
