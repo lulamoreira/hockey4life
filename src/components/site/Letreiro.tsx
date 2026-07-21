@@ -76,7 +76,7 @@ function MarqueeHorizontal({
         @keyframes letreiro-x-rtl { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
         @keyframes letreiro-x-ltr { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
       `}</style>
-      <div className="flex h-full items-center whitespace-nowrap will-change-transform" style={style}>
+      <div className="flex h-full w-max items-center whitespace-nowrap will-change-transform" style={style}>
         {dup.map((it, idx) => (
           <span key={`${it.id}-${idx}`} className="flex items-center" aria-hidden={idx >= items.length ? "true" : undefined}>
             <Link
