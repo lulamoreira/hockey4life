@@ -14,11 +14,13 @@ export function SiteLayout({
 }) {
   const aparencia = normalizeAparencia(config?.aparencia);
   return (
-    <div className="relative flex min-h-screen flex-col text-foreground">
+    <>
       <FundoArena aparencia={aparencia} />
-      <Header temasMenu={temasMenu} />
-      <main className="flex-1">{children}</main>
-      <Footer config={config} />
-    </div>
+      <div className="relative z-10 flex min-h-screen flex-col text-foreground">
+        <Header temasMenu={temasMenu} />
+        <main className="flex-1">{children}</main>
+        <Footer config={config} />
+      </div>
+    </>
   );
 }

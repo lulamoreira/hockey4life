@@ -68,7 +68,7 @@ export function FundoArena({ aparencia }: { aparencia: AparenciaConfig }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
     >
       <picture className={aparencia.mostrar_celular ? "block h-full w-full" : "hidden h-full w-full md:block"}>
         <source media="(min-width: 1921px)" srcSet={urls.url_2048} />
