@@ -496,3 +496,92 @@ function TextArea({ label, value, onChange }: { label: string; value: string; on
     </div>
   );
 }
+
+function LetreiroEditor({
+  value,
+  onChange,
+}: {
+  value: import("@/lib/posts.functions").LetreiroSettings;
+  onChange: (v: import("@/lib/posts.functions").LetreiroSettings) => void;
+}) {
+  const l = value;
+  const set = (patch: Partial<typeof l>) => onChange({ ...l, ...patch });
+  const horizontal = l.direcao === "rtl" || l.direcao === "ltr";
+  const previewItems = [
+    { id: "p1", titulo: "Manchete de exemplo 1 para pré-visualização", slug: "#" },
+    { id: "p2", titulo: "Segunda manchete rolando na fita vermelha", slug: "#" },
+    { id: "p3", titulo: "E uma terceira só pra fechar o loop", slug: "#" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={l.ativo} onChange={(e) => set({ ativo: e.target.checked })} />
+        <span>Mostrar o letreiro no topo da home</span>
+      </label>
+
+      <div className={l.ativo ? "space-y-4" : "space-y-4 opacity-50 pointer-events-none"}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rótulo da etiqueta</label>
+            <input
+              value={l.rotulo}
+              maxLength={40}
+              onChange={(e) => set({ rotulo: e.target.value })}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">Padrão: NÃO PERCA</p>
+          </div>
+          <NumField label="Quantas manchetes" value={l.quantidade} min={3} max={15} def={5} onChange={(v) => set({ quantidade: v })} />
+        </div>
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Origem das manchetes</div>
+          <div className="space-y-1">
+            <RadioRow name="lo" value="recentes" checked={l.origem === "recentes"} onChange={(v) => set({ origem: v as any })} label="As mais recentes" />
+            <RadioRow name="lo" value="manual" checked={l.origem === "manual"} onChange={(v) => set({ origem: v as any })} label='Só as marcadas manualmente (campo "Não perca" na matéria)' />
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Direção</div>
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+            {([
+              { v: "rtl", l: "→ para ←" },
+              { v: "ltr", l: "← para →" },
+              { v: "up", l: "↑ (baixo→cima)" },
+              { v: "down", l: "↓ (cima→baixo)" },
+            ] as const).map((o) => (
+              <button
+                key={o.v}
+                onClick={() => set({ direcao: o.v as LetreiroDirecao })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  l.direcao === o.v ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <NumField
+          label={horizontal ? "Segundos por volta" : "Segundos por manchete"}
+          value={l.velocidade}
+          min={3}
+          max={60}
+          def={horizontal ? 30 : 5}
+          onChange={(v) => set({ velocidade: v })}
+        />
+      </div>
+
+      {/* Pré-visualização ao vivo */}
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pré-visualização</div>
+        <div className="overflow-hidden rounded-md border border-border">
+          <Letreiro items={previewItems} settings={l} standalone />
+        </div>
+      </div>
+    </div>
+  );
+}
