@@ -97,7 +97,17 @@ export function PostsListPage() {
             <tr>
               <th className="px-4 py-3 text-left">Título</th>
               <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-left">Publicação</th>
+              <th className="px-4 py-3 text-left">
+                <button
+                  type="button"
+                  onClick={() => { setOrdem((o) => (o === "desc" ? "asc" : "desc")); setPage(1); }}
+                  aria-label={`Ordenar por publicação — atualmente ${ordem === "desc" ? "mais recentes primeiro" : "mais antigas primeiro"}`}
+                  className="inline-flex items-center gap-1 uppercase tracking-wider text-primary hover:underline"
+                >
+                  Publicação
+                  {ordem === "desc" ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
+                </button>
+              </th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
