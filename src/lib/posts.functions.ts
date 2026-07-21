@@ -13,6 +13,7 @@ function publicClient() {
 
 export type OrdemListagem = "desc" | "asc";
 export type LetreiroDirecao = "rtl" | "ltr" | "up" | "down";
+export type TransicaoManchete = "rtl" | "ltr" | "up" | "down" | "fade";
 
 export type LetreiroSettings = {
   ativo: boolean;
@@ -23,9 +24,18 @@ export type LetreiroSettings = {
   velocidade: number; // segundos (por volta em horizontal; por manchete em vertical)
 };
 
+export type CarrosselSettings = {
+  quantidade: number;      // 1..10 — com 1 fica estático
+  transicao: TransicaoManchete;
+  intervalo: number;       // segundos por slide (3..30)
+  duracaoMs: number;       // duração da transição (200..1500)
+  fixadaComRodizio: boolean; // se há manchete fixa: participa ou fica sozinha
+};
+
 export type HomeSettings = {
   ordem: OrdemListagem;
   manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
+  carrossel: CarrosselSettings;
   quantidades: {
     home_grade: number;
     leia_agora: number;
@@ -48,9 +58,18 @@ export const LETREIRO_PADRAO: LetreiroSettings = {
   velocidade: 30,
 };
 
+export const CARROSSEL_PADRAO: CarrosselSettings = {
+  quantidade: 5,
+  transicao: "rtl",
+  intervalo: 7,
+  duracaoMs: 600,
+  fixadaComRodizio: true,
+};
+
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
   ordem: "desc",
   manchete: { modo: "auto", post_id: null, fixada_em: null },
+  carrossel: CARROSSEL_PADRAO,
   quantidades: { home_grade: 12, leia_agora: 5, arquivo: 12, tema: 12, leia_tambem: 3, nao_perca: 6 },
   nao_perca: { ativo: true, modo: "recentes" },
   letreiro: LETREIRO_PADRAO,
