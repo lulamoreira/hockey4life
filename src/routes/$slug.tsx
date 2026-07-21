@@ -131,6 +131,24 @@ function PostPage() {
         </div>
       </article>
 
+      {(anterior || proximo) && (
+        <nav className="mx-auto grid max-w-4xl gap-3 px-4 pb-10 sm:grid-cols-2">
+          {anterior ? (
+            <Link to="/$slug" params={{ slug: anterior.slug }} className="group rounded-lg border border-border p-4 hover:border-primary">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">← Anterior</div>
+              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{anterior.titulo}</div>
+            </Link>
+          ) : <div />}
+          {proximo ? (
+            <Link to="/$slug" params={{ slug: proximo.slug }} className="group rounded-lg border border-border p-4 text-right hover:border-primary">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Próxima →</div>
+              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{proximo.titulo}</div>
+            </Link>
+          ) : <div />}
+        </nav>
+      )}
+
+
       {relacionados.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
           <h2 className="h4l-title mb-6 border-b border-border pb-2 text-2xl text-foreground md:text-3xl">
