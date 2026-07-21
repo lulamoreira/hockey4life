@@ -139,6 +139,8 @@ function HomeTab() {
       quantidades: { ...HOME_SETTINGS_PADRAO.quantidades, ...(raw.quantidades ?? {}) },
       nao_perca: { ...HOME_SETTINGS_PADRAO.nao_perca, ...(raw.nao_perca ?? {}) },
       letreiro: { ...HOME_SETTINGS_PADRAO.letreiro, ...(raw.letreiro ?? {}) },
+      times: { ...HOME_SETTINGS_PADRAO.times, ...(raw.times ?? {}) },
+
     });
   }, [data]);
 
