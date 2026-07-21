@@ -53,13 +53,21 @@ function EditorPage() {
     }
   }, [isNew, postQ.data]);
 
+  const [uploadInfo, setUploadInfo] = useState<string>("");
   const onUpload = async (file: File) => {
     setUploading(true);
+    setUploadInfo("");
     try {
-      const { key, publicUrl } = await uploadFn({ data: { nomeArquivo: file.name } });
-      const { error } = await supabase.storage.from("midia").upload(key, file, { upsert: false });
+      const { optimizeImage, renameFor, formatBytes } = await import("@/lib/image-optim");
+      const r = await optimizeImage(file, { maxWidth: 1600 });
+      const outName = renameFor(file.name, r.main.ext);
+      const { key, publicUrl } = await uploadFn({ data: { nomeArquivo: outName } });
+      const { error } = await supabase.storage.from("midia").upload(key, r.main.blob, {
+        upsert: false, contentType: r.main.blob.type || undefined,
+      });
       if (error) throw error;
       setImagemCapa(publicUrl);
+      setUploadInfo(`${formatBytes(r.originalSize)} → ${formatBytes(r.main.blob.size)}${r.usedOriginal ? " (original mantido)" : ""}`);
     } catch (e: any) {
       alert("Erro no upload: " + (e?.message ?? "desconhecido"));
     } finally {
