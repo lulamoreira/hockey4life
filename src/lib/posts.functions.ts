@@ -305,6 +305,7 @@ export const listAllPublishedSlugs = createServerFn({ method: "GET" }).handler(a
     .eq("status", "publicado")
     .lte("publicado_em", new Date().toISOString())
     .order("publicado_em", { ascending: false })
+    .order("id", { ascending: false })
     .limit(5000);
   return data ?? [];
 });
