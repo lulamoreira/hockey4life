@@ -45,7 +45,7 @@ export function PostsListPage() {
           <p className="text-sm text-muted-foreground">Gerencie o conteúdo do portal.</p>
         </div>
         <Link
-          to="/admin/posts/$id" params={{ id: "novo" }}
+          to="/admin/posts/novo"
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" /> Nova matéria
