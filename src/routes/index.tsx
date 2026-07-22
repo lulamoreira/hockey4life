@@ -62,8 +62,8 @@ function HomePage() {
           {/* Leia agora */}
           <aside className="lg:col-span-1">
             <div className="overflow-hidden rounded-lg border border-border bg-card/60">
-              <div className="bg-black/60 py-2 text-center">
-                <span className="h4l-title text-sm uppercase tracking-[0.2em] text-primary">
+              <div className="bg-black/70 py-2 text-center">
+                <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
                   Leia agora
                 </span>
               </div>
