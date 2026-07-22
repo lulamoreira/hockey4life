@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { LogoImg } from "./Logo";
 
 export function Footer({ config }: { config: Record<string, any> }) {
   const rodape = config?.rodape ?? {};
@@ -10,10 +11,9 @@ export function Footer({ config }: { config: Record<string, any> }) {
     <footer className="mt-16 border-t border-border bg-card">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h4l-title text-xl text-primary">HOCKEY</span>
-            <span className="h4l-title text-xl text-foreground">4LIFE</span>
-          </div>
+          <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
+            <LogoImg height={36} />
+          </Link>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">
             {rodape.texto ??
               "Histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo."}

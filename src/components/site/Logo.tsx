@@ -1,17 +1,54 @@
 import { Link } from "@tanstack/react-router";
+import logoEscuro from "@/assets/logo-escuro.png.asset.json";
+import logoClaro from "@/assets/logo-claro.png.asset.json";
 
 /**
- * Logo H4L — versão tipográfica (mesma usada no Admin, por enquanto).
+ * Logo Hockey4Life. Alterna automaticamente entre a versão para fundo
+ * escuro e a versão para fundo claro conforme o tema atual (classe .dark no <html>).
+ *
+ * As imagens têm fundo transparente — não envolvemos em box com background.
+ * Servimos com altura fixa e largura automática (nunca esticado).
  */
-export function Logo() {
+export function Logo({ height = 40 }: { height?: number }) {
   return (
     <Link
       to="/"
       aria-label="Hockey4Life — página inicial"
-      className="flex items-center gap-1"
+      className="inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
     >
-      <span className="h4l-title text-2xl leading-none text-primary md:text-3xl">HOCKEY</span>
-      <span className="h4l-title text-2xl leading-none text-foreground md:text-3xl">4LIFE</span>
+      <LogoImg height={height} />
     </Link>
+  );
+}
+
+/** Apenas a imagem (sem link) — útil em headers do admin, telas de login etc. */
+export function LogoImg({ height = 40, className = "" }: { height?: number; className?: string }) {
+  return (
+    <>
+      {/* Tema escuro */}
+      <img
+        src={logoEscuro.url}
+        alt="Hockey4Life"
+        width={height * 3.2}
+        height={height}
+        style={{ height, width: "auto" }}
+        className={`hidden select-none dark:block ${className}`}
+        decoding="async"
+        loading="eager"
+        draggable={false}
+      />
+      {/* Tema claro */}
+      <img
+        src={logoClaro.url}
+        alt="Hockey4Life"
+        width={height * 3.2}
+        height={height}
+        style={{ height, width: "auto" }}
+        className={`block select-none dark:hidden ${className}`}
+        decoding="async"
+        loading="eager"
+        draggable={false}
+      />
+    </>
   );
 }

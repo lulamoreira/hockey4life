@@ -6,6 +6,7 @@ import { getMyRole } from "@/lib/admin.functions";
 import { useState } from "react";
 import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { LogoImg } from "@/components/site/Logo";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -47,9 +48,8 @@ function AdminShell() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 shrink-0 border-r border-border bg-card md:block">
         <div className="p-6">
-          <Link to="/" className="flex items-center gap-1">
-            <span className="h4l-title text-lg text-primary">HOCKEY</span>
-            <span className="h4l-title text-lg">4LIFE</span>
+          <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
+            <LogoImg height={28} />
           </Link>
           <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">Admin</div>
         </div>
@@ -83,8 +83,13 @@ function AdminShell() {
       <div className="flex-1">
         <div className="border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex items-center justify-between">
-            <span className="h4l-title text-primary">H4L Admin</span>
-            <button onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }} className="text-sm text-muted-foreground">Sair</button>
+            <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
+              <LogoImg height={22} />
+            </Link>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }} className="text-sm text-muted-foreground">Sair</button>
+            </div>
           </div>
           <nav className="mt-3 flex flex-wrap gap-2">
             {nav.map((n) => (
@@ -122,11 +127,10 @@ function LoginScreen() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1">
-            <span className="h4l-title text-2xl text-primary">HOCKEY</span>
-            <span className="h4l-title text-2xl">4LIFE</span>
+          <div className="flex items-center justify-center">
+            <LogoImg height={40} />
           </div>
-          <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Painel administrativo</p>
+          <p className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">Painel administrativo</p>
         </div>
         <form onSubmit={login} className="mt-6 space-y-3">
           <input
