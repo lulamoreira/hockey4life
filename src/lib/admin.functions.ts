@@ -594,6 +594,9 @@ const autorInput = z.object({
   bio_curta: z.string().max(500).optional().nullable(),
   bio_media: z.string().max(1500).optional().nullable(),
   bio_longa: z.string().max(8000).optional().nullable(),
+  cargo: z.string().max(200).optional().nullable(),
+  formacao: z.string().max(300).optional().nullable(),
+  competencias: z.string().max(500).optional().nullable(),
   linkedin_url: z.string().url().optional().nullable().or(z.literal("")),
   foto_url: z.string().url().optional().nullable().or(z.literal("")),
   links: z.record(z.string(), z.string()).default({}),
@@ -602,7 +605,7 @@ const autorInput = z.object({
   linha_do_tempo: z.array(z.object({ ano: z.string().max(20), texto: z.string().max(500) })).default([]),
 });
 
-const AUTOR_COLS = "id,nome,slug,bio,bio_curta,bio_media,bio_longa,linkedin_url,foto_url,links,outros_links,fotos,linha_do_tempo,criado_em";
+const AUTOR_COLS = "id,nome,slug,bio,bio_curta,bio_media,bio_longa,cargo,formacao,competencias,linkedin_url,foto_url,links,outros_links,fotos,linha_do_tempo,criado_em";
 
 export const listAutores = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -639,6 +642,9 @@ export const saveAutor = createServerFn({ method: "POST" })
       bio_curta: data.bio_curta || null,
       bio_media: data.bio_media || null,
       bio_longa: data.bio_longa || null,
+      cargo: data.cargo || null,
+      formacao: data.formacao || null,
+      competencias: data.competencias || null,
       linkedin_url: data.linkedin_url || null,
       foto_url: data.foto_url || null,
       links: data.links ?? {},
