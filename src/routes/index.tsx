@@ -6,7 +6,7 @@ import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
-import { PlacaresLetreiros } from "@/components/site/PlacaresLetreiros";
+import { PlacaresLetreiros, ProximosJogosFaixa } from "@/components/site/PlacaresLetreiros";
 
 const homeQuery = () =>
   queryOptions({
@@ -101,6 +101,9 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Faixa amarela "Próximos jogos" logo acima de Últimas histórias */}
+      <ProximosJogosFaixa settings={placares} />
 
       {/* Últimas histórias */}
       {ultimas.length > 0 && (

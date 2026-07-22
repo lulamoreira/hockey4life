@@ -81,11 +81,13 @@ function Faixa({
   items,
   direcao,
   velocidade,
+  variante = "vermelho",
 }: {
   rotulo: string;
   items: Item[];
   direcao: "rtl" | "ltr";
   velocidade: number;
+  variante?: "vermelho" | "amarelo";
 }) {
   const [hoverPaused, setHoverPaused] = useState(false);
   const [focusPaused, setFocusPaused] = useState(false);
@@ -100,16 +102,23 @@ function Faixa({
     @keyframes placares-ltr { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
   `;
 
+  const amarelo = variante === "amarelo";
+  const containerCls = amarelo
+    ? "bg-primary text-black"
+    : "bg-destructive text-destructive-foreground";
+  const rotuloCls = amarelo ? "bg-primary/90" : "bg-destructive/90";
+  const dotCls = amarelo ? "text-black/40" : "text-destructive-foreground/50";
+
   return (
     <div
-      className="flex items-stretch overflow-hidden bg-destructive text-destructive-foreground"
+      className={`flex items-stretch overflow-hidden ${containerCls}`}
       style={{ height: ALTURA_FAIXA }}
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
       onFocusCapture={() => setFocusPaused(true)}
       onBlurCapture={() => setFocusPaused(false)}
     >
-      <div className="flex shrink-0 items-center bg-destructive/90 px-4">
+      <div className={`flex shrink-0 items-center px-4 ${rotuloCls}`}>
         <span className="h4l-title text-[12px] uppercase tracking-widest">{rotulo}</span>
       </div>
       <div className="relative min-w-0 flex-1 overflow-hidden text-sm">
@@ -134,7 +143,7 @@ function Faixa({
                     aria-hidden={clone ? "true" : undefined}
                   >
                     <ItemLabel item={it} clone={clone} />
-                    <span className="px-1 text-destructive-foreground/50" aria-hidden="true">
+                    <span className={`px-1 ${dotCls}`} aria-hidden="true">
                       •
                     </span>
                   </span>
@@ -252,6 +261,45 @@ export function PlacaresLetreiros({ settings }: { settings: PlacaresSettings }) 
     <section aria-label="Placares NHL" className="grid grid-cols-1 sm:grid-cols-2">
       <Faixa rotulo="ÚLTIMOS RESULTADOS" items={ultimos} direcao={settings.direcao} velocidade={settings.velocidade} />
       <Faixa rotulo="PRÓXIMOS JOGOS" items={proximos} direcao={settings.direcao} velocidade={settings.velocidade} />
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------
+ * Faixa dedicada só de "Próximos jogos" — visual amarelo/preto
+ * ------------------------------------------------------------------ */
+export function ProximosJogosFaixa({
+  settings,
+}: {
+  settings: PlacaresSettings;
+}) {
+  if (!settings.ativo || !settings.mostrarProximos) return null;
+
+  const q = useQuery({
+    queryKey: ["placares-nhl-proximos", settings.quantidadeProximos],
+    queryFn: () =>
+      getNhlGames({
+        data: { maxUltimos: 0, maxProximos: settings.quantidadeProximos },
+      }),
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+  });
+
+  if (q.isLoading) {
+    return <div className="w-full bg-muted/30" style={{ height: ALTURA_FAIXA }} aria-hidden="true" />;
+  }
+  const proximos: Item[] = (q.data?.proximos ?? []).map(toProximo);
+  if (!proximos.length) return null;
+
+  return (
+    <section aria-label="Próximos jogos NHL">
+      <Faixa
+        rotulo="PRÓXIMOS JOGOS"
+        items={proximos}
+        direcao={settings.direcao}
+        velocidade={settings.velocidade}
+        variante="amarelo"
+      />
     </section>
   );
 }
