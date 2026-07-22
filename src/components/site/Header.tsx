@@ -5,16 +5,29 @@ import { Logo } from "./Logo";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
+export type MenuCabecalho = { arquivo: boolean; busca: boolean; fale_conosco: boolean };
+export const MENU_CABECALHO_PADRAO: MenuCabecalho = { arquivo: true, busca: true, fale_conosco: true };
+export function normalizeMenuCabecalho(v: any): MenuCabecalho {
+  const o = v && typeof v === "object" ? v : {};
+  return {
+    arquivo: o.arquivo !== false,
+    busca: o.busca !== false,
+    fale_conosco: o.fale_conosco !== false,
+  };
+}
+
 const MAX_TIMES = 5;
 const MAX_ASSUNTOS = 3;
 
-export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
+export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; menu?: MenuCabecalho; loading?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const m = menu ?? MENU_CABECALHO_PADRAO;
 
   const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu).slice(0, MAX_TIMES);
   const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu).slice(0, MAX_ASSUNTOS);
-  const carregando = temasMenu.length === 0;
+  const carregando = loading === true;
+
 
   const isTemaAtivo = (tipo: "time" | "assunto", slug: string) =>
     pathname === `/${tipo}/${slug}`;
@@ -64,37 +77,44 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
                   </Link>
                 );
               })}
-              <Link
-                to="/arquivo"
-                aria-current={isArquivoAtivo ? "page" : undefined}
-                className={`${linkBase} ${isArquivoAtivo ? linkAtivo : linkInativo}`}
-              >
-                Arquivo
-              </Link>
+              {m.arquivo && (
+                <Link
+                  to="/arquivo"
+                  aria-current={isArquivoAtivo ? "page" : undefined}
+                  className={`${linkBase} ${isArquivoAtivo ? linkAtivo : linkInativo}`}
+                >
+                  Arquivo
+                </Link>
+              )}
+
             </>
           )}
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            to="/busca"
-            className={`hidden rounded-md p-2 transition-colors hover:bg-muted hover:text-foreground md:inline-flex ${pathname === "/busca" ? "text-primary" : "text-muted-foreground"}`}
-            aria-label="Buscar"
-            aria-current={pathname === "/busca" ? "page" : undefined}
-          >
-            <Search className="h-4 w-4" />
-          </Link>
-          <Link
-            to="/fale-conosco"
-            aria-current={pathname === "/fale-conosco" ? "page" : undefined}
-            className={`hidden rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${
-              pathname === "/fale-conosco"
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
-            }`}
-          >
-            Fale conosco
-          </Link>
+          {m.busca && (
+            <Link
+              to="/busca"
+              className={`hidden rounded-md p-2 transition-colors hover:bg-muted hover:text-foreground md:inline-flex ${pathname === "/busca" ? "text-primary" : "text-muted-foreground"}`}
+              aria-label="Buscar"
+              aria-current={pathname === "/busca" ? "page" : undefined}
+            >
+              <Search className="h-4 w-4" />
+            </Link>
+          )}
+          {m.fale_conosco && (
+            <Link
+              to="/fale-conosco"
+              aria-current={pathname === "/fale-conosco" ? "page" : undefined}
+              className={`hidden rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${
+                pathname === "/fale-conosco"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
+              }`}
+            >
+              Fale conosco
+            </Link>
+          )}
           <button
             className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
             onClick={() => setOpen(true)}
@@ -103,6 +123,7 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
             <Menu className="h-5 w-5" />
           </button>
         </div>
+
       </div>
 
       {open && (
@@ -117,9 +138,10 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
             </div>
             <nav className="mt-6 flex flex-col gap-1">
               <MobileLink to="/" pathname={pathname} onClick={() => setOpen(false)}>Início</MobileLink>
-              <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>
-              <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>
-              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
+              {m.arquivo && <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>}
+              {m.busca && <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>}
+              {m.fale_conosco && <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>}
+
 
               {times.length > 0 && (
                 <div className="mt-4">

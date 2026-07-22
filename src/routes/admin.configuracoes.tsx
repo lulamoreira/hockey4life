@@ -1017,6 +1017,8 @@ import {
   normalizeAparencia,
   type AparenciaConfig,
 } from "@/components/site/FundoArena";
+import { MENU_CABECALHO_PADRAO, normalizeMenuCabecalho, type MenuCabecalho } from "@/components/site/Header";
+
 
 function AparenciaTab() {
   const qc = useQueryClient();
@@ -1025,13 +1027,16 @@ function AparenciaTab() {
   const { data, isLoading } = useQuery({ queryKey: ["admin-config"], queryFn: () => listConfig() });
 
   const [s, setS] = useState<AparenciaConfig>(APARENCIA_PADRAO);
+  const [menu, setMenu] = useState<MenuCabecalho>(MENU_CABECALHO_PADRAO);
   const [msg, setMsg] = useState("");
+  const [menuMsg, setMenuMsg] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadInfo, setUploadInfo] = useState("");
 
   useEffect(() => {
     if (!data) return;
     setS(normalizeAparencia(data.aparencia));
+    setMenu(normalizeMenuCabecalho(data.menu_cabecalho));
   }, [data]);
 
   const doSave = async (patch?: Partial<AparenciaConfig>) => {
@@ -1044,6 +1049,17 @@ function AparenciaTab() {
     qc.invalidateQueries({ queryKey: ["home"] });
     setMsg("Aparência salva.");
   };
+
+  const toggleMenu = async (key: keyof MenuCabecalho, val: boolean) => {
+    const next = { ...menu, [key]: val };
+    setMenu(next);
+    setMenuMsg("");
+    await save({ data: { chave: "menu_cabecalho", valor: next } });
+    qc.invalidateQueries({ queryKey: ["admin-config"] });
+    qc.invalidateQueries({ queryKey: ["site-config"] });
+    setMenuMsg("Menu salvo.");
+  };
+
 
   const onUploadFundo = async (file: File) => {
     setUploading(true);
@@ -1100,7 +1116,20 @@ function AparenciaTab() {
 
   return (
     <div className="space-y-6">
+      <Section title="Menu do cabeçalho">
+        <p className="text-sm text-muted-foreground">
+          Ative ou desative os itens fixos do menu. Os temas marcados como “no menu” continuam vindo da tela de Temas e aparecem antes destes itens.
+        </p>
+        <div className="mt-3 space-y-2">
+          <MenuToggle label="Arquivo" checked={menu.arquivo} onChange={(v) => toggleMenu("arquivo", v)} />
+          <MenuToggle label="Ícone de busca" checked={menu.busca} onChange={(v) => toggleMenu("busca", v)} />
+          <MenuToggle label="Botão Fale conosco" checked={menu.fale_conosco} onChange={(v) => toggleMenu("fale_conosco", v)} />
+        </div>
+        {menuMsg && <p className="mt-2 text-sm text-primary">{menuMsg}</p>}
+      </Section>
+
       <Section title="Fundo do site" onReset={() => doSave(APARENCIA_PADRAO)}>
+
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={s.ativo} onChange={(e) => setS({ ...s, ativo: e.target.checked })} />
           Fundo ativo
@@ -1219,5 +1248,22 @@ function AparenciaTab() {
         )}
       </Section>
     </div>
+  );
+}
+
+function MenuToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center justify-between gap-4 rounded-md border border-border px-3 py-2 text-sm">
+      <span>{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"}`}
+      >
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
+      </button>
+    </label>
   );
 }
