@@ -114,9 +114,9 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
             onClick={compartilharNativo}
             className={linkClasses}
             aria-label="Compartilhar via aplicativo do celular"
+            title="Compartilhar"
           >
-            <Share2 className="h-3.5 w-3.5" />
-            Compartilhar
+            <Share2 className="h-4 w-4" />
           </button>
         )}
         {AncoraBtn(wa)}
@@ -128,9 +128,9 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
             className={linkClasses}
             aria-expanded={maisAberto}
             aria-label="Mais opções de compartilhamento"
+            title="Mais"
           >
-            <MoreHorizontal className="h-3.5 w-3.5" />
-            Mais
+            <MoreHorizontal className="h-4 w-4" />
           </button>
           {maisAberto && (
             <div
