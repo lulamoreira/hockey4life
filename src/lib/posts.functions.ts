@@ -261,8 +261,23 @@ export type AutorResumo = {
   nome: string;
   slug: string;
   bio: string | null;
+  bio_curta: string | null;
+  bio_media: string | null;
+  bio_longa: string | null;
+  linkedin_url: string | null;
+  outros_links: Record<string, string> | null;
+  fotos: string[] | null;
+  linha_do_tempo: Array<{ ano: string; texto: string }> | null;
   foto_url: string | null;
   links: Record<string, string> | null;
+};
+
+export type AutorStats = {
+  total: number;
+  primeiro_ano: number | null;
+  ultimo_ano: number | null;
+  times_count: number;
+  por_ano: Array<{ ano: number; total: number }>;
 };
 
 export type PostFull = PostListItem & {
