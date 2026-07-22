@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
+import { UltimasCarrossel } from "@/components/site/UltimasCarrossel";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 import { PlacaresNaoPerca } from "@/components/site/PlacaresLetreiros";
 import { YouTubeFacade } from "@/components/site/YouTubeFacade";
