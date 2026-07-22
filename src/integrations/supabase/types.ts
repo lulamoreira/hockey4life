@@ -289,6 +289,7 @@ export type Database = {
           atualizado_em: string
           autor_id: string | null
           busca_tsv: unknown
+          chapeu: string | null
           conteudo: string | null
           credito_imagem: string | null
           criado_em: string
@@ -307,6 +308,7 @@ export type Database = {
           atualizado_em?: string
           autor_id?: string | null
           busca_tsv?: unknown
+          chapeu?: string | null
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
@@ -325,6 +327,7 @@ export type Database = {
           atualizado_em?: string
           autor_id?: string | null
           busca_tsv?: unknown
+          chapeu?: string | null
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
