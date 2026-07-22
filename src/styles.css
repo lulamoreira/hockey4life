@@ -81,28 +81,29 @@
 }
 
 .dark {
-  /* --- Tema escuro (original) --- */
+  /* --- Tema escuro --- */
   --background: oklch(0.145 0.005 260);
   --foreground: oklch(0.97 0.005 90);
   --card: oklch(0.185 0.005 260);
   --card-foreground: oklch(0.97 0.005 90);
   --popover: oklch(0.185 0.005 260);
   --popover-foreground: oklch(0.97 0.005 90);
-  --primary: oklch(0.881 0.169 96.5);
-  --primary-foreground: oklch(0.15 0.01 260);
-  --brand-fill: oklch(0.881 0.169 96.5);
-  --brand-fill-foreground: oklch(0.15 0.01 260);
+  /* Amarelo H4L #FFCA0A (mais quente que o antigo #EDD91B). */
+  --primary: #FFCA0A;
+  --primary-foreground: #16150F;
+  --brand-fill: #FFCA0A;
+  --brand-fill-foreground: #16150F;
   --secondary: oklch(0.24 0.008 260);
   --secondary-foreground: oklch(0.97 0.005 90);
   --muted: oklch(0.22 0.008 260);
   --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.881 0.169 96.5);
-  --accent-foreground: oklch(0.15 0.01 260);
+  --accent: #FFCA0A;
+  --accent-foreground: #16150F;
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.98 0.005 90);
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.881 0.169 96.5 / 0.6);
+  --ring: rgba(255, 202, 10, 0.6);
 }
 
 /* Transição suave entre temas — até 200ms; anulada com prefers-reduced-motion. */
