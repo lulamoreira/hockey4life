@@ -79,6 +79,32 @@ function HomePage() {
       <NhlPlacar />
 
 
+      {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
+      {hfc.video_url && (
+        <section className="mx-auto max-w-7xl px-4 py-12">
+          <div className="rounded-lg bg-black/40 p-6 backdrop-blur-sm md:p-10">
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+              <div className="aspect-video overflow-hidden rounded-lg bg-black">
+                <iframe
+                  src={hfc.video_url}
+                  title={hfc.titulo ?? "Vídeo destaque"}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest text-destructive">Especial</div>
+                <h2 className="mt-2 h4l-title text-3xl text-foreground md:text-5xl">
+                  {hfc.titulo ?? "Vídeo destaque"}
+                </h2>
+                <p className="mt-4 max-w-lg text-muted-foreground">{hfc.texto}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Últimas histórias */}
       {ultimas.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
@@ -96,32 +122,6 @@ function HomePage() {
         </section>
       )}
 
-
-
-
-      {/* Hockey Fights Cancer */}
-      {hfc.video_url && (
-        <section className="mx-auto max-w-7xl px-4 py-12">
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-            <div className="aspect-video overflow-hidden rounded-lg bg-black">
-              <iframe
-                src={hfc.video_url}
-                title={hfc.titulo ?? "Hockey Fights Cancer"}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-            <div>
-              <div className="text-xs font-bold uppercase tracking-widest text-destructive">Especial</div>
-              <h2 className="mt-2 h4l-title text-3xl text-foreground md:text-5xl">
-                {hfc.titulo ?? "Hockey Fights Cancer"}
-              </h2>
-              <p className="mt-4 max-w-lg text-muted-foreground">{hfc.texto}</p>
-            </div>
-          </div>
-        </section>
-      )}
     </SiteLayout>
   );
 }
