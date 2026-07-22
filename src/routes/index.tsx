@@ -6,7 +6,7 @@ import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
-import { NhlPlacar } from "@/components/site/NhlPlacar";
+import { PlacaresLetreiros } from "@/components/site/PlacaresLetreiros";
 
 const homeQuery = () =>
   queryOptions({
