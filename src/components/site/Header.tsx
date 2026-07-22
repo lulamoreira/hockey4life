@@ -5,16 +5,29 @@ import { Logo } from "./Logo";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
+export type MenuCabecalho = { arquivo: boolean; busca: boolean; fale_conosco: boolean };
+export const MENU_CABECALHO_PADRAO: MenuCabecalho = { arquivo: true, busca: true, fale_conosco: true };
+export function normalizeMenuCabecalho(v: any): MenuCabecalho {
+  const o = v && typeof v === "object" ? v : {};
+  return {
+    arquivo: o.arquivo !== false,
+    busca: o.busca !== false,
+    fale_conosco: o.fale_conosco !== false,
+  };
+}
+
 const MAX_TIMES = 5;
 const MAX_ASSUNTOS = 3;
 
-export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
+export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; menu?: MenuCabecalho; loading?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const m = menu ?? MENU_CABECALHO_PADRAO;
 
   const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu).slice(0, MAX_TIMES);
   const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu).slice(0, MAX_ASSUNTOS);
-  const carregando = temasMenu.length === 0;
+  const carregando = loading === true;
+
 
   const isTemaAtivo = (tipo: "time" | "assunto", slug: string) =>
     pathname === `/${tipo}/${slug}`;
