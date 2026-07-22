@@ -576,8 +576,19 @@ Deno.serve(async (req) => {
       }
     }
   } catch (e: any) {
-    console.error("[importar-wp] fatal", e?.message ?? e);
-    return new Response(JSON.stringify({ erro: e?.message ?? String(e) }), {
+    const msg = e?.message ?? String(e);
+    console.error("[importar-wp] fatal", msg);
+    // Grava fatal ANTES de retornar, e libera o lock
+    try {
+      await adminBoot.from("importacao_log").insert({
+        nivel: "fatal", msg: msg.slice(0, 2000), contexto: { stack: e?.stack ?? null },
+      });
+      await adminBoot.from("importacao_estado").update({
+        em_execucao: false, materia_atual: null, imagem_atual: null,
+        batimento_em: new Date().toISOString(),
+      }).eq("id", 1);
+    } catch (_) { /* ignora */ }
+    return new Response(JSON.stringify({ erro: msg, codigo: "fatal" }), {
       status: 500, headers: { ...CORS, "content-type": "application/json" },
     });
   }
