@@ -91,7 +91,7 @@ function AutorPage() {
 
   return (
     <SiteLayout config={siteData.config}>
-      <div className="mx-auto my-6 max-w-6xl rounded-lg bg-black/50 px-4 py-8 backdrop-blur-sm md:my-10 md:px-8 md:py-10">
+      <div className="mx-auto my-6 max-w-6xl rounded-lg px-4 py-8 backdrop-blur-sm dark:bg-black/50 md:my-10 md:px-8 md:py-10">
         {/* Topo */}
         <header className="flex flex-col items-center gap-6 text-center md:flex-row md:items-start md:text-left">
           {autor.foto_url ? (
