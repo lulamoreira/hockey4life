@@ -415,6 +415,7 @@ Deno.serve(async (req) => {
           { wp_id, slug, status: "erro", erro: msg, importado_em: new Date().toISOString() },
           { onConflict: "wp_id" },
         );
+        gravarLog(admin, "erro", `#${wp_id} ${slug}: ${msg}`, wp_id);
         return "ERRO";
       }
     }
