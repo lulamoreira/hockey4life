@@ -68,6 +68,10 @@ export function TimesCarrossel({
         @media (prefers-reduced-motion: reduce) {
           .h4l-times-track { animation: none !important; }
         }
+        /* Mobile: no máximo 3 logos visíveis para não cortar o nome do time */
+        @media (max-width: 767px) {
+          .h4l-times-item-h { width: calc(100cqw / 3 - 0.75rem) !important; min-width: 84px; }
+        }
       `}</style>
       <div className={`mx-auto max-w-7xl px-4 ${standalone ? "py-2" : "py-6"} ${s.pausarNoHover ? "h4l-times-pause" : ""}`}>
         <div
@@ -93,7 +97,12 @@ export function TimesCarrossel({
                     height: `${s.alturaPx}px`,
                   };
               return (
-                <li key={`${t.slug}-${i}`} className="shrink-0" style={itemStyle}>
+                <li
+                  key={`${t.slug}-${i}`}
+                  className={`shrink-0 ${vertical ? "" : "h4l-times-item-h"}`}
+                  style={itemStyle}
+                >
+
 
                   <Link
                     to="/time/$slug"
