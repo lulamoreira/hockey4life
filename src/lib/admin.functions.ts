@@ -584,3 +584,68 @@ export const getAdminPostSimple = createServerFn({ method: "GET" })
       .maybeSingle();
     return p ?? null;
   });
+
+// ============ AUTORES ============
+const autorInput = z.object({
+  id: z.string().uuid().optional(),
+  nome: z.string().min(1).max(160),
+  slug: z.string().min(1).max(160),
+  bio: z.string().max(4000).optional().nullable(),
+  foto_url: z.string().url().optional().nullable().or(z.literal("")),
+  links: z.record(z.string(), z.string()).default({}),
+});
+
+export const listAutores = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("autores")
+      .select("id,nome,slug,bio,foto_url,links,criado_em")
+      .order("nome", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  });
+
+export const getAutor = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ context, data }) => {
+    const { data: aut, error } = await context.supabase
+      .from("autores")
+      .select("id,nome,slug,bio,foto_url,links,criado_em")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw error;
+    return aut ?? null;
+  });
+
+export const saveAutor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => autorInput.parse(v))
+  .handler(async ({ context, data }) => {
+    const payload = {
+      nome: data.nome,
+      slug: data.slug,
+      bio: data.bio || null,
+      foto_url: data.foto_url || null,
+      links: data.links ?? {},
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("autores").update(payload).eq("id", data.id);
+      if (error) throw error;
+      return { id: data.id };
+    }
+    const { data: created, error } = await context.supabase
+      .from("autores").insert(payload).select("id").single();
+    if (error) throw error;
+    return { id: created.id };
+  });
+
+export const deleteAutor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.from("autores").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
