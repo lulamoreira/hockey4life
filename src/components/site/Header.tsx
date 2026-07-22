@@ -161,12 +161,22 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-6 flex flex-col gap-1">
+            <nav className="mt-6 flex flex-col gap-1" aria-label="Menu de navegação">
+              <SecaoMenu>Navegar</SecaoMenu>
               <MobileLink to="/" pathname={pathname} onClick={() => setOpen(false)}>Início</MobileLink>
               {m.arquivo && <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>}
-              {m.busca && <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>}
-              {m.fale_conosco && <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>}
-
+              <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>
+              <Link
+                to="/autor/$slug"
+                params={{ slug: "diogo-finelli" }}
+                onClick={() => setOpen(false)}
+                aria-current={pathname === "/autor/diogo-finelli" ? "page" : undefined}
+                className={`rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted ${pathname === "/autor/diogo-finelli" ? "text-primary" : ""}`}
+              >
+                Sobre o autor
+              </Link>
+              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
+              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Contato</MobileLink>
 
               {times.length > 0 && (
                 <div className="mt-4">
@@ -198,6 +208,52 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                   })}
                 </div>
               )}
+
+              <div className="mt-6 border-t border-border pt-4">
+                <SecaoMenu>Conta</SecaoMenu>
+                {!logado && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <LogIn className="h-4 w-4" /> Login
+                  </Link>
+                )}
+                {logado && isEditor && (
+                  <Link
+                    to="/admin/posts/novo"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide text-primary hover:bg-muted"
+                  >
+                    <PenSquare className="h-4 w-4" /> Incluir matéria
+                  </Link>
+                )}
+                {logado && isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <Shield className="h-4 w-4" /> Admin
+                  </Link>
+                )}
+                {logado && (
+                  <button
+                    type="button"
+                    onClick={sair}
+                    className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm uppercase tracking-wide text-destructive hover:bg-muted"
+                  >
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                )}
+                {logado && session?.user.email && (
+                  <div className="mt-2 flex items-center gap-2 px-3 text-xs text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    <span className="truncate">{session.user.email}</span>
+                  </div>
+                )}
+              </div>
             </nav>
           </aside>
         </div>
