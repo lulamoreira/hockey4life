@@ -290,7 +290,7 @@ export type PostFull = PostListItem & {
   autor_id: string | null;
 };
 
-const POST_COLS = "id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
+const POST_COLS = "id,titulo,slug,chapeu,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
 
 type SB = ReturnType<typeof publicClient>;
 
