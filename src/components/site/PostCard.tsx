@@ -51,20 +51,54 @@ export function PostCard({ post }: { post: PostListItem }) {
 
 export function PostCardSmall({ post }: { post: PostListItem }) {
   const tema = post.temas?.[0];
-  const chapeu = post.chapeu?.trim();
+  const dataExtenso = (() => {
+    try {
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        timeZone: "America/Sao_Paulo",
+      }).format(new Date(post.publicado_em));
+    } catch {
+      return formatDataBR(post.publicado_em);
+    }
+  })();
   return (
-    <Link to="/$slug" params={{ slug: post.slug }} className="group block border-b border-border py-3 last:border-b-0">
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-        {chapeu ? (
-          <span className="rounded bg-primary/20 px-1.5 py-0.5 font-bold text-primary">{chapeu}</span>
-        ) : tema ? (
-          <span className="rounded bg-primary/20 px-1.5 py-0.5 text-primary">{tema.nome}</span>
-        ) : null}
-        <span>{formatDataBR(post.publicado_em)}</span>
+    <Link
+      to="/$slug"
+      params={{ slug: post.slug }}
+      className="group flex gap-3 border-b border-border/60 p-3 transition-colors last:border-b-0 hover:bg-white/5"
+    >
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-muted">
+        {post.imagem_capa ? (
+          <img
+            src={post.imagem_capa}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <span className="h4l-title text-lg text-muted-foreground/40">H4L</span>
+          </div>
+        )}
       </div>
-      <h4 className="mt-1 h4l-title text-lg leading-tight text-foreground transition-colors group-hover:text-primary">
-        {post.titulo}
-      </h4>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span>{dataExtenso}</span>
+          {tema && (
+            <>
+              <span aria-hidden="true" className="text-muted-foreground/50">|</span>
+              <span className="font-semibold text-primary">{tema.nome}</span>
+            </>
+          )}
+        </div>
+        <h4 className="mt-1 line-clamp-3 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+          {post.titulo}
+        </h4>
+      </div>
     </Link>
   );
 }
+
