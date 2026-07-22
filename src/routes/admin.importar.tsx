@@ -398,6 +398,16 @@ function ImportarPage() {
         </div>
       )}
 
+      {alertaFaltantes && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-amber-500/60 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <span>
+            O cursor terminou, mas ainda faltam <strong>{fmt(faltamMaterias)}</strong> matérias no banco.
+            Rode a conferência abaixo para listar os wp_id que ficaram de fora e reimporte apenas eles.
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-4">
         <Card label="Matérias no banco" value={fmt(feito)} />
         <Card label="Na origem" value={fmt(totalOrigem)} />
