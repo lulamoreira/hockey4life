@@ -318,6 +318,19 @@ Deno.serve(async (req) => {
     };
 
 
+    // Autor público das matérias importadas do WordPress (Diogo Finelli).
+    // Buscamos pelo slug para nunca gravar id inválido.
+    const AUTOR_SLUG_IMPORT = "diogo-finelli";
+    const { data: autorRow, error: autorErr } = await admin
+      .from("autores").select("id").eq("slug", AUTOR_SLUG_IMPORT).maybeSingle();
+    if (autorErr || !autorRow?.id) {
+      await admin.from("importacao_estado").update({ em_execucao: false, batimento_em: new Date().toISOString() }).eq("id", 1);
+      const msg = `Autor "${AUTOR_SLUG_IMPORT}" não encontrado na tabela autores — cadastre-o antes de importar.`;
+      await gravarLog(admin, "erro", msg);
+      return jsonResp({ erro: msg, codigo: "autor_ausente" }, 400);
+    }
+    const autorImportId: string = autorRow.id;
+
     // Mapa wp_tag -> tema uuid
     let temaByTagId = new Map<number, string>();
     const carregarMapaTemas = async () => {
