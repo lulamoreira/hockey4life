@@ -576,6 +576,7 @@ export const getAutorPublico = createServerFn({ method: "GET" })
   .inputValidator((v) =>
     z.object({
       slug: z.string().min(1),
+      todas: z.boolean().default(false),
       page: z.number().int().min(1).default(1),
       perPage: z.number().int().min(1).max(50).default(12),
     }).parse(v),
@@ -585,33 +586,60 @@ export const getAutorPublico = createServerFn({ method: "GET" })
     const now = new Date().toISOString();
     const { data: autor, error } = await sb
       .from("autores")
-      .select("id,nome,slug,bio,foto_url,links")
+      .select("id,nome,slug,bio,bio_curta,bio_media,bio_longa,linkedin_url,outros_links,fotos,linha_do_tempo,foto_url,links")
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw error;
     if (!autor) return null;
 
-    const from = (data.page - 1) * data.perPage;
-    const to = from + data.perPage - 1;
-    const { data: posts, count } = await sb
+    // Estatísticas via RPC
+    const { data: statsRaw } = await sb.rpc("autor_estatisticas", { _slug: data.slug });
+    const stats = (statsRaw ?? { total: 0, primeiro_ano: null, ultimo_ano: null, times_count: 0, por_ano: [] }) as AutorStats;
+
+    if (data.todas) {
+      const from = (data.page - 1) * data.perPage;
+      const to = from + data.perPage - 1;
+      const { data: posts, count } = await sb
+        .from("posts")
+        .select(POST_COLS, { count: "exact" })
+        .eq("autor_id", (autor as any).id)
+        .eq("status", "publicado")
+        .lte("publicado_em", now)
+        .order("publicado_em", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, to);
+      const items = await attachTemas(sb, posts ?? []);
+      return {
+        autor: autor as AutorResumo,
+        stats,
+        modo: "lista" as const,
+        items: items as PostListItem[],
+        total: count ?? 0,
+        page: data.page,
+        perPage: data.perPage,
+        totalPages: Math.max(1, Math.ceil((count ?? 0) / data.perPage)),
+      };
+    }
+
+    // Perfil (últimas 6)
+    const { data: posts } = await sb
       .from("posts")
-      .select(POST_COLS, { count: "exact" })
-      .eq("autor_id", autor.id)
+      .select(POST_COLS)
+      .eq("autor_id", (autor as any).id)
       .eq("status", "publicado")
       .lte("publicado_em", now)
       .order("publicado_em", { ascending: false })
       .order("id", { ascending: false })
-      .range(from, to);
-    const items = await attachTemas(sb, posts ?? []);
+      .limit(6);
+    const ultimas = await attachTemas(sb, posts ?? []);
     return {
       autor: autor as AutorResumo,
-      items: items as PostListItem[],
-      total: count ?? 0,
-      page: data.page,
-      perPage: data.perPage,
-      totalPages: Math.max(1, Math.ceil((count ?? 0) / data.perPage)),
+      stats,
+      modo: "perfil" as const,
+      ultimas: ultimas as PostListItem[],
     };
   });
+
 
 export const getPostsByTema = createServerFn({ method: "GET" })
   .inputValidator((v) =>
