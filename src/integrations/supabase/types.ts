@@ -330,7 +330,15 @@ export type Database = {
           titulo?: string
           wp_id?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "autores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
