@@ -272,6 +272,46 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function HighlightCard({ destaque, unidade, descricao }: { destaque: string; unidade: string; descricao: string }) {
+  return (
+    <div className="rounded-lg border border-primary/40 bg-primary/5 p-5 text-center backdrop-blur-sm">
+      <div className="h4l-title text-4xl leading-none text-primary md:text-5xl">{destaque}</div>
+      <div className="mt-1 text-xs uppercase tracking-widest text-primary/80">{unidade}</div>
+      <div className="mt-2 text-sm text-foreground/90">{descricao}</div>
+    </div>
+  );
+}
+
+function LinhaDoTempo({ itens }: { itens: Array<{ ano: string; texto: string }> }) {
+  const [expandido, setExpandido] = useState(false);
+  const visiveis = expandido ? itens : itens.slice(0, 4);
+  const resto = itens.length - 4;
+  return (
+    <>
+      <ol className="relative border-l-2 border-primary/40 pl-6">
+        {visiveis.map((item, i) => (
+          <li key={i} className="relative mb-6 last:mb-0">
+            <span className="absolute -left-[33px] top-1.5 h-4 w-4 rounded-full bg-primary ring-4 ring-background" />
+            <div className="h4l-title text-2xl text-primary">{item.ano}</div>
+            <p className="mt-1 text-sm text-foreground/90 md:text-base">{item.texto}</p>
+          </li>
+        ))}
+      </ol>
+      {resto > 0 && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => setExpandido((v) => !v)}
+            className="inline-flex items-center gap-2 rounded-md border border-primary/50 bg-transparent px-5 py-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            {expandido ? "Recolher" : `Ver carreira completa (+${resto})`}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
 function BarrasPorAno({ data }: { data: Array<{ ano: number; total: number }> }) {
   const max = Math.max(...data.map((d) => d.total), 1);
   return (
