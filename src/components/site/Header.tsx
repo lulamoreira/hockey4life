@@ -1,8 +1,12 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Search, X } from "lucide-react";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { LogIn, LogOut, Menu, PenSquare, Search, Shield, User, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth";
+import { getMyRole } from "@/lib/admin.functions";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
@@ -23,7 +27,26 @@ const MAX_ASSUNTOS = 3;
 export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; menu?: MenuCabecalho; loading?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
   const m = menu ?? MENU_CABECALHO_PADRAO;
+
+  const { session } = useAuthSession();
+  const logado = !!session;
+  const roleQ = useQuery({
+    queryKey: ["my-role", session?.user.id ?? "anon"],
+    queryFn: () => getMyRole(),
+    enabled: logado,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const isAdmin = !!roleQ.data?.isAdmin;
+  const isEditor = !!roleQ.data?.isEditor;
+
+  async function sair() {
+    setOpen(false);
+    await supabase.auth.signOut();
+    router.invalidate();
+  }
 
   const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu).slice(0, MAX_TIMES);
   const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu).slice(0, MAX_ASSUNTOS);
@@ -138,12 +161,22 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-6 flex flex-col gap-1">
+            <nav className="mt-6 flex flex-col gap-1" aria-label="Menu de navegação">
+              <SecaoMenu>Navegar</SecaoMenu>
               <MobileLink to="/" pathname={pathname} onClick={() => setOpen(false)}>Início</MobileLink>
               {m.arquivo && <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>}
-              {m.busca && <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>}
-              {m.fale_conosco && <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>}
-
+              <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>
+              <Link
+                to="/autor/$slug"
+                params={{ slug: "diogo-finelli" }}
+                onClick={() => setOpen(false)}
+                aria-current={pathname === "/autor/diogo-finelli" ? "page" : undefined}
+                className={`rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted ${pathname === "/autor/diogo-finelli" ? "text-primary" : ""}`}
+              >
+                Sobre o autor
+              </Link>
+              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
+              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Contato</MobileLink>
 
               {times.length > 0 && (
                 <div className="mt-4">
@@ -175,6 +208,52 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                   })}
                 </div>
               )}
+
+              <div className="mt-6 border-t border-border pt-4">
+                <SecaoMenu>Conta</SecaoMenu>
+                {!logado && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <LogIn className="h-4 w-4" /> Login
+                  </Link>
+                )}
+                {logado && isEditor && (
+                  <Link
+                    to="/admin/posts/novo"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide text-primary hover:bg-muted"
+                  >
+                    <PenSquare className="h-4 w-4" /> Incluir matéria
+                  </Link>
+                )}
+                {logado && isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <Shield className="h-4 w-4" /> Admin
+                  </Link>
+                )}
+                {logado && (
+                  <button
+                    type="button"
+                    onClick={sair}
+                    className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm uppercase tracking-wide text-destructive hover:bg-muted"
+                  >
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                )}
+                {logado && session?.user.email && (
+                  <div className="mt-2 flex items-center gap-2 px-3 text-xs text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    <span className="truncate">{session.user.email}</span>
+                  </div>
+                )}
+              </div>
             </nav>
           </aside>
         </div>
@@ -191,6 +270,14 @@ function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" 
       className={`rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted ${ativo ? "text-primary" : ""}`}>
       {children}
     </Link>
+  );
+}
+
+function SecaoMenu({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1 mt-1 px-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+      {children}
+    </div>
   );
 }
 
