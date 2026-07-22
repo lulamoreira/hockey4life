@@ -251,6 +251,11 @@ function Slide({
                 {formatDataBR(post.publicado_em)}
               </span>
             </div>
+            {post.chapeu && (
+              <div className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-primary md:text-sm">
+                {post.chapeu}
+              </div>
+            )}
             <h1
               className="h4l-title leading-tight text-foreground transition-colors group-hover:text-primary"
               style={{

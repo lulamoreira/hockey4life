@@ -26,6 +26,7 @@ const postInput = z.object({
   id: z.string().uuid().optional(),
   titulo: z.string().min(1).max(300),
   slug: z.string().min(1).max(200),
+  chapeu: z.string().max(30).optional().nullable(),
   resumo: z.string().max(1000).optional().nullable(),
   conteudo: z.string().optional().nullable(),
   imagem_capa: z.string().url().optional().nullable().or(z.literal("")),
@@ -46,6 +47,7 @@ export const listAdminPosts = createServerFn({ method: "GET" })
       q: z.string().default(""),
       page: z.number().int().min(1).default(1),
       ordem: z.enum(["desc", "asc"]).default("desc"),
+      sem_chapeu: z.boolean().default(false),
     }).parse(v ?? {}),
   )
   .handler(async ({ context, data }) => {
@@ -55,12 +57,13 @@ export const listAdminPosts = createServerFn({ method: "GET" })
     const asc = data.ordem === "asc";
     let q = context.supabase
       .from("posts")
-      .select("id,titulo,slug,status,destaque,nao_perca,publicado_em,atualizado_em", { count: "exact" })
+      .select("id,titulo,slug,chapeu,status,destaque,nao_perca,publicado_em,atualizado_em", { count: "exact" })
       .order("publicado_em", { ascending: asc, nullsFirst: asc })
       .order("id", { ascending: asc })
       .range(from, to);
     if (data.status !== "todos") q = q.eq("status", data.status);
     if (data.q) q = q.ilike("titulo", `%${data.q}%`);
+    if (data.sem_chapeu) q = q.or("chapeu.is.null,chapeu.eq.");
     const { data: items, count, error } = await q;
     if (error) throw error;
     return {
@@ -78,7 +81,7 @@ export const getAdminPost = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: post, error } = await context.supabase
       .from("posts")
-      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,status,destaque,nao_perca,publicado_em,atualizado_em,criado_em,autor_id,wp_id")
+      .select("id,titulo,slug,chapeu,resumo,conteudo,imagem_capa,credito_imagem,status,destaque,nao_perca,publicado_em,atualizado_em,criado_em,autor_id,wp_id")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw error;
@@ -97,6 +100,7 @@ export const savePost = createServerFn({ method: "POST" })
     const payload: any = {
       titulo: data.titulo,
       slug: data.slug,
+      chapeu: (data.chapeu ?? "").trim() || null,
       resumo: data.resumo || null,
       conteudo: data.conteudo || null,
       imagem_capa: data.imagem_capa || null,

@@ -247,6 +247,7 @@ export type PostListItem = {
   id: string;
   titulo: string;
   slug: string;
+  chapeu: string | null;
   resumo: string | null;
   imagem_capa: string | null;
   credito_imagem: string | null;
@@ -289,7 +290,7 @@ export type PostFull = PostListItem & {
   autor_id: string | null;
 };
 
-const POST_COLS = "id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
+const POST_COLS = "id,titulo,slug,chapeu,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
 
 type SB = ReturnType<typeof publicClient>;
 
@@ -464,7 +465,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
 
     const { data: post, error } = await sb
       .from("posts")
-      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,publicado_em,atualizado_em,destaque,nao_perca,status,autor_id")
+      .select("id,titulo,slug,chapeu,resumo,conteudo,imagem_capa,credito_imagem,publicado_em,atualizado_em,destaque,nao_perca,status,autor_id")
       .eq("slug", data.slug)
       .eq("status", "publicado")
       .lte("publicado_em", now)
@@ -506,7 +507,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
       if (ids.length > 0) {
         const { data: rel } = await sb
           .from("post_temas")
-          .select("post_id, tema_id, posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
+          .select("post_id, tema_id, posts!inner(id,titulo,slug,chapeu,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)")
           .in("tema_id", ids)
           .eq("posts.status", "publicado")
           .lte("posts.publicado_em", now)
@@ -670,7 +671,7 @@ export const getPostsByTema = createServerFn({ method: "GET" })
     const nowIso = new Date().toISOString();
     const { data: rels, count } = await sb
       .from("post_temas")
-      .select("posts!inner(id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)", {
+      .select("posts!inner(id,titulo,slug,chapeu,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca,status)", {
         count: "exact",
       })
       .eq("tema_id", tema.id)

@@ -24,6 +24,7 @@ export function PostEditor({ id }: { id?: string }) {
 
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
+  const [chapeu, setChapeu] = useState("");
   const [resumo, setResumo] = useState("");
   const [conteudo, setConteudo] = useState("");
   const [imagemCapa, setImagemCapa] = useState("");
@@ -43,6 +44,7 @@ export function PostEditor({ id }: { id?: string }) {
     if (!isNew && postQ.data?.post) {
       const p = postQ.data.post;
       setTitulo(p.titulo); setSlug(p.slug);
+      setChapeu((p as any).chapeu ?? "");
       setResumo(p.resumo ?? ""); setConteudo(p.conteudo ?? "");
       setImagemCapa(p.imagem_capa ?? ""); setCreditoImagem(p.credito_imagem ?? "");
       setStatus(p.status); setDestaque(p.destaque); setNaoPerca(p.nao_perca);
@@ -102,6 +104,7 @@ export function PostEditor({ id }: { id?: string }) {
         data: {
           id: isNew ? undefined : id,
           titulo, slug: slug || slugify(titulo),
+          chapeu: chapeu.trim() || null,
           resumo: resumo || null, conteudo: conteudo || null,
           imagem_capa: imagemCapa || null, credito_imagem: creditoImagem || null,
           status: finalStatus, destaque, nao_perca: naoPerca,
@@ -145,6 +148,23 @@ export function PostEditor({ id }: { id?: string }) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
+          <Field label="Chapéu">
+            <input
+              value={chapeu}
+              onChange={(e) => setChapeu(e.target.value.slice(0, 30))}
+              maxLength={30}
+              placeholder="Ex.: Tour da taça"
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm uppercase tracking-wider text-primary focus:border-primary focus:outline-none"
+            />
+            <div className="mt-1 flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">
+                Retranca curta que aparece acima do título no destaque da capa. Duas ou três palavras.
+              </span>
+              <span className={chapeu.length > 24 ? "font-semibold text-destructive" : "text-muted-foreground"}>
+                {chapeu.length}/30{chapeu.length > 24 ? " — pode quebrar linha no celular" : ""}
+              </span>
+            </div>
+          </Field>
           <Field label="Título">
             <input value={titulo}
               onChange={(e) => { setTitulo(e.target.value); if (isNew) setSlug(slugify(e.target.value)); }}
