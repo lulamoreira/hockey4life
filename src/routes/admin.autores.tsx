@@ -219,6 +219,18 @@ function AutorForm({ id, onSaved, onDeleted, onCancel }: { id?: string; onSaved:
           </Field>
         </div>
 
+        <Field label="Cargo / linha de apoio (aparece sob o nome)">
+          <input value={cargo} onChange={(e) => setCargo(e.target.value)} maxLength={200} placeholder="Ex.: Jornalista esportivo desde 2000 · Belo Horizonte, MG" className={inputCls} />
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Formação">
+            <input value={formacao} onChange={(e) => setFormacao(e.target.value)} maxLength={300} className={inputCls} />
+          </Field>
+          <Field label="Competências (separadas por · ou ,)">
+            <input value={competencias} onChange={(e) => setCompetencias(e.target.value)} maxLength={500} className={inputCls} />
+          </Field>
+        </div>
+
         <Field label="Foto principal">
           {foto && <img src={foto} alt="" className="mb-2 h-24 w-24 rounded-full object-cover" />}
           <input value={foto} onChange={(e) => setFoto(e.target.value)} placeholder="URL da foto" className={inputCls} />
