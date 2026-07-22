@@ -1017,6 +1017,8 @@ import {
   normalizeAparencia,
   type AparenciaConfig,
 } from "@/components/site/FundoArena";
+import { MENU_CABECALHO_PADRAO, normalizeMenuCabecalho, type MenuCabecalho } from "@/components/site/Header";
+
 
 function AparenciaTab() {
   const qc = useQueryClient();
