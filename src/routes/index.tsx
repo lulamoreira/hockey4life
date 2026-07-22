@@ -44,7 +44,7 @@ function HomePage() {
     <SiteLayout config={config}>
       {times.length > 0 && <TimesCarrossel times={times} settings={timesSettings} />}
 
-      <Letreiro items={naoPerca} settings={letreiro} redes={config?.redes_sociais} />
+
 
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-3">
@@ -125,6 +125,12 @@ function HomePage() {
       {/* Placares: abaixo das últimas (padrão) ou acima do rodapé */}
       {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
       {placares.posicao === "acima_rodape" && <PlacaresLetreiros settings={placares} />}
+
+      {/* Letreiro "NÃO PERCA" logo acima do rodapé */}
+      <div className="mx-auto max-w-7xl px-4 pb-6">
+        <Letreiro items={naoPerca} settings={letreiro} redes={config?.redes_sociais} />
+      </div>
+
 
     </SiteLayout>
   );
