@@ -44,7 +44,7 @@ function HomePage() {
     <SiteLayout config={config}>
       {times.length > 0 && <TimesCarrossel times={times} settings={timesSettings} />}
 
-      <Letreiro items={naoPerca} settings={letreiro} />
+      <Letreiro items={naoPerca} settings={letreiro} redes={config?.redes_sociais} />
 
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-3">

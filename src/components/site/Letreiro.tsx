@@ -1,16 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Facebook, Instagram, Rss } from "lucide-react";
 import type { LetreiroSettings } from "@/lib/posts.functions";
 
 type Item = { id: string; titulo: string; slug: string };
+type Redes = { facebook?: string; instagram?: string; x?: string; youtube?: string };
 
 export function Letreiro({
   items,
   settings,
-  standalone = false,
+  redes,
 }: {
   items: Item[];
   settings: LetreiroSettings;
+  redes?: Redes;
   standalone?: boolean;
 }) {
   const [paused, setPaused] = useState(false);
@@ -22,26 +25,45 @@ export function Letreiro({
   const horizontal = settings.direcao === "rtl" || settings.direcao === "ltr";
   const running = !paused;
 
-  const altura = settings.alturaPx ?? 36;
-  const fonteTitulos = settings.fonteTitulosPx ?? 14;
-  const rotuloTam = settings.rotuloTamanhoPx ?? 12;
+  const sociais: Array<{
+    key: string;
+    href: string;
+    label: string;
+    icon: ReactNode;
+    external: boolean;
+  }> = [];
+  if (redes?.facebook) sociais.push({ key: "fb", href: redes.facebook, label: "Facebook", icon: <Facebook size={14} />, external: true });
+  if (redes?.x) sociais.push({ key: "x", href: redes.x, label: "X (Twitter)", icon: <XIcon />, external: true });
+  if (redes?.instagram) sociais.push({ key: "ig", href: redes.instagram, label: "Instagram", icon: <Instagram size={14} />, external: true });
+  sociais.push({ key: "rss", href: "/feed", label: "RSS", icon: <Rss size={14} />, external: false });
 
   return (
-    <div
-      className="bg-destructive text-destructive-foreground"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <div className="mx-auto flex max-w-7xl items-stretch overflow-hidden px-0" style={{ height: `${altura}px` }}>
+    <div className="mx-auto max-w-7xl px-4">
+      <div
+        className="flex h-[30px] items-stretch overflow-hidden text-[hsl(var(--letreiro-fg,0_0%_100%))]"
+        style={{ backgroundColor: "rgba(119,119,119,0.55)" }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={() => setPaused(false)}
+      >
+        {/* Etiqueta esquerda com ponta triangular */}
         <div
-          className="flex shrink-0 items-center gap-2 bg-destructive/90 px-4 font-black uppercase tracking-widest"
-          style={{ fontSize: `${rotuloTam}px` }}
+          className="relative flex shrink-0 items-center bg-[#1a1a1a] pl-3 pr-5 text-white"
+          style={{
+            clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)",
+          }}
         >
-          <span className="h4l-title">{rotulo}</span>
+          <span
+            className="h4l-title uppercase leading-none tracking-wider"
+            style={{ fontSize: "14px", fontWeight: 700 }}
+          >
+            {rotulo}
+          </span>
         </div>
-        <div className="relative flex-1 overflow-hidden" style={{ fontSize: `${fonteTitulos}px` }}>
+
+        {/* Manchetes */}
+        <div className="relative flex-1 overflow-hidden text-white" style={{ fontSize: "12px" }}>
           {reducedMotion ? (
             <FadeTicker items={items} intervalMs={Math.max(2000, settings.velocidade * 1000)} running={running} />
           ) : horizontal ? (
@@ -50,8 +72,33 @@ export function Letreiro({
             <MarqueeVertical items={items} direcao={settings.direcao as "up" | "down"} segundos={settings.velocidade} running={running} />
           )}
         </div>
+
+        {/* Ícones sociais — escondidos no mobile */}
+        <div className="hidden shrink-0 items-stretch sm:flex">
+          {sociais.map((s, i) => (
+            <a
+              key={s.key}
+              href={s.href}
+              aria-label={s.label}
+              target={s.external ? "_blank" : undefined}
+              rel={s.external ? "noopener noreferrer" : undefined}
+              className="flex h-[30px] w-[30px] items-center justify-center bg-black/40 text-white transition-colors hover:bg-black/70"
+              style={{ borderLeft: i === 0 ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.12)" }}
+            >
+              {s.icon}
+            </a>
+          ))}
+        </div>
       </div>
     </div>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.914l-5.41-6.61L4.5 22H1.244l8.02-9.17L1 2h7.09l4.88 6.02L18.244 2Zm-1.21 18h1.86L7.05 4H5.09l11.944 16Z" />
+    </svg>
   );
 }
 
@@ -69,10 +116,7 @@ function MarqueeHorizontal({
   segundos: number;
   running: boolean;
 }) {
-  // Duplica a lista para o loop ficar sem emenda
   const dup = useMemo(() => [...items, ...items], [items]);
-  // Direção RTL: começa em 0% e vai para -50% (metade, já que duplicamos)
-  // Direção LTR: começa em -50% e vai para 0%
   const style: React.CSSProperties = {
     animation: `letreiro-x-${direcao} ${segundos}s linear infinite`,
     animationPlayState: running ? "running" : "paused",
@@ -89,12 +133,12 @@ function MarqueeHorizontal({
             <Link
               to="/$slug"
               params={{ slug: it.slug }}
-              className="px-4 font-medium hover:underline"
+              className="px-4 no-underline hover:underline"
               tabIndex={idx >= items.length ? -1 : 0}
             >
               {it.titulo}
             </Link>
-            <span className="text-destructive-foreground/50">•</span>
+            <span className="text-white/40">•</span>
           </span>
         ))}
       </div>
@@ -140,7 +184,7 @@ function MarqueeVertical({
           <Link
             to="/$slug"
             params={{ slug: current.slug }}
-            className="line-clamp-1 px-4 font-medium hover:underline"
+            className="line-clamp-1 px-4 no-underline hover:underline"
           >
             {current.titulo}
           </Link>
@@ -163,7 +207,7 @@ function FadeTicker({ items, intervalMs, running }: { items: Item[]; intervalMs:
   const it = items[idx];
   return (
     <div key={it?.id} className="animate-in fade-in flex h-full items-center">
-      <Link to="/$slug" params={{ slug: it.slug }} className="line-clamp-1 px-4 font-medium hover:underline">
+      <Link to="/$slug" params={{ slug: it.slug }} className="line-clamp-1 px-4 no-underline hover:underline">
         {it.titulo}
       </Link>
     </div>
