@@ -87,7 +87,7 @@ function GeralTab() {
 
   return (
     <div className="space-y-6">
-      <Section title="Hockey Fights Cancer">
+      <Section title="Vídeo destaque capa">
         <Input label="URL do vídeo (embed)" value={hfc.video_url} onChange={(v)=>setHfc({...hfc, video_url:v})} />
         <Input label="Título" value={hfc.titulo} onChange={(v)=>setHfc({...hfc, titulo:v})} />
         <TextArea label="Texto" value={hfc.texto} onChange={(v)=>setHfc({...hfc, texto:v})} />
