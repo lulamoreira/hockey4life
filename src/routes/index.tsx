@@ -61,18 +61,31 @@ function HomePage() {
 
           {/* Leia agora */}
           <aside className="lg:col-span-1">
-            <div className="h4l-title mb-3 flex items-center gap-2 text-lg text-foreground">
-              <span className="h-2 w-2 rounded-full bg-primary" /> LEIA AGORA
-            </div>
-            <div>
-              {leiaAgora.map((p) => (
-                <PostCardSmall key={p.id} post={p} />
-              ))}
-              {leiaAgora.length === 0 && (
-                <p className="text-sm text-muted-foreground">Aguardando conteúdo.</p>
+            <div className="overflow-hidden rounded-lg border border-border bg-card/60">
+              <div className="bg-black/60 py-2 text-center">
+                <span className="h4l-title text-sm uppercase tracking-[0.2em] text-primary">
+                  Leia agora
+                </span>
+              </div>
+              <div>
+                {leiaAgora.map((p) => (
+                  <PostCardSmall key={p.id} post={p} />
+                ))}
+                {leiaAgora.length === 0 && (
+                  <p className="p-4 text-sm text-muted-foreground">Aguardando conteúdo.</p>
+                )}
+              </div>
+              {leiaAgora.length > 0 && (
+                <Link
+                  to="/arquivo"
+                  className="block border-t border-border/60 py-2 text-center text-xs font-semibold uppercase tracking-wider text-primary hover:bg-white/5"
+                >
+                  Ver mais →
+                </Link>
               )}
             </div>
           </aside>
+
         </div>
       </section>
 

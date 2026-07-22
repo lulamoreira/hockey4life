@@ -221,52 +221,60 @@ function Slide({
   style: React.CSSProperties;
   settings: CarrosselSettings;
 }) {
+  const chapeu = post.chapeu?.trim();
+  const destaque = chapeu || post.titulo;
   return (
     <div className="absolute inset-0 will-change-transform" style={style}>
-      <Link to="/$slug" params={{ slug: post.slug }} className="group block h-full w-full">
-        <div className="relative h-full w-full overflow-hidden">
+      <Link
+        to="/$slug"
+        params={{ slug: post.slug }}
+        aria-label={post.titulo}
+        className="group block h-full w-full"
+      >
+        <div className="relative h-full w-full overflow-hidden bg-black">
           {post.imagem_capa ? (
-            <img
-              src={post.imagem_capa}
-              alt={post.titulo}
-              loading={eager ? "eager" : "lazy"}
-              // fetchpriority não é aceito no TS oficial ainda em todos os JSX types
-              {...({ fetchpriority: eager ? "high" : "auto" } as any)}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            <>
+              {/* Fundo desfocado para fotos verticais/estreitas */}
+              <img
+                src={post.imagem_capa}
+                alt=""
+                aria-hidden="true"
+                loading={eager ? "eager" : "lazy"}
+                className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-50"
+              />
+              {/* Foto principal, contida sem esticar */}
+              <img
+                src={post.imagem_capa}
+                alt={post.titulo}
+                loading={eager ? "eager" : "lazy"}
+                {...({ fetchpriority: eager ? "high" : "auto" } as any)}
+                className="relative h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center bg-muted">
               <span className="h4l-title text-6xl text-muted-foreground/30">H4L</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              {post.temas?.slice(0, 2).map((t) => (
-                <span key={t.slug} className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
-                  {t.nome}
-                </span>
-              ))}
-              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {formatDataBR(post.publicado_em)}
-              </span>
-            </div>
-            {post.chapeu && (
-              <div className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-primary md:text-sm">
-                {post.chapeu}
-              </div>
-            )}
-            <h1
-              className="h4l-title leading-tight text-foreground transition-colors group-hover:text-primary"
+
+          {/* Degradê inferior, ~40% da altura */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black via-black/70 to-transparent" />
+
+          {/* Conteúdo: chapéu gigante + resumo (2 linhas) */}
+          <div className="absolute inset-x-0 bottom-0 p-5 md:p-6" style={{ paddingLeft: 20, paddingRight: 20 }}>
+            <h2
+              aria-hidden={chapeu ? "true" : undefined}
+              className="h4l-title uppercase leading-[0.95] text-white line-clamp-2"
               style={{
-                fontSize: `clamp(${settings.tituloPx}px, ${settings.tituloPx + (settings.tituloPxLg - settings.tituloPx) * 0.5}px, ${settings.tituloPxLg}px)`,
+                fontSize: `clamp(${settings.tituloPx}px, ${(settings.tituloPx + settings.tituloPxLg) / 2}px, ${settings.tituloPxLg}px)`,
+                letterSpacing: "0.01em",
               }}
             >
-              {post.titulo}
-            </h1>
+              {destaque}
+            </h2>
             {post.resumo && (
               <p
-                className="mt-3 line-clamp-2 max-w-2xl text-muted-foreground"
+                className="mt-2 line-clamp-2 max-w-3xl font-light text-white/90"
                 style={{ fontSize: `${settings.resumoPx}px` }}
               >
                 {post.resumo}
@@ -278,3 +286,4 @@ function Slide({
     </div>
   );
 }
+
