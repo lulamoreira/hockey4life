@@ -264,3 +264,42 @@ export function PlacaresLetreiros({ settings }: { settings: PlacaresSettings }) 
     </section>
   );
 }
+
+/* ------------------------------------------------------------------
+ * Faixa dedicada só de "Próximos jogos" — visual amarelo/preto
+ * ------------------------------------------------------------------ */
+export function ProximosJogosFaixa({
+  settings,
+}: {
+  settings: PlacaresSettings;
+}) {
+  if (!settings.ativo || !settings.mostrarProximos) return null;
+
+  const q = useQuery({
+    queryKey: ["placares-nhl-proximos", settings.quantidadeProximos],
+    queryFn: () =>
+      getNhlGames({
+        data: { maxUltimos: 0, maxProximos: settings.quantidadeProximos },
+      }),
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+  });
+
+  if (q.isLoading) {
+    return <div className="w-full bg-muted/30" style={{ height: ALTURA_FAIXA }} aria-hidden="true" />;
+  }
+  const proximos: Item[] = (q.data?.proximos ?? []).map(toProximo);
+  if (!proximos.length) return null;
+
+  return (
+    <section aria-label="Próximos jogos NHL">
+      <Faixa
+        rotulo="PRÓXIMOS JOGOS"
+        items={proximos}
+        direcao={settings.direcao}
+        velocidade={settings.velocidade}
+        variante="amarelo"
+      />
+    </section>
+  );
+}
