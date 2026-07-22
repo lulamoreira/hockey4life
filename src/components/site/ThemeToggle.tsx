@@ -23,17 +23,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   useEffect(() => {
     setTema(lerTemaInicial());
     setPronto(true);
-
-    // Enquanto não houver escolha manual, seguir o sistema.
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (e: MediaQueryListEvent) => {
-      if (localStorage.getItem(STORAGE_KEY)) return;
-      const proximo: Tema = e.matches ? "escuro" : "claro";
-      aplicarTema(proximo);
-      setTema(proximo);
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    // Sem "seguir o sistema": o padrão do H4L é escuro; a única fonte de
+    // verdade além disso é a escolha manual salva em localStorage.
   }, []);
 
   function aplicarTema(t: Tema) {
