@@ -1027,13 +1027,16 @@ function AparenciaTab() {
   const { data, isLoading } = useQuery({ queryKey: ["admin-config"], queryFn: () => listConfig() });
 
   const [s, setS] = useState<AparenciaConfig>(APARENCIA_PADRAO);
+  const [menu, setMenu] = useState<MenuCabecalho>(MENU_CABECALHO_PADRAO);
   const [msg, setMsg] = useState("");
+  const [menuMsg, setMenuMsg] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadInfo, setUploadInfo] = useState("");
 
   useEffect(() => {
     if (!data) return;
     setS(normalizeAparencia(data.aparencia));
+    setMenu(normalizeMenuCabecalho(data.menu_cabecalho));
   }, [data]);
 
   const doSave = async (patch?: Partial<AparenciaConfig>) => {
@@ -1046,6 +1049,17 @@ function AparenciaTab() {
     qc.invalidateQueries({ queryKey: ["home"] });
     setMsg("Aparência salva.");
   };
+
+  const toggleMenu = async (key: keyof MenuCabecalho, val: boolean) => {
+    const next = { ...menu, [key]: val };
+    setMenu(next);
+    setMenuMsg("");
+    await save({ data: { chave: "menu_cabecalho", valor: next } });
+    qc.invalidateQueries({ queryKey: ["admin-config"] });
+    qc.invalidateQueries({ queryKey: ["site-config"] });
+    setMenuMsg("Menu salvo.");
+  };
+
 
   const onUploadFundo = async (file: File) => {
     setUploading(true);
