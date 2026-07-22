@@ -32,6 +32,7 @@ export function PostEditor({ id }: { id?: string }) {
   const [destaque, setDestaque] = useState(false);
   const [naoPerca, setNaoPerca] = useState(false);
   const [publicadoEm, setPublicadoEm] = useState("");
+  const [autorId, setAutorId] = useState<string>("");
   const [selTemas, setSelTemas] = useState<Set<string>>(new Set());
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
