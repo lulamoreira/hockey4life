@@ -194,6 +194,32 @@ function normalizeHomeSettings(raw: any): HomeSettings {
     ativo: np.ativo,
     origem: np.modo,
   };
+function normalizePlacares(raw: any): PlacaresSettings {
+  const p = raw ?? {};
+  const dir = ["rtl", "ltr"].includes(p.direcao) ? p.direcao : PLACARES_PADRAO.direcao;
+  const pos = ["apos_ultimas", "acima_rodape"].includes(p.posicao) ? p.posicao : PLACARES_PADRAO.posicao;
+  return {
+    ativo: p.ativo !== false,
+    mostrarUltimos: p.mostrarUltimos !== false,
+    mostrarProximos: p.mostrarProximos !== false,
+    quantidadeUltimos: clamp(p.quantidadeUltimos, 3, 20, PLACARES_PADRAO.quantidadeUltimos),
+    quantidadeProximos: clamp(p.quantidadeProximos, 3, 20, PLACARES_PADRAO.quantidadeProximos),
+    direcao: dir as PlacaresDirecao,
+    velocidade: clamp(p.velocidade, 10, 120, PLACARES_PADRAO.velocidade),
+    posicao: pos as PlacaresPosicao,
+  };
+}
+
+function normalizeHomeSettings(raw: any): HomeSettings {
+  const s = raw ?? {};
+  const q = s.quantidades ?? {};
+  const np = s.nao_perca ?? {};
+  const m = s.manchete ?? {};
+  // Migração suave: se letreiro não existir, herda do bloco antigo nao_perca
+  const letreiroRaw = s.letreiro ?? {
+    ativo: np.ativo,
+    origem: np.modo,
+  };
   const naoPercaModo = np.modo === "manual" ? "manual" : "recentes";
   return {
     ordem: s.ordem === "asc" ? "asc" : "desc",
@@ -217,6 +243,7 @@ function normalizeHomeSettings(raw: any): HomeSettings {
     },
     letreiro: normalizeLetreiro(letreiroRaw, naoPercaModo),
     times: normalizeTimes(s.times),
+    placares: normalizePlacares(s.placares),
   };
 }
 
