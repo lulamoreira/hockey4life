@@ -18,31 +18,52 @@ export type Database = {
         Row: {
           atualizado_em: string
           bio: string | null
+          bio_curta: string | null
+          bio_longa: string | null
+          bio_media: string | null
           criado_em: string
           foto_url: string | null
+          fotos: Json
           id: string
+          linha_do_tempo: Json
+          linkedin_url: string | null
           links: Json
           nome: string
+          outros_links: Json
           slug: string
         }
         Insert: {
           atualizado_em?: string
           bio?: string | null
+          bio_curta?: string | null
+          bio_longa?: string | null
+          bio_media?: string | null
           criado_em?: string
           foto_url?: string | null
+          fotos?: Json
           id?: string
+          linha_do_tempo?: Json
+          linkedin_url?: string | null
           links?: Json
           nome: string
+          outros_links?: Json
           slug: string
         }
         Update: {
           atualizado_em?: string
           bio?: string | null
+          bio_curta?: string | null
+          bio_longa?: string | null
+          bio_media?: string | null
           criado_em?: string
           foto_url?: string | null
+          fotos?: Json
           id?: string
+          linha_do_tempo?: Json
+          linkedin_url?: string | null
           links?: Json
           nome?: string
+          outros_links?: Json
           slug?: string
         }
         Relationships: []
