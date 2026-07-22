@@ -77,13 +77,16 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                   </Link>
                 );
               })}
-              <Link
-                to="/arquivo"
-                aria-current={isArquivoAtivo ? "page" : undefined}
-                className={`${linkBase} ${isArquivoAtivo ? linkAtivo : linkInativo}`}
-              >
-                Arquivo
-              </Link>
+              {m.arquivo && (
+                <Link
+                  to="/arquivo"
+                  aria-current={isArquivoAtivo ? "page" : undefined}
+                  className={`${linkBase} ${isArquivoAtivo ? linkAtivo : linkInativo}`}
+                >
+                  Arquivo
+                </Link>
+              )}
+
             </>
           )}
         </nav>
