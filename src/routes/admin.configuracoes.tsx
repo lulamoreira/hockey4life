@@ -7,6 +7,8 @@ import { HOME_SETTINGS_PADRAO, LETREIRO_PADRAO, CARROSSEL_PADRAO, TIMES_CARROSSE
 import { Letreiro } from "@/components/site/Letreiro";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 import { PlacaresLetreiros } from "@/components/site/PlacaresLetreiros";
+import { parseYouTube } from "@/lib/youtube";
+import { YouTubeFacade } from "@/components/site/YouTubeFacade";
 
 import { formatDataBR } from "@/lib/slugify";
 
@@ -58,7 +60,7 @@ function GeralTab() {
   const save = useServerFn(saveConfig);
   const { data } = useQuery({ queryKey: ["admin-config"], queryFn: () => listConfig() });
 
-  const [hfc, setHfc] = useState({ video_url: "", titulo: "", texto: "" });
+  const [hfc, setHfc] = useState({ video_url: "", video_url_original: "", titulo: "", texto: "" });
   const [rodape, setRodape] = useState({ texto: "", creditos: "" });
   const [contato, setContato] = useState({ email: "" });
   const [redes, setRedes] = useState({ instagram: "", facebook: "", x: "", youtube: "" });
@@ -74,6 +76,10 @@ function GeralTab() {
 
   const saveAll = async () => {
     setMsg("");
+    if (hfc.video_url_original.trim() && !parseYouTube(hfc.video_url_original)) {
+      setMsg("Não reconheci esse endereço do YouTube. Cole o link da página do vídeo.");
+      return;
+    }
     await Promise.all([
       save({ data: { chave: "hockey_fights_cancer", valor: hfc } }),
       save({ data: { chave: "rodape", valor: rodape } }),
@@ -86,10 +92,38 @@ function GeralTab() {
     setMsg("Configurações salvas.");
   };
 
+  const hfcParsed = parseYouTube(hfc.video_url_original || hfc.video_url);
+  const hfcErro =
+    hfc.video_url_original.trim() && !hfcParsed
+      ? "Não reconheci esse endereço do YouTube. Cole o link da página do vídeo."
+      : "";
+
   return (
     <div className="space-y-6">
       <Section title="Vídeo destaque capa">
-        <Input label="URL do vídeo (embed)" value={hfc.video_url} onChange={(v)=>setHfc({...hfc, video_url:v})} />
+        <Input
+          label="URL do vídeo no YouTube"
+          value={hfc.video_url_original}
+          onChange={(v) => {
+            const parsed = parseYouTube(v);
+            setHfc({
+              ...hfc,
+              video_url_original: v,
+              video_url: parsed ? parsed.embedUrl : "",
+            });
+          }}
+        />
+        {hfcErro && <p className="text-sm text-destructive">{hfcErro}</p>}
+        {hfcParsed && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Endereço de incorporação: <code className="break-all">{hfcParsed.embedUrl}</code>
+            </p>
+            <div className="max-w-md">
+              <YouTubeFacade url={hfc.video_url_original} title={hfc.titulo || "Pré-visualização"} />
+            </div>
+          </div>
+        )}
         <Input label="Título" value={hfc.titulo} onChange={(v)=>setHfc({...hfc, titulo:v})} />
         <TextArea label="Texto" value={hfc.texto} onChange={(v)=>setHfc({...hfc, texto:v})} />
       </Section>
