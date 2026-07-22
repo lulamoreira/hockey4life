@@ -494,6 +494,8 @@ Deno.serve(async (req) => {
       const posts = await r.json();
       registrar("info", `Página ${paginaAtual}/${totalPaginas} recebida (${posts.length} posts), iniciando no índice ${idxInicio}`);
 
+      await gravarLog(admin, "lote", `Início do lote — página ${paginaAtual}/${totalPaginas}, ${posts.length} posts, idx=${idxInicio}`);
+
       // Processa em paralelo com concorrência 4, respeitando tempo limite
       let cursorIdx = idxInicio;
       const fila = posts.slice(idxInicio).map((p: any, i: number) => ({ p, idx: idxInicio + i }));
@@ -501,7 +503,11 @@ Deno.serve(async (req) => {
       let pararLote = false;
       await paralelo(fila, 4, async (item: any) => {
         if (pararLote) return;
-        if (Date.now() - t0 > TEMPO_MAX_MS) { pararLote = true; parcial = true; return; }
+        if (Date.now() - t0 > TEMPO_MAX_MS) {
+          pararLote = true; parcial = true;
+          gravarLog(admin, "info", `Tempo limite atingido no lote — retomará no próximo`);
+          return;
+        }
         const status = await processarPost(item.p);
         if (status === "IMPORTADA") importados++;
         else if (status === "ATUALIZADA") atualizados++;
@@ -510,7 +516,7 @@ Deno.serve(async (req) => {
         cursorIdx = Math.max(cursorIdx, item.idx + 1);
         ultimoWpId = item.p.id;
         idxFinal = cursorIdx;
-        registrar(status.toLowerCase(), `#${item.p.id} ${decodeEntities(item.p.title?.rendered ?? "")}`);
+        registrar(status.toLowerCase(), `#${item.p.id} ${decodeEntities(item.p.title?.rendered ?? "")}`, item.p.id);
         // atualiza cursor no banco a cada matéria concluída
         await heartbeat({
           indice_pagina: cursorIdx, ultimo_wp_id: ultimoWpId,
@@ -533,8 +539,14 @@ Deno.serve(async (req) => {
         materia_atual: null, imagem_atual: null,
         ult_importados: importados, ult_atualizados: atualizados,
         ult_pulados: pulados, ult_erros: erros.length, bytes_baixados: bytes,
+        tot_importados: (estadoAtual?.tot_importados ?? 0) + importados,
+        tot_atualizados: (estadoAtual?.tot_atualizados ?? 0) + atualizados,
+        tot_pulados: (estadoAtual?.tot_pulados ?? 0) + pulados,
+        tot_erros: (estadoAtual?.tot_erros ?? 0) + erros.length,
         batimento_em: new Date().toISOString(),
       }).eq("id", 1);
+
+      await gravarLog(admin, "lote", `Fim do lote pág ${paginaAtual}: ${importados} imp, ${atualizados} atu, ${pulados} pul, ${erros.length} erros${parcial ? " (parcial — tempo)" : ""}`);
 
       const resp = {
         acao: "lote",
