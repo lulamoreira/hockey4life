@@ -6,7 +6,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const WP = "https://hockey4life.com.br/wp-json/wp/v2";
 const BUCKET = "midia";
-const TEMPO_MAX_MS = 50_000;
+const TEMPO_MAX_MS = 45_000;
 const HEARTBEAT_STALE_MS = 3 * 60_000;
 const TAM_PADRAO = 25;
 
