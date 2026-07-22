@@ -47,9 +47,8 @@ function AdminShell() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 shrink-0 border-r border-border bg-card md:block">
         <div className="p-6">
-          <Link to="/" className="flex items-center gap-1">
-            <span className="h4l-title text-lg text-primary">HOCKEY</span>
-            <span className="h4l-title text-lg">4LIFE</span>
+          <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
+            <LogoImg height={28} />
           </Link>
           <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">Admin</div>
         </div>
