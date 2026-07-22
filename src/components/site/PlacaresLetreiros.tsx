@@ -303,3 +303,152 @@ export function ProximosJogosFaixa({
     </section>
   );
 }
+
+/* ------------------------------------------------------------------
+ * Faixa estilo "NÃO PERCA" — cinza translúcido + etiqueta triangular
+ * ------------------------------------------------------------------ */
+function FaixaNaoPerca({
+  rotulo,
+  items,
+  direcao,
+  velocidade,
+}: {
+  rotulo: string;
+  items: Item[];
+  direcao: "rtl" | "ltr";
+  velocidade: number;
+}) {
+  const [paused, setPaused] = useState(false);
+  const visible = usePageVisible();
+  const reduced = usePrefersReducedMotion();
+  const running = !paused && visible;
+  const dup = useMemo(() => [...items, ...items], [items]);
+
+  const keyId = rotulo.replace(/\s+/g, "-").toLowerCase();
+  const keyframes = `
+    @keyframes plnp-${keyId}-rtl { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+    @keyframes plnp-${keyId}-ltr { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
+  `;
+
+  return (
+    <div
+      className="flex h-[30px] items-stretch overflow-hidden text-white"
+      style={{ backgroundColor: "rgba(119,119,119,0.55)" }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div
+        className="relative flex shrink-0 items-center bg-[#1a1a1a] pl-3 pr-5 text-white"
+        style={{
+          clipPath:
+            "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)",
+        }}
+      >
+        <span
+          className="h4l-title uppercase leading-none tracking-wider"
+          style={{ fontSize: "14px", fontWeight: 700 }}
+        >
+          {rotulo}
+        </span>
+      </div>
+      <div className="relative min-w-0 flex-1 overflow-hidden" style={{ fontSize: "12px" }}>
+        {reduced ? (
+          <FadeItens items={items} intervaloMs={Math.max(3000, velocidade * 200)} running={running} />
+        ) : (
+          <>
+            <style>{keyframes}</style>
+            <div
+              className="flex h-full w-max items-center whitespace-nowrap will-change-transform"
+              style={{
+                animation: `plnp-${keyId}-${direcao} ${velocidade}s linear infinite`,
+                animationPlayState: running ? "running" : "paused",
+              }}
+            >
+              {dup.map((it, idx) => {
+                const clone = idx >= items.length;
+                return (
+                  <span
+                    key={`${it.key}-${idx}`}
+                    className="flex items-center"
+                    aria-hidden={clone ? "true" : undefined}
+                  >
+                    {it.href ? (
+                      <a
+                        href={it.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 no-underline hover:underline tabular-nums"
+                        tabIndex={clone ? -1 : 0}
+                      >
+                        {it.label}
+                      </a>
+                    ) : (
+                      <span className="px-4 tabular-nums">{it.label}</span>
+                    )}
+                    <span className="text-white/40">•</span>
+                  </span>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
+  if (!settings.ativo) return null;
+  if (!settings.mostrarUltimos && !settings.mostrarProximos) return null;
+
+  const q = useQuery({
+    queryKey: ["placares-nhl-np", settings.quantidadeUltimos, settings.quantidadeProximos],
+    queryFn: () =>
+      getNhlGames({
+        data: {
+          maxUltimos: settings.mostrarUltimos ? settings.quantidadeUltimos : 0,
+          maxProximos: settings.mostrarProximos ? settings.quantidadeProximos : 0,
+        },
+      }),
+    refetchInterval: (query) => {
+      const d = query.state.data;
+      const temAoVivo = d?.ultimos?.some((j) => j.estado === "LIVE");
+      return temAoVivo ? 60_000 : 5 * 60_000;
+    },
+    staleTime: 30_000,
+  });
+
+  if (q.isLoading) return null;
+
+  const ultimos: Item[] = (settings.mostrarUltimos ? (q.data?.ultimos ?? []) : []).map(toResultado);
+  const proximos: Item[] = (settings.mostrarProximos ? (q.data?.proximos ?? []) : []).map(toProximo);
+  const temU = ultimos.length > 0;
+  const temP = proximos.length > 0;
+  if (!temU && !temP) return null;
+
+  return (
+    <section aria-label="Placares NHL" className="mx-auto max-w-7xl px-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {temU && (
+          <FaixaNaoPerca
+            rotulo="ÚLTIMOS RESULTADOS"
+            items={ultimos}
+            direcao={settings.direcao}
+            velocidade={settings.velocidade}
+          />
+        )}
+        {temP && (
+          <FaixaNaoPerca
+            rotulo="PRÓXIMOS JOGOS"
+            items={proximos}
+            direcao={settings.direcao}
+            velocidade={settings.velocidade}
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
