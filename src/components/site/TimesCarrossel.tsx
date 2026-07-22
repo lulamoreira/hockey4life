@@ -89,7 +89,7 @@ export function TimesCarrossel({
               const itemStyle: React.CSSProperties = vertical
                 ? { height: `${s.alturaPx}px`, width: "100%" }
                 : {
-                    width: `calc(100cqw / ${visiveis} - 0.75rem)`,
+                    width: `max(72px, calc(100cqw / ${visiveis} - 0.75rem))`,
                     height: `${s.alturaPx}px`,
                   };
               return (

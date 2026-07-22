@@ -60,9 +60,9 @@ function BuscaPage() {
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             placeholder="O que você procura?"
-            className="flex-1 rounded-md border border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
+            className="min-w-0 flex-1 rounded-md border border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
           />
-          <button className="rounded-md bg-primary px-5 py-3 font-semibold uppercase tracking-wide text-primary-foreground hover:bg-primary/90">
+          <button className="shrink-0 rounded-md bg-primary px-4 py-3 text-sm font-semibold uppercase tracking-wide text-primary-foreground hover:bg-primary/90 sm:px-5 sm:text-base">
             Buscar
           </button>
         </form>
