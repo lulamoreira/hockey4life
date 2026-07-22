@@ -34,6 +34,7 @@ const postInput = z.object({
   destaque: z.boolean().default(false),
   nao_perca: z.boolean().default(false),
   publicado_em: z.string().nullable().optional(),
+  autor_id: z.string().uuid().nullable().optional(),
   temaIds: z.array(z.string().uuid()).default([]),
 });
 
