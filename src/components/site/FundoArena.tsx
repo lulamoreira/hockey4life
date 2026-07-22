@@ -87,9 +87,13 @@ export function FundoArena({ aparencia }: { aparencia: AparenciaConfig }) {
           }}
         />
       </picture>
-      {/* Camada de escurecimento */}
+      {/* Camada de escurecimento (escuro) OU véu claro (tema claro). */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 dark:hidden"
+        style={{ backgroundColor: `rgba(244,242,236,0.7)` }}
+      />
+      <div
+        className="absolute inset-0 hidden dark:block"
         style={{ backgroundColor: `rgba(13,13,15,${(aparencia.escurecimento / 100).toFixed(3)})` }}
       />
     </div>

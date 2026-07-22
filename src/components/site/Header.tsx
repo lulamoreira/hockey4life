@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
@@ -102,6 +103,7 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               <Search className="h-4 w-4" />
             </Link>
           )}
+          <ThemeToggle className="hidden md:inline-flex" />
           {m.fale_conosco && (
             <Link
               to="/fale-conosco"
@@ -115,6 +117,7 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               Fale conosco
             </Link>
           )}
+          <ThemeToggle className="md:hidden" />
           <button
             className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
             onClick={() => setOpen(true)}
