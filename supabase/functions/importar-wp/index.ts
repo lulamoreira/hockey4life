@@ -450,8 +450,13 @@ Deno.serve(async (req) => {
           em_execucao: false, materia_atual: null, imagem_atual: null,
           ult_importados: importados, ult_atualizados: atualizados,
           ult_pulados: pulados, ult_erros: erros.length, bytes_baixados: bytes,
+          tot_importados: (estadoAtual?.tot_importados ?? 0) + importados,
+          tot_atualizados: (estadoAtual?.tot_atualizados ?? 0) + atualizados,
+          tot_pulados: (estadoAtual?.tot_pulados ?? 0) + pulados,
+          tot_erros: (estadoAtual?.tot_erros ?? 0) + erros.length,
           batimento_em: new Date().toISOString(),
         }).eq("id", 1);
+        await gravarLog(admin, "lote", `Lote de IDs finalizado: ${importados} importadas, ${atualizados} atualizadas, ${pulados} puladas, ${erros.length} erros`);
         return jsonResp({
           acao, importados, atualizados, pulados, imagens_subidas: imagensSubidas,
           bytes_baixados: bytes, erros, log, parcial, duracao_ms: Date.now() - t0,
