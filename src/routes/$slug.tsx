@@ -1,12 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { getPostBySlug, getSiteConfig } from "@/lib/posts.functions";
+import { getPostBySlug, getSiteConfig, getRecentesFallback } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PostCard } from "@/components/site/PostCard";
 import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import DOMPurify from "isomorphic-dompurify";
+import { Search } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 const postQuery = (slug: string) =>
   queryOptions({
@@ -32,13 +35,13 @@ export const Route = createFileRoute("/$slug")({
     await context.queryClient.ensureQueryData(configQuery());
     return result;
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     if (!loaderData) {
       return { meta: [{ title: "Matéria não encontrada — Hockey4Life" }, { name: "robots", content: "noindex" }] };
     }
-    const { post } = loaderData;
+    const { post, autor } = loaderData;
     const desc = post.resumo ?? `${post.titulo} — Hockey4Life`;
-    const url = `/${post.slug}`;
+    const url = `https://hockey4life.com.br/${post.slug}`;
     const meta: Array<Record<string, string>> = [
       { title: `${post.titulo} — Hockey4Life` },
       { name: "description", content: desc.slice(0, 160) },
@@ -48,12 +51,56 @@ export const Route = createFileRoute("/$slug")({
       { property: "og:url", content: url },
       { name: "twitter:title", content: post.titulo },
       { name: "twitter:description", content: desc.slice(0, 200) },
+      { name: "twitter:card", content: "summary_large_image" },
     ];
     if (post.imagem_capa) {
       meta.push({ property: "og:image", content: post.imagem_capa });
       meta.push({ name: "twitter:image", content: post.imagem_capa });
     }
-    return { meta, links: [{ rel: "canonical", href: url }] };
+
+    // JSON-LD NewsArticle
+    const jsonLd: any = {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      headline: post.titulo,
+      description: desc.slice(0, 200),
+      datePublished: post.publicado_em,
+      dateModified: post.atualizado_em || post.publicado_em,
+      mainEntityOfPage: url,
+      url,
+    };
+    if (post.imagem_capa) jsonLd.image = [post.imagem_capa];
+    if (autor) {
+      jsonLd.author = {
+        "@type": "Person",
+        name: autor.nome,
+        url: `https://hockey4life.com.br/autor/${autor.slug}`,
+      };
+    }
+    jsonLd.publisher = {
+      "@type": "Organization",
+      name: "Hockey4Life",
+      url: "https://hockey4life.com.br",
+    };
+
+    // Breadcrumbs JSON-LD
+    const breadcrumbs = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Início", item: "https://hockey4life.com.br/" },
+        { "@type": "ListItem", position: 2, name: post.titulo, item: url },
+      ],
+    };
+
+    return {
+      meta,
+      links: [{ rel: "canonical", href: `/${params.slug}` }],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(jsonLd) },
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
+      ],
+    };
   },
   component: PostPage,
 });
@@ -63,106 +110,243 @@ function PostPage() {
   const { data } = useSuspenseQuery(postQuery(slug));
   const { data: siteData } = useSuspenseQuery(configQuery());
   if (!data) return null;
-  const { post, relacionados, anterior, proximo } = data;
+  const { post, autor, recentes, relacionados, anterior, proximo } = data;
   const dataObj = post.publicado_em ? new Date(post.publicado_em) : null;
   const ano = dataObj?.getFullYear();
   const mes = dataObj ? dataObj.getMonth() + 1 : null;
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
+  const videoUrl: string | undefined = siteData.config?.hockey_fights_cancer?.video_url;
 
   return (
     <SiteLayout config={siteData.config}>
-      <div className="mx-auto my-8 max-w-5xl rounded-lg bg-black/50 px-2 py-6 backdrop-blur-sm md:my-10 md:px-6 md:py-10">
-      <article className="mx-auto max-w-4xl px-4 py-4">
-        <div className="mb-4 flex flex-wrap gap-2">
-          {post.temas.map((t) => (
-            <Link
-              key={t.slug}
-              to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
-              params={{ slug: t.slug }}
-              className="rounded bg-primary/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-primary/25"
-            >
-              {t.nome}
-            </Link>
-          ))}
-        </div>
-        <h1 className="h4l-title text-4xl leading-tight text-foreground md:text-6xl">{post.titulo}</h1>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <span>{formatDataBR(post.publicado_em)}</span>
-          {ano && mes && (
-            <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
-              ver mês
-            </Link>
-          )}
-          <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-          <span>{tempoLeitura(post.conteudo)} min de leitura</span>
-        </div>
-
-        {post.imagem_capa && (
-          <figure className="mt-8">
-            <img src={post.imagem_capa} alt={post.titulo} className="w-full rounded-lg" />
-            {post.credito_imagem && (
-              <figcaption className="mt-2 text-xs italic text-muted-foreground">
-                Foto: {post.credito_imagem}
-              </figcaption>
-            )}
-          </figure>
-        )}
-
-        {post.resumo && (
-          <p className="mt-8 border-l-2 border-primary pl-4 text-lg font-medium text-foreground/90">
-            {post.resumo}
-          </p>
-        )}
-
-        {post.conteudo && (
-          <div
-            className="prose-h4l mt-8"
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(post.conteudo, {
-                ADD_TAGS: ["iframe"],
-                ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
-              }),
-            }}
-          />
-        )}
-
-        <div className="mt-10 border-t border-border pt-6">
-          <ShareButtons url={url} titulo={post.titulo} />
-        </div>
-      </article>
-
-      {(anterior || proximo) && (
-        <nav className="mx-auto grid max-w-4xl gap-3 px-4 pb-10 sm:grid-cols-2">
-          {anterior ? (
-            <Link to="/$slug" params={{ slug: anterior.slug }} className="group rounded-lg border border-border p-4 hover:border-primary">
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">← Anterior</div>
-              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{anterior.titulo}</div>
-            </Link>
-          ) : <div />}
-          {proximo ? (
-            <Link to="/$slug" params={{ slug: proximo.slug }} className="group rounded-lg border border-border p-4 text-right hover:border-primary">
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Próxima →</div>
-              <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{proximo.titulo}</div>
-            </Link>
-          ) : <div />}
+      <div className="mx-auto my-6 max-w-7xl rounded-lg bg-black/50 px-3 py-6 backdrop-blur-sm md:my-10 md:px-6 md:py-10">
+        {/* Breadcrumbs visíveis */}
+        <nav aria-label="Trilha" className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
+          <Link to="/" className="hover:text-primary">Início</Link>
+          <span className="mx-2 opacity-50">/</span>
+          <span className="text-foreground/80 line-clamp-1 inline-block max-w-[60vw] align-bottom">{post.titulo}</span>
         </nav>
-      )}
 
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+          {/* Coluna principal */}
+          <article className="min-w-0">
+            <div className="mb-3 flex flex-wrap gap-2">
+              {post.temas.map((t) => (
+                <Link
+                  key={t.slug}
+                  to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
+                  params={{ slug: t.slug }}
+                  className="rounded bg-primary/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-primary/25"
+                >
+                  {t.nome}
+                </Link>
+              ))}
+            </div>
 
-      {relacionados.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-12">
-          <h2 className="h4l-title mb-6 border-b border-border pb-2 text-2xl text-foreground md:text-3xl">
-            Leia também
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {relacionados.map((p) => (
-              <PostCard key={p.id} post={p} />
-            ))}
-          </div>
-        </section>
-      )}
+            <h1 className="h4l-title text-3xl leading-tight text-foreground md:text-5xl">{post.titulo}</h1>
+
+            {/* Linha do autor */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-border py-3 text-sm text-muted-foreground">
+              {autor && (
+                <Link to="/autor/$slug" params={{ slug: autor.slug }} className="flex items-center gap-2 hover:text-primary">
+                  {autor.foto_url ? (
+                    <img src={autor.foto_url} alt={autor.nome} className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                      {autor.nome.charAt(0)}
+                    </span>
+                  )}
+                  <span className="font-semibold text-foreground">{autor.nome}</span>
+                </Link>
+              )}
+              <span>{formatDataBR(post.publicado_em)}</span>
+              <span>{tempoLeitura(post.conteudo)} min de leitura</span>
+              {ano && mes && (
+                <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
+                  ver mês
+                </Link>
+              )}
+              <div className="ml-auto">
+                <ShareButtons url={url} titulo={post.titulo} />
+              </div>
+            </div>
+
+            {post.imagem_capa && (
+              <figure className="mt-6">
+                <img src={post.imagem_capa} alt={post.titulo} className="w-full rounded-lg" />
+                {post.credito_imagem && (
+                  <figcaption className="mt-2 text-xs italic text-muted-foreground">
+                    Foto: {post.credito_imagem}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+
+            {post.resumo && (
+              <p className="mt-6 border-l-2 border-primary pl-4 text-lg font-medium text-foreground/90">
+                {post.resumo}
+              </p>
+            )}
+
+            {post.conteudo && (
+              <div
+                className="prose-h4l mt-6"
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(post.conteudo, {
+                    ADD_TAGS: ["iframe"],
+                    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
+                  }),
+                }}
+              />
+            )}
+
+            <div className="mt-10 border-t border-border pt-6">
+              <ShareButtons url={url} titulo={post.titulo} />
+            </div>
+
+            {(anterior || proximo) && (
+              <nav className="mt-8 grid gap-3 sm:grid-cols-2">
+                {anterior ? (
+                  <Link to="/$slug" params={{ slug: anterior.slug }} className="group rounded-lg border border-border p-4 hover:border-primary">
+                    <div className="text-[11px] uppercase tracking-widest text-muted-foreground">← Anterior</div>
+                    <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{anterior.titulo}</div>
+                  </Link>
+                ) : <div />}
+                {proximo ? (
+                  <Link to="/$slug" params={{ slug: proximo.slug }} className="group rounded-lg border border-border p-4 text-right hover:border-primary">
+                    <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Próxima →</div>
+                    <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{proximo.titulo}</div>
+                  </Link>
+                ) : <div />}
+              </nav>
+            )}
+
+            {relacionados.length > 0 && (
+              <section className="mt-12">
+                <h2 className="h4l-title mb-6 border-b border-border pb-2 text-2xl text-foreground md:text-3xl">
+                  Leia também
+                </h2>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {relacionados.map((p) => (
+                    <PostCard key={p.id} post={p} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </article>
+
+          {/* Sidebar */}
+          <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            {autor && (
+              <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+                <div className="h4l-title mb-3 text-sm text-primary">Sobre o autor</div>
+                <div className="flex items-start gap-3">
+                  {autor.foto_url ? (
+                    <img src={autor.foto_url} alt={autor.nome} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/20 text-lg font-bold text-primary">
+                      {autor.nome.charAt(0)}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block font-bold text-foreground hover:text-primary">
+                      {autor.nome}
+                    </Link>
+                    {autor.bio && <p className="mt-1 text-xs text-muted-foreground line-clamp-4">{autor.bio}</p>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+              <div className="h4l-title mb-3 text-sm text-primary">Pesquise</div>
+              <SidebarSearch />
+            </div>
+
+            <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+              <div className="h4l-title mb-3 text-sm text-primary">Matérias recentes</div>
+              <ul className="space-y-3">
+                {recentes.map((r) => (
+                  <li key={r.id}>
+                    <Link to="/$slug" params={{ slug: r.slug }} className="flex gap-3 group">
+                      {r.imagem_capa && (
+                        <img src={r.imagem_capa} alt="" className="h-14 w-20 shrink-0 rounded object-cover" />
+                      )}
+                      <div className="min-w-0">
+                        <div className="line-clamp-2 text-xs font-semibold text-foreground group-hover:text-primary">
+                          {r.titulo}
+                        </div>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {formatDataBR(r.publicado_em)}
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {videoUrl && (
+              <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+                <div className="h4l-title mb-3 text-sm text-primary">Vídeo destaque</div>
+                <div className="aspect-video overflow-hidden rounded">
+                  <iframe
+                    src={toEmbedUrl(videoUrl)}
+                    title="Vídeo destaque"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="h-full w-full"
+                  />
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
       </div>
     </SiteLayout>
   );
+}
+
+function SidebarSearch() {
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!q.trim()) return;
+        navigate({ to: "/busca", search: { q: q.trim() } as any });
+      }}
+      className="flex items-center gap-2"
+    >
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Buscar…"
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+      />
+      <button type="submit" className="rounded-md bg-primary p-2 text-primary-foreground hover:opacity-90">
+        <Search className="h-4 w-4" />
+      </button>
+    </form>
+  );
+}
+
+function toEmbedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname === "youtu.be") {
+      return `https://www.youtube.com/embed${u.pathname}`;
+    }
+    if (u.hostname.includes("vimeo.com")) {
+      const id = u.pathname.replace(/\//g, "");
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+  } catch { /* noop */ }
+  return url;
 }

@@ -3,6 +3,7 @@ export const RESERVED_SLUGS = new Set<string>([
   "admin",
   "time",
   "assunto",
+  "autor",
   "busca",
   "arquivo",
   "temas",

@@ -20,6 +20,7 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TimeSlugRouteImport } from './routes/time.$slug'
+import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
 import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
 import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
@@ -30,6 +31,7 @@ import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
+import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
 import { Route as AdminPostsIndexRouteImport } from './routes/admin.posts.index'
 import { Route as AdminMateriasIndexRouteImport } from './routes/admin.materias.index'
 import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
@@ -94,6 +96,11 @@ const TimeSlugRoute = TimeSlugRouteImport.update({
   path: '/time/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutorSlugRoute = AutorSlugRouteImport.update({
+  id: '/autor/$slug',
+  path: '/autor/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
   id: '/assunto/$slug',
   path: '/assunto/$slug',
@@ -142,6 +149,11 @@ const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
 const AdminBackupRoute = AdminBackupRouteImport.update({
   id: '/backup',
   path: '/backup',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAutoresRoute = AdminAutoresRouteImport.update({
+  id: '/autores',
+  path: '/autores',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPostsIndexRoute = AdminPostsIndexRouteImport.update({
@@ -196,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
@@ -206,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
+  '/autor/$slug': typeof AutorSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/materias/$id': typeof AdminMateriasIdRoute
@@ -226,6 +240,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
@@ -234,6 +249,7 @@ export interface FileRoutesByTo {
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
+  '/autor/$slug': typeof AutorSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin': typeof AdminIndexRoute
   '/admin/materias/$id': typeof AdminMateriasIdRoute
@@ -256,6 +272,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
@@ -266,6 +283,7 @@ export interface FileRoutesById {
   '/admin_/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
+  '/autor/$slug': typeof AutorSlugRoute
   '/time/$slug': typeof TimeSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/materias/$id': typeof AdminMateriasIdRoute
@@ -289,6 +307,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
@@ -299,6 +318,7 @@ export interface FileRouteTypes {
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
+    | '/autor/$slug'
     | '/time/$slug'
     | '/admin/'
     | '/admin/materias/$id'
@@ -319,6 +339,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
@@ -327,6 +348,7 @@ export interface FileRouteTypes {
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
+    | '/autor/$slug'
     | '/time/$slug'
     | '/admin'
     | '/admin/materias/$id'
@@ -348,6 +370,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
@@ -358,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin_/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
+    | '/autor/$slug'
     | '/time/$slug'
     | '/admin/'
     | '/admin/materias/$id'
@@ -382,6 +406,7 @@ export interface RootRouteChildren {
   TemasRoute: typeof TemasRoute
   AdminCriarContaRoute: typeof AdminCriarContaRoute
   AssuntoSlugRoute: typeof AssuntoSlugRoute
+  AutorSlugRoute: typeof AutorSlugRoute
   TimeSlugRoute: typeof TimeSlugRoute
   ApiPublicHooksBackupAutomaticoRoute: typeof ApiPublicHooksBackupAutomaticoRoute
 }
@@ -465,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimeSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/autor/$slug': {
+      id: '/autor/$slug'
+      path: '/autor/$slug'
+      fullPath: '/autor/$slug'
+      preLoaderRoute: typeof AutorSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assunto/$slug': {
       id: '/assunto/$slug'
       path: '/assunto/$slug'
@@ -533,6 +565,13 @@ declare module '@tanstack/react-router' {
       path: '/backup'
       fullPath: '/admin/backup'
       preLoaderRoute: typeof AdminBackupRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/autores': {
+      id: '/admin/autores'
+      path: '/autores'
+      fullPath: '/admin/autores'
+      preLoaderRoute: typeof AdminAutoresRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/posts/': {
@@ -627,6 +666,7 @@ const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAutoresRoute: typeof AdminAutoresRoute
   AdminBackupRoute: typeof AdminBackupRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
@@ -638,6 +678,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAutoresRoute: AdminAutoresRoute,
   AdminBackupRoute: AdminBackupRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
@@ -685,6 +726,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemasRoute: TemasRoute,
   AdminCriarContaRoute: AdminCriarContaRoute,
   AssuntoSlugRoute: AssuntoSlugRoute,
+  AutorSlugRoute: AutorSlugRoute,
   TimeSlugRoute: TimeSlugRoute,
   ApiPublicHooksBackupAutomaticoRoute: ApiPublicHooksBackupAutomaticoRoute,
 }

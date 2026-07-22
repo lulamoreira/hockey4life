@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { getAdminPost, listTemas, savePost, criarUploadUrl } from "@/lib/admin.functions";
+import { getAdminPost, listTemas, listAutores, savePost, criarUploadUrl } from "@/lib/admin.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -20,6 +20,7 @@ export function PostEditor({ id }: { id?: string }) {
     enabled: !isNew,
   });
   const temasQ = useQuery({ queryKey: ["admin-temas"], queryFn: () => listTemas() });
+  const autoresQ = useQuery({ queryKey: ["admin-autores"], queryFn: () => listAutores() });
 
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
@@ -31,6 +32,7 @@ export function PostEditor({ id }: { id?: string }) {
   const [destaque, setDestaque] = useState(false);
   const [naoPerca, setNaoPerca] = useState(false);
   const [publicadoEm, setPublicadoEm] = useState("");
+  const [autorId, setAutorId] = useState<string>("");
   const [selTemas, setSelTemas] = useState<Set<string>>(new Set());
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
@@ -45,6 +47,7 @@ export function PostEditor({ id }: { id?: string }) {
       setImagemCapa(p.imagem_capa ?? ""); setCreditoImagem(p.credito_imagem ?? "");
       setStatus(p.status); setDestaque(p.destaque); setNaoPerca(p.nao_perca);
       setPublicadoEm(p.publicado_em ? new Date(p.publicado_em).toISOString().slice(0, 16) : "");
+      setAutorId((p as any).autor_id ?? "");
       setSelTemas(new Set(postQ.data.temaIds));
     }
   }, [isNew, postQ.data]);
@@ -103,6 +106,7 @@ export function PostEditor({ id }: { id?: string }) {
           imagem_capa: imagemCapa || null, credito_imagem: creditoImagem || null,
           status: finalStatus, destaque, nao_perca: naoPerca,
           publicado_em: publicadoEm ? new Date(publicadoEm).toISOString() : null,
+          autor_id: autorId || null,
           temaIds: Array.from(selTemas),
         },
       });
@@ -205,6 +209,21 @@ export function PostEditor({ id }: { id?: string }) {
             <input value={creditoImagem} onChange={(e)=>setCreditoImagem(e.target.value)} placeholder="Crédito da imagem"
               className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground" />
           </div>
+
+          <div className="rounded-lg border border-border bg-card p-4">
+            <div className="h4l-title mb-3 text-sm">Autor</div>
+            <select value={autorId} onChange={(e)=>setAutorId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground">
+              <option value="">— Sem autor —</option>
+              {(autoresQ.data ?? []).map((a: any) => (
+                <option key={a.id} value={a.id}>{a.nome}</option>
+              ))}
+            </select>
+            <Link to="/admin/autores" className="mt-2 inline-block text-[11px] text-primary hover:underline">
+              Gerenciar autores →
+            </Link>
+          </div>
+
 
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="h4l-title mb-3 text-sm">Temas</div>

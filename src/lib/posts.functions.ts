@@ -256,9 +256,19 @@ export type PostListItem = {
   temas: Array<{ nome: string; slug: string; tipo: "time" | "assunto" }>;
 };
 
+export type AutorResumo = {
+  id: string;
+  nome: string;
+  slug: string;
+  bio: string | null;
+  foto_url: string | null;
+  links: Record<string, string> | null;
+};
+
 export type PostFull = PostListItem & {
   conteudo: string | null;
   atualizado_em: string;
+  autor_id: string | null;
 };
 
 const POST_COLS = "id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
@@ -436,7 +446,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
 
     const { data: post, error } = await sb
       .from("posts")
-      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,publicado_em,atualizado_em,destaque,nao_perca,status")
+      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,publicado_em,atualizado_em,destaque,nao_perca,status,autor_id")
       .eq("slug", data.slug)
       .eq("status", "publicado")
       .lte("publicado_em", now)
@@ -444,6 +454,29 @@ export const getPostBySlug = createServerFn({ method: "GET" })
     if (error) throw error;
     if (!post) return null;
     const [withTemas] = await attachTemas(sb, [post]);
+
+    // Autor (se houver)
+    let autor: AutorResumo | null = null;
+    if ((post as any).autor_id) {
+      const { data: aut } = await sb
+        .from("autores")
+        .select("id,nome,slug,bio,foto_url,links")
+        .eq("id", (post as any).autor_id)
+        .maybeSingle();
+      if (aut) autor = aut as AutorResumo;
+    }
+
+    // Matérias recentes (sidebar)
+    const { data: recentesRaw } = await sb
+      .from("posts")
+      .select("id,titulo,slug,publicado_em,imagem_capa")
+      .eq("status", "publicado")
+      .lte("publicado_em", now)
+      .neq("id", post.id)
+      .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(6);
+    const recentes = (recentesRaw ?? []) as Array<{ id: string; titulo: string; slug: string; publicado_em: string | null; imagem_capa: string | null }>;
 
     // Relacionados: por qtde de temas em comum, empate por data desc
     let relacionados: PostListItem[] = [];
@@ -515,9 +548,53 @@ export const getPostBySlug = createServerFn({ method: "GET" })
 
     return {
       post: withTemas as PostFull,
+      autor,
+      recentes,
       relacionados,
       anterior: prevRow ?? null,
       proximo: nextRow ?? null,
+    };
+  });
+
+// Página pública do autor
+export const getAutorPublico = createServerFn({ method: "GET" })
+  .inputValidator((v) =>
+    z.object({
+      slug: z.string().min(1),
+      page: z.number().int().min(1).default(1),
+      perPage: z.number().int().min(1).max(50).default(12),
+    }).parse(v),
+  )
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    const now = new Date().toISOString();
+    const { data: autor, error } = await sb
+      .from("autores")
+      .select("id,nome,slug,bio,foto_url,links")
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (error) throw error;
+    if (!autor) return null;
+
+    const from = (data.page - 1) * data.perPage;
+    const to = from + data.perPage - 1;
+    const { data: posts, count } = await sb
+      .from("posts")
+      .select(POST_COLS, { count: "exact" })
+      .eq("autor_id", autor.id)
+      .eq("status", "publicado")
+      .lte("publicado_em", now)
+      .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to);
+    const items = await attachTemas(sb, posts ?? []);
+    return {
+      autor: autor as AutorResumo,
+      items: items as PostListItem[],
+      total: count ?? 0,
+      page: data.page,
+      perPage: data.perPage,
+      totalPages: Math.max(1, Math.ceil((count ?? 0) / data.perPage)),
     };
   });
 
