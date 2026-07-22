@@ -1,60 +1,97 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
+const MAX_TIMES = 5;
+const MAX_ASSUNTOS = 3;
+
 export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
   const [open, setOpen] = useState(false);
-  const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu);
-  const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu).slice(0, MAX_TIMES);
+  const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu).slice(0, MAX_ASSUNTOS);
+  const carregando = temasMenu.length === 0;
+
+  const isTemaAtivo = (tipo: "time" | "assunto", slug: string) =>
+    pathname === `/${tipo}/${slug}`;
+  const isArquivoAtivo = pathname === "/arquivo" || pathname.startsWith("/arquivo/");
+
+  const linkBase =
+    "text-sm font-semibold uppercase tracking-wide transition-colors hover:text-primary";
+  const linkInativo = "text-muted-foreground";
+  const linkAtivo = "text-primary";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
         <Logo />
 
-        <nav className="hidden items-center gap-6 md:flex">
-          {times.slice(0, 5).map((t) => (
-            <Link
-              key={t.slug}
-              to="/time/$slug"
-              params={{ slug: t.slug }}
-              className="text-sm font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-primary"
-            >
-              {t.nome}
-            </Link>
-          ))}
-          {assuntos.slice(0, 3).map((t) => (
-            <Link
-              key={t.slug}
-              to="/assunto/$slug"
-              params={{ slug: t.slug }}
-              className="text-sm font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-primary"
-            >
-              {t.nome}
-            </Link>
-          ))}
-          <Link
-            to="/arquivo"
-            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-primary"
-          >
-            Arquivo
-          </Link>
+        {/* min-h reserva espaço enquanto os temas carregam para não pular */}
+        <nav className="hidden min-h-[24px] items-center gap-6 md:flex" aria-label="Menu principal">
+          {carregando ? (
+            <SkeletonMenu />
+          ) : (
+            <>
+              {times.map((t) => {
+                const ativo = isTemaAtivo("time", t.slug);
+                return (
+                  <Link
+                    key={t.slug}
+                    to="/time/$slug"
+                    params={{ slug: t.slug }}
+                    aria-current={ativo ? "page" : undefined}
+                    className={`${linkBase} ${ativo ? linkAtivo : linkInativo}`}
+                  >
+                    {t.nome}
+                  </Link>
+                );
+              })}
+              {assuntos.map((t) => {
+                const ativo = isTemaAtivo("assunto", t.slug);
+                return (
+                  <Link
+                    key={t.slug}
+                    to="/assunto/$slug"
+                    params={{ slug: t.slug }}
+                    aria-current={ativo ? "page" : undefined}
+                    className={`${linkBase} ${ativo ? linkAtivo : linkInativo}`}
+                  >
+                    {t.nome}
+                  </Link>
+                );
+              })}
+              <Link
+                to="/arquivo"
+                aria-current={isArquivoAtivo ? "page" : undefined}
+                className={`${linkBase} ${isArquivoAtivo ? linkAtivo : linkInativo}`}
+              >
+                Arquivo
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
           <Link
             to="/busca"
-            className="hidden rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
+            className={`hidden rounded-md p-2 transition-colors hover:bg-muted hover:text-foreground md:inline-flex ${pathname === "/busca" ? "text-primary" : "text-muted-foreground"}`}
             aria-label="Buscar"
+            aria-current={pathname === "/busca" ? "page" : undefined}
           >
             <Search className="h-4 w-4" />
           </Link>
           <Link
             to="/fale-conosco"
-            className="hidden rounded-md border border-primary/50 bg-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary hover:text-primary-foreground md:inline-flex"
+            aria-current={pathname === "/fale-conosco" ? "page" : undefined}
+            className={`hidden rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${
+              pathname === "/fale-conosco"
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
+            }`}
           >
             Fale conosco
           </Link>
@@ -79,37 +116,39 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
               </button>
             </div>
             <nav className="mt-6 flex flex-col gap-1">
-              <Link to="/" onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted">
-                Início
-              </Link>
-              <Link to="/arquivo" onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted">
-                Arquivo
-              </Link>
-              <Link to="/busca" onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted">
-                Buscar
-              </Link>
-              <Link to="/fale-conosco" onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted">
-                Fale conosco
-              </Link>
+              <MobileLink to="/" pathname={pathname} onClick={() => setOpen(false)}>Início</MobileLink>
+              <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>
+              <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>
+              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
 
               {times.length > 0 && (
                 <div className="mt-4">
                   <div className="px-3 text-xs font-semibold uppercase text-muted-foreground">Times</div>
-                  {times.map((t) => (
-                    <Link key={t.slug} to="/time/$slug" params={{ slug: t.slug }} onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm hover:bg-muted">
-                      {t.nome}
-                    </Link>
-                  ))}
+                  {times.map((t) => {
+                    const ativo = isTemaAtivo("time", t.slug);
+                    return (
+                      <Link key={t.slug} to="/time/$slug" params={{ slug: t.slug }} onClick={() => setOpen(false)}
+                        aria-current={ativo ? "page" : undefined}
+                        className={`block rounded px-3 py-2 text-sm hover:bg-muted ${ativo ? "text-primary" : ""}`}>
+                        {t.nome}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
               {assuntos.length > 0 && (
                 <div className="mt-4">
                   <div className="px-3 text-xs font-semibold uppercase text-muted-foreground">Assuntos</div>
-                  {assuntos.map((t) => (
-                    <Link key={t.slug} to="/assunto/$slug" params={{ slug: t.slug }} onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm hover:bg-muted">
-                      {t.nome}
-                    </Link>
-                  ))}
+                  {assuntos.map((t) => {
+                    const ativo = isTemaAtivo("assunto", t.slug);
+                    return (
+                      <Link key={t.slug} to="/assunto/$slug" params={{ slug: t.slug }} onClick={() => setOpen(false)}
+                        aria-current={ativo ? "page" : undefined}
+                        className={`block rounded px-3 py-2 text-sm hover:bg-muted ${ativo ? "text-primary" : ""}`}>
+                        {t.nome}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </nav>
@@ -117,5 +156,29 @@ export function Header({ temasMenu }: { temasMenu: TemaMenu[] }) {
         </div>
       )}
     </header>
+  );
+}
+
+function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" | "/busca" | "/fale-conosco"; pathname: string; onClick: () => void; children: React.ReactNode }) {
+  const ativo = pathname === to || (to === "/arquivo" && pathname.startsWith("/arquivo/"));
+  return (
+    <Link to={to} onClick={onClick}
+      aria-current={ativo ? "page" : undefined}
+      className={`rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted ${ativo ? "text-primary" : ""}`}>
+      {children}
+    </Link>
+  );
+}
+
+function SkeletonMenu() {
+  // 4 placeholders com largura semelhante aos rótulos reais.
+  return (
+    <>
+      {[64, 72, 80, 64].map((w, i) => (
+        <span key={i} aria-hidden="true"
+          className="inline-block h-4 rounded bg-muted/40"
+          style={{ width: `${w}px` }} />
+      ))}
+    </>
   );
 }
