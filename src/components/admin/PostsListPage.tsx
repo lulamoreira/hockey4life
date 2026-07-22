@@ -11,13 +11,14 @@ export function PostsListPage() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [ordem, setOrdem] = useState<"desc" | "asc">("desc");
+  const [semChapeu, setSemChapeu] = useState(false);
   const del = useServerFn(deletePost);
   const unpin = useServerFn(desafixarPost);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-posts", status, q, page, ordem],
-    queryFn: () => listAdminPosts({ data: { status, q, page, ordem } }),
+    queryKey: ["admin-posts", status, q, page, ordem, semChapeu],
+    queryFn: () => listAdminPosts({ data: { status, q, page, ordem, sem_chapeu: semChapeu } }),
   });
   const fixadoQ = useQuery({ queryKey: ["admin-fixado"], queryFn: () => getPostFixado() });
 
@@ -84,6 +85,14 @@ export function PostsListPage() {
             {s === "todos" ? "Todos" : s}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => { setSemChapeu((v) => !v); setPage(1); }}
+          className={`rounded border px-3 py-1.5 text-xs uppercase tracking-wide ${semChapeu?"border-primary bg-primary/10 text-primary":"border-border text-muted-foreground"}`}
+          title="Mostrar só matérias sem chapéu"
+        >
+          Sem chapéu
+        </button>
         <input
           value={q} onChange={(e)=>{setQ(e.target.value); setPage(1);}}
           placeholder="Buscar título…"
@@ -116,6 +125,11 @@ export function PostsListPage() {
             {data?.items.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
                 <td className="px-4 py-3">
+                  {(p as any).chapeu && (
+                    <div className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                      {(p as any).chapeu}
+                    </div>
+                  )}
                   {p.status === "publicado" ? (
                     <a
                       href={`/${p.slug}`}

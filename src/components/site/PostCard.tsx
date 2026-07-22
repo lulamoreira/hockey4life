@@ -4,6 +4,7 @@ import type { PostListItem } from "@/lib/posts.functions";
 
 export function PostCard({ post }: { post: PostListItem }) {
   const tema = post.temas?.[0];
+  const chapeu = post.chapeu?.trim();
   return (
     <Link
       to="/$slug"
@@ -23,11 +24,15 @@ export function PostCard({ post }: { post: PostListItem }) {
             <span className="h4l-title text-4xl text-muted-foreground/40">H4L</span>
           </div>
         )}
-        {tema && (
+        {chapeu ? (
+          <span className="absolute left-3 top-3 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+            {chapeu}
+          </span>
+        ) : tema ? (
           <span className="absolute left-3 top-3 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
             {tema.nome}
           </span>
-        )}
+        ) : null}
       </div>
       <div className="p-4">
         <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -46,10 +51,15 @@ export function PostCard({ post }: { post: PostListItem }) {
 
 export function PostCardSmall({ post }: { post: PostListItem }) {
   const tema = post.temas?.[0];
+  const chapeu = post.chapeu?.trim();
   return (
     <Link to="/$slug" params={{ slug: post.slug }} className="group block border-b border-border py-3 last:border-b-0">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-        {tema && <span className="rounded bg-primary/20 px-1.5 py-0.5 text-primary">{tema.nome}</span>}
+        {chapeu ? (
+          <span className="rounded bg-primary/20 px-1.5 py-0.5 font-bold text-primary">{chapeu}</span>
+        ) : tema ? (
+          <span className="rounded bg-primary/20 px-1.5 py-0.5 text-primary">{tema.nome}</span>
+        ) : null}
         <span>{formatDataBR(post.publicado_em)}</span>
       </div>
       <h4 className="mt-1 h4l-title text-lg leading-tight text-foreground transition-colors group-hover:text-primary">
