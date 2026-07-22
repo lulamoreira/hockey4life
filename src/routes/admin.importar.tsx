@@ -285,13 +285,21 @@ function ImportarPage() {
     setRodando(true);
     stopRef.current = false;
     try {
-      const CHUNK = 25;
+      const CHUNK = 5;
       let restantes = [...conferir.faltando];
+      let voltas = 0;
       while (restantes.length && !stopRef.current) {
         const parte = restantes.slice(0, CHUNK);
-        const r = await chamar({ acao: "importar_ids", ids: parte, forcar: true });
+        const r: any = await chamar({ acao: "importar_ids", ids: parte, forcar: true });
         setUltima(r);
-        restantes = restantes.slice(parte.length);
+        // Remove só o que foi de fato tocado (processado ou marcado como erro).
+        const tocados: number[] = [
+          ...(r?.pendentes ? parte.filter((id: number) => !r.pendentes.includes(id)) : parte),
+        ];
+        restantes = restantes.filter((id) => !tocados.includes(id));
+        // Se o servidor devolveu pendentes idênticos por 3 voltas seguidas, aborta pra não travar.
+        voltas++;
+        if (voltas > conferir.faltando.length + 10) break;
         await invalidarTudo();
       }
       await rodarConferencia();
