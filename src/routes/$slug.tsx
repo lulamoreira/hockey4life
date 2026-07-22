@@ -166,7 +166,13 @@ function PostPage() {
                 </Link>
               )}
               <div className="ml-auto">
-                <ShareButtons url={url} titulo={post.titulo} />
+                <ShareButtons
+                  url={url}
+                  titulo={post.titulo}
+                  resumo={post.resumo}
+                  chapeu={post.chapeu}
+                  imagemCapa={post.imagem_capa}
+                />
               </div>
             </div>
 
@@ -201,7 +207,13 @@ function PostPage() {
             )}
 
             <div className="mt-10 border-t border-border pt-6">
-              <ShareButtons url={url} titulo={post.titulo} />
+              <ShareButtons
+                url={url}
+                titulo={post.titulo}
+                resumo={post.resumo}
+                chapeu={post.chapeu}
+                imagemCapa={post.imagem_capa}
+              />
             </div>
 
             {autor && (
