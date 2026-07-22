@@ -127,11 +127,10 @@ function LoginScreen() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1">
-            <span className="h4l-title text-2xl text-primary">HOCKEY</span>
-            <span className="h4l-title text-2xl">4LIFE</span>
+          <div className="flex items-center justify-center">
+            <LogoImg height={40} />
           </div>
-          <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Painel administrativo</p>
+          <p className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">Painel administrativo</p>
         </div>
         <form onSubmit={login} className="mt-6 space-y-3">
           <input
