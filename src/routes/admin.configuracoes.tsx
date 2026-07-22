@@ -244,7 +244,13 @@ function HomeTab() {
         <TimesEditor value={s.times} onChange={(t) => setS({ ...s, times: t })} />
       </Section>
 
-
+      {/* Placares NHL — dois letreiros compactos lado a lado */}
+      <Section
+        title="Placares (letreiros de resultados e próximos jogos)"
+        onReset={() => setS({ ...s, placares: PLACARES_PADRAO })}
+      >
+        <PlacaresEditor value={s.placares} onChange={(p) => setS({ ...s, placares: p })} />
+      </Section>
 
 
       {msg && (
