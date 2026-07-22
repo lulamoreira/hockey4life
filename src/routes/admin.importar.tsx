@@ -427,7 +427,19 @@ function ImportarPage() {
         <MiniCard cor="text-destructive" label="Erros" value={ultE} />
       </div>
 
+      {/* Totais acumulados desta importação (persistem entre lotes) */}
+      <div className="rounded-md border border-border bg-card p-3">
+        <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Totais acumulados</p>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <MiniCard cor="text-emerald-500" label="Importadas" value={(estado.data?.tot_importados ?? 0) as number} />
+          <MiniCard cor="text-sky-500" label="Atualizadas" value={(estado.data?.tot_atualizados ?? 0) as number} />
+          <MiniCard cor="text-muted-foreground" label="Puladas" value={(estado.data?.tot_pulados ?? 0) as number} />
+          <MiniCard cor="text-destructive" label="Erros" value={(estado.data?.tot_erros ?? 0) as number} />
+        </div>
+      </div>
+
       <p className="text-xs text-muted-foreground">
+
         <strong>IMPORTADA:</strong> veio agora, pela primeira vez. ·{" "}
         <strong>ATUALIZADA:</strong> já existia e foi editada no WordPress depois. ·{" "}
         <strong>PULADA:</strong> já existia e nada mudou na origem — é o que acelera a importação. ·{" "}
