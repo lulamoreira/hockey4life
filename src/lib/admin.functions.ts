@@ -591,16 +591,25 @@ const autorInput = z.object({
   nome: z.string().min(1).max(160),
   slug: z.string().min(1).max(160),
   bio: z.string().max(4000).optional().nullable(),
+  bio_curta: z.string().max(500).optional().nullable(),
+  bio_media: z.string().max(1500).optional().nullable(),
+  bio_longa: z.string().max(8000).optional().nullable(),
+  linkedin_url: z.string().url().optional().nullable().or(z.literal("")),
   foto_url: z.string().url().optional().nullable().or(z.literal("")),
   links: z.record(z.string(), z.string()).default({}),
+  outros_links: z.record(z.string(), z.string()).default({}),
+  fotos: z.array(z.string().url()).default([]),
+  linha_do_tempo: z.array(z.object({ ano: z.string().max(20), texto: z.string().max(500) })).default([]),
 });
+
+const AUTOR_COLS = "id,nome,slug,bio,bio_curta,bio_media,bio_longa,linkedin_url,foto_url,links,outros_links,fotos,linha_do_tempo,criado_em";
 
 export const listAutores = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("autores")
-      .select("id,nome,slug,bio,foto_url,links,criado_em")
+      .select(AUTOR_COLS)
       .order("nome", { ascending: true });
     if (error) throw error;
     return data ?? [];
@@ -612,7 +621,7 @@ export const getAutor = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: aut, error } = await context.supabase
       .from("autores")
-      .select("id,nome,slug,bio,foto_url,links,criado_em")
+      .select(AUTOR_COLS)
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw error;
@@ -627,8 +636,15 @@ export const saveAutor = createServerFn({ method: "POST" })
       nome: data.nome,
       slug: data.slug,
       bio: data.bio || null,
+      bio_curta: data.bio_curta || null,
+      bio_media: data.bio_media || null,
+      bio_longa: data.bio_longa || null,
+      linkedin_url: data.linkedin_url || null,
       foto_url: data.foto_url || null,
       links: data.links ?? {},
+      outros_links: data.outros_links ?? {},
+      fotos: data.fotos ?? [],
+      linha_do_tempo: data.linha_do_tempo ?? [],
     };
     if (data.id) {
       const { error } = await context.supabase.from("autores").update(payload).eq("id", data.id);
