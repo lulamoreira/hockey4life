@@ -166,7 +166,13 @@ function PostPage() {
                 </Link>
               )}
               <div className="ml-auto">
-                <ShareButtons url={url} titulo={post.titulo} />
+                <ShareButtons
+                  url={url}
+                  titulo={post.titulo}
+                  resumo={post.resumo}
+                  chapeu={post.chapeu}
+                  imagemCapa={post.imagem_capa}
+                />
               </div>
             </div>
 
