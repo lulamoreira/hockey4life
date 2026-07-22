@@ -416,6 +416,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
     letreiro,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
     times: settings.times,
+    placares: settings.placares,
     config: configMap,
 
   };
