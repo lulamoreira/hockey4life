@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      autores: {
+        Row: {
+          atualizado_em: string
+          bio: string | null
+          criado_em: string
+          foto_url: string | null
+          id: string
+          links: Json
+          nome: string
+          slug: string
+        }
+        Insert: {
+          atualizado_em?: string
+          bio?: string | null
+          criado_em?: string
+          foto_url?: string | null
+          id?: string
+          links?: Json
+          nome: string
+          slug: string
+        }
+        Update: {
+          atualizado_em?: string
+          bio?: string | null
+          criado_em?: string
+          foto_url?: string | null
+          id?: string
+          links?: Json
+          nome?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       configuracoes: {
         Row: {
           atualizado_em: string
