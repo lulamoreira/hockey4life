@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Facebook, Instagram, Rss } from "lucide-react";
 import type { LetreiroSettings } from "@/lib/posts.functions";
 
