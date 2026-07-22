@@ -105,7 +105,7 @@ function ArquivoPage() {
   const clearAll = () => navigate({ to: "/arquivo", search: { q: "", temas: [], ano: null, mes: null, ordem: "desc", page: 1 } as any });
 
   return (
-    <SiteLayout config={site.config} temasMenu={site.temasMenu as any}>
+    <SiteLayout config={site.config}>
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex items-end justify-between gap-4">
           <div>

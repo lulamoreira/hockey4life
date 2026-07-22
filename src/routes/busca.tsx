@@ -46,7 +46,7 @@ function BuscaPage() {
   const setOrdem = (o: "rel" | "desc" | "asc") => navigate({ to: "/busca", search: { q, page: 1, ordem: o } });
 
   return (
-    <SiteLayout config={site.config} temasMenu={site.temasMenu as any}>
+    <SiteLayout config={site.config}>
       <div className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="h4l-title text-4xl text-foreground md:text-5xl">Buscar</h1>
         <form

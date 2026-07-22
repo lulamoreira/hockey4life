@@ -46,7 +46,7 @@ function TemaTimePage() {
   const { data: site } = useSuspenseQuery(cfg());
 
   return (
-    <SiteLayout config={site.config} temasMenu={site.temasMenu as any}>
+    <SiteLayout config={site.config}>
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="text-xs font-bold uppercase tracking-widest text-primary">TIME</div>
         <h1 className="mt-1 h4l-title text-4xl text-foreground md:text-6xl">{data.tema?.nome}</h1>
