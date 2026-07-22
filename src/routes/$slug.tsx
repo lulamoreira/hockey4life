@@ -255,13 +255,17 @@ function PostPage() {
 
             {relacionados.length > 0 && (
               <section className="mt-12">
-                <h2 className="h4l-title mb-6 border-b border-border pb-2 text-2xl text-foreground md:text-3xl">
-                  Leia também
-                </h2>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {relacionados.map((p) => (
-                    <PostCard key={p.id} post={p} />
-                  ))}
+                <div className="overflow-hidden rounded-lg border border-border bg-card/60">
+                  <div className="bg-black/70 py-2 text-center">
+                    <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
+                      Leia também
+                    </span>
+                  </div>
+                  <div>
+                    {relacionados.map((p) => (
+                      <PostCardSmall key={p.id} post={p} />
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
