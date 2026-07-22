@@ -59,9 +59,13 @@ export function PostCardSmall({ post }: { post: PostListItem }) {
         month: "long",
         year: "numeric",
         timeZone: "America/Sao_Paulo",
-      }).format(new Date(post.publicado_em));
+      })
+        .format(new Date(post.publicado_em))
+        .replace(" de ", " DE ")
+        .replace(" de ", " DE ")
+        .toUpperCase();
     } catch {
-      return formatDataBR(post.publicado_em);
+      return formatDataBR(post.publicado_em).toUpperCase();
     }
   })();
 
@@ -69,7 +73,7 @@ export function PostCardSmall({ post }: { post: PostListItem }) {
     <Link
       to="/$slug"
       params={{ slug: post.slug }}
-      className="group flex gap-3 border-b border-border/60 p-3 transition-colors last:border-b-0 hover:bg-white/5"
+      className="group flex gap-3 border-b border-border/60 p-2.5 transition-colors last:border-b-0 hover:bg-white/5"
     >
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-muted">
         {post.imagem_capa ? (
@@ -87,20 +91,24 @@ export function PostCardSmall({ post }: { post: PostListItem }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+        <div className="font-list-cond flex flex-wrap items-center gap-1.5 text-[11px] font-bold uppercase leading-tight text-muted-foreground">
           <span>{dataExtenso}</span>
           {tema && (
             <>
               <span aria-hidden="true" className="text-muted-foreground/50">|</span>
-              <span className="font-semibold text-primary">{tema.nome}</span>
+              <span className="text-primary">{tema.nome.toUpperCase()}</span>
             </>
           )}
         </div>
-        <h4 className="mt-1 line-clamp-3 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h4
+          className="font-list mt-1 line-clamp-3 text-foreground transition-colors group-hover:text-primary"
+          style={{ fontSize: "12px", fontWeight: 700, lineHeight: 1.25 }}
+        >
           {post.titulo}
         </h4>
       </div>
     </Link>
   );
 }
+
 

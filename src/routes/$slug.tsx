@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getPostBySlug, getSiteConfig, getRecentesFallback } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PostCard } from "@/components/site/PostCard";
+import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
@@ -255,13 +255,17 @@ function PostPage() {
 
             {relacionados.length > 0 && (
               <section className="mt-12">
-                <h2 className="h4l-title mb-6 border-b border-border pb-2 text-2xl text-foreground md:text-3xl">
-                  Leia também
-                </h2>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {relacionados.map((p) => (
-                    <PostCard key={p.id} post={p} />
-                  ))}
+                <div className="overflow-hidden rounded-lg border border-border bg-card/60">
+                  <div className="bg-black/70 py-2 text-center">
+                    <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
+                      Leia também
+                    </span>
+                  </div>
+                  <div>
+                    {relacionados.map((p) => (
+                      <PostCardSmall key={p.id} post={p} />
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
@@ -295,28 +299,19 @@ function PostPage() {
               <SidebarSearch />
             </div>
 
-            <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
-              <div className="h4l-title mb-3 text-sm text-primary">Matérias recentes</div>
-              <ul className="space-y-3">
+            <div className="overflow-hidden rounded-lg border border-border bg-card/60 backdrop-blur-sm">
+              <div className="bg-black/70 py-2 text-center">
+                <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
+                  Matérias recentes
+                </span>
+              </div>
+              <div>
                 {recentes.map((r) => (
-                  <li key={r.id}>
-                    <Link to="/$slug" params={{ slug: r.slug }} className="flex gap-3 group">
-                      {r.imagem_capa && (
-                        <img src={r.imagem_capa} alt="" className="h-14 w-20 shrink-0 rounded object-cover" />
-                      )}
-                      <div className="min-w-0">
-                        <div className="line-clamp-2 text-xs font-semibold text-foreground group-hover:text-primary">
-                          {r.titulo}
-                        </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {formatDataBR(r.publicado_em)}
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
+                  <PostCardSmall key={r.id} post={r as any} />
                 ))}
-              </ul>
+              </div>
             </div>
+
 
             {videoUrl && (
               <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
