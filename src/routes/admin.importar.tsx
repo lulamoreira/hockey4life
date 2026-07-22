@@ -627,27 +627,61 @@ function ImportarPage() {
         <h2 className="h4l-title flex items-center gap-2 text-xl text-foreground">
           <AlertTriangle className="h-5 w-5 text-destructive" /> Erros ({erros.data?.total ?? 0})
         </h2>
-        <div className="mt-3 max-h-96 overflow-y-auto rounded-md border border-border bg-card">
-          {erros.data?.itens.length ? (
-            <ul className="divide-y divide-border">
-              {erros.data.itens.map((e) => (
-                <li key={e.wp_id} className="p-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <a href={`https://hockey4life.com.br/?p=${e.wp_id}`} target="_blank" rel="noreferrer"
-                      className="font-mono text-primary hover:underline">#{e.wp_id} {e.slug}</a>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(e.importado_em).toLocaleString("pt-BR")}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-destructive">{e.erro}</p>
-                </li>
+        {(() => {
+          const itens = erros.data?.itens ?? [];
+          if (!itens.length) {
+            return (
+              <div className="mt-3 rounded-md border border-border bg-card p-4 text-sm text-muted-foreground">
+                Sem erros registrados.
+              </div>
+            );
+          }
+          // Agrupa por mensagem — um erro repetido 155 vezes é UM problema, não 155.
+          const chave = (msg: string | null) => (msg ?? "")
+            .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<uuid>")
+            .replace(/\d+/g, "#").trim();
+          const grupos = new Map<string, { amostra: string; itens: typeof itens }>();
+          for (const it of itens) {
+            const k = chave(it.erro);
+            if (!grupos.has(k)) grupos.set(k, { amostra: it.erro ?? "(sem mensagem)", itens: [] });
+            grupos.get(k)!.itens.push(it);
+          }
+          const arr = [...grupos.values()].sort((a, b) => b.itens.length - a.itens.length);
+          return (
+            <div className="mt-3 space-y-3">
+              {arr.map((g, i) => (
+                <details key={i} className="rounded-md border border-border bg-card" open={i === 0}>
+                  <summary className="cursor-pointer list-none p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-sm">
+                        <span className="font-semibold text-destructive">
+                          {g.itens.length} {g.itens.length === 1 ? "matéria falhou" : "matérias falharam"} pelo mesmo motivo:
+                        </span>{" "}
+                        <span className="text-foreground">{g.amostra}</span>
+                      </div>
+                      <span className="shrink-0 text-xs text-muted-foreground">ver matérias</span>
+                    </div>
+                  </summary>
+                  <ul className="max-h-72 divide-y divide-border overflow-y-auto border-t border-border">
+                    {g.itens.map((e) => (
+                      <li key={e.wp_id} className="p-3 text-sm">
+                        <div className="flex items-center justify-between">
+                          <a href={`https://hockey4life.com.br/?p=${e.wp_id}`} target="_blank" rel="noreferrer"
+                            className="font-mono text-primary hover:underline">#{e.wp_id} {e.slug}</a>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(e.importado_em).toLocaleString("pt-BR")}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               ))}
-            </ul>
-          ) : (
-            <p className="p-4 text-sm text-muted-foreground">Sem erros registrados.</p>
-          )}
-        </div>
+            </div>
+          );
+        })()}
       </div>
+
     </div>
   );
 }

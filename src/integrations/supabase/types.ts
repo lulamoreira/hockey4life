@@ -293,6 +293,7 @@ export type Database = {
           conteudo: string | null
           credito_imagem: string | null
           criado_em: string
+          criado_por: string | null
           destaque: boolean
           id: string
           imagem_capa: string | null
@@ -312,6 +313,7 @@ export type Database = {
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
+          criado_por?: string | null
           destaque?: boolean
           id?: string
           imagem_capa?: string | null
@@ -331,6 +333,7 @@ export type Database = {
           conteudo?: string | null
           credito_imagem?: string | null
           criado_em?: string
+          criado_por?: string | null
           destaque?: boolean
           id?: string
           imagem_capa?: string | null
