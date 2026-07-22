@@ -477,7 +477,17 @@ function ImportarPage() {
         </button>
       </div>
 
-      {erroGlobal && <p className="text-sm text-destructive">{erroGlobal}</p>}
+      {erroGlobal && (
+        <div className="rounded-md border border-destructive/60 bg-destructive/10 p-3 text-sm text-destructive">
+          <p>{erroGlobal.amigavel}</p>
+          {erroGlobal.tecnico && (
+            <details className="mt-1 text-xs text-destructive/80">
+              <summary className="cursor-pointer">ver detalhes técnicos</summary>
+              <pre className="mt-1 whitespace-pre-wrap font-mono">{erroGlobal.tecnico}</pre>
+            </details>
+          )}
+        </div>
+      )}
 
       {/* Conferência com a origem */}
       <div className="rounded-md border border-border bg-card p-4">
