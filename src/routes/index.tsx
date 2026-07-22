@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
+import { UltimasCarrossel } from "@/components/site/UltimasCarrossel";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 import { PlacaresNaoPerca } from "@/components/site/PlacaresLetreiros";
 import { YouTubeFacade } from "@/components/site/YouTubeFacade";
@@ -128,7 +129,8 @@ function HomePage() {
               Ver arquivo →
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <UltimasCarrossel posts={ultimas.slice(0, 9)} />
+          <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
             {ultimas.slice(0, 9).map((p) => (
               <PostCard key={p.id} post={p} />
             ))}
