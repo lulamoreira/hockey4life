@@ -102,6 +102,9 @@ function HomePage() {
         </section>
       )}
 
+      {/* Faixa amarela "Próximos jogos" logo acima de Últimas histórias */}
+      <ProximosJogosFaixa settings={placares} />
+
       {/* Últimas histórias */}
       {ultimas.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
