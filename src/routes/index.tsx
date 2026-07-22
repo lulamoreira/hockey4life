@@ -76,10 +76,6 @@ function HomePage() {
         </div>
       </section>
 
-      {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
-
-
-
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
       {hfc.video_url && (
         <section className="mx-auto max-w-7xl px-4 py-12">
@@ -122,6 +118,10 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Placares: abaixo das últimas (padrão) ou acima do rodapé */}
+      {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
+      {placares.posicao === "acima_rodape" && <PlacaresLetreiros settings={placares} />}
 
     </SiteLayout>
   );
