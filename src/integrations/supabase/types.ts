@@ -105,7 +105,12 @@ export type Database = {
           id: number
           imagem_atual: string | null
           indice_pagina: number
+          iniciado_em: string | null
           materia_atual: string | null
+          tot_atualizados: number
+          tot_erros: number
+          tot_importados: number
+          tot_pulados: number
           total_importados: number
           total_paginas: number
           ult_atualizados: number
@@ -124,7 +129,12 @@ export type Database = {
           id?: number
           imagem_atual?: string | null
           indice_pagina?: number
+          iniciado_em?: string | null
           materia_atual?: string | null
+          tot_atualizados?: number
+          tot_erros?: number
+          tot_importados?: number
+          tot_pulados?: number
           total_importados?: number
           total_paginas?: number
           ult_atualizados?: number
@@ -143,7 +153,12 @@ export type Database = {
           id?: number
           imagem_atual?: string | null
           indice_pagina?: number
+          iniciado_em?: string | null
           materia_atual?: string | null
+          tot_atualizados?: number
+          tot_erros?: number
+          tot_importados?: number
+          tot_pulados?: number
           total_importados?: number
           total_paginas?: number
           ult_atualizados?: number
@@ -179,6 +194,33 @@ export type Database = {
           slug?: string | null
           status?: Database["public"]["Enums"]["importacao_status"]
           wp_id?: number
+        }
+        Relationships: []
+      }
+      importacao_log: {
+        Row: {
+          contexto: Json | null
+          id: number
+          msg: string
+          nivel: string
+          ts: string
+          wp_id: number | null
+        }
+        Insert: {
+          contexto?: Json | null
+          id?: number
+          msg: string
+          nivel: string
+          ts?: string
+          wp_id?: number | null
+        }
+        Update: {
+          contexto?: Json | null
+          id?: number
+          msg?: string
+          nivel?: string
+          ts?: string
+          wp_id?: number | null
         }
         Relationships: []
       }
