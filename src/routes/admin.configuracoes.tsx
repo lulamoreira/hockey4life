@@ -141,6 +141,7 @@ function HomeTab() {
       nao_perca: { ...HOME_SETTINGS_PADRAO.nao_perca, ...(raw.nao_perca ?? {}) },
       letreiro: { ...HOME_SETTINGS_PADRAO.letreiro, ...(raw.letreiro ?? {}) },
       times: { ...HOME_SETTINGS_PADRAO.times, ...(raw.times ?? {}) },
+      placares: { ...HOME_SETTINGS_PADRAO.placares, ...(raw.placares ?? {}) },
 
     });
   }, [data]);
