@@ -68,6 +68,10 @@ function AdminShell() {
           ))}
         </nav>
         <div className="mt-4 border-t border-border p-3">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">Tema</span>
+            <ThemeToggle />
+          </div>
           <button
             onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
