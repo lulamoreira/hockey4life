@@ -63,7 +63,9 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
   const linkAtivo = "text-primary";
 
   return (
+    <>
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
         <Logo />
 
