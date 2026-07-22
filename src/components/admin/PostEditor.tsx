@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { getAdminPost, listTemas, savePost, criarUploadUrl } from "@/lib/admin.functions";
+import { getAdminPost, listTemas, listAutores, savePost, criarUploadUrl } from "@/lib/admin.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
