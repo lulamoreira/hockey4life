@@ -299,28 +299,19 @@ function PostPage() {
               <SidebarSearch />
             </div>
 
-            <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
-              <div className="h4l-title mb-3 text-sm text-primary">Matérias recentes</div>
-              <ul className="space-y-3">
+            <div className="overflow-hidden rounded-lg border border-border bg-card/60 backdrop-blur-sm">
+              <div className="bg-black/70 py-2 text-center">
+                <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
+                  Matérias recentes
+                </span>
+              </div>
+              <div>
                 {recentes.map((r) => (
-                  <li key={r.id}>
-                    <Link to="/$slug" params={{ slug: r.slug }} className="flex gap-3 group">
-                      {r.imagem_capa && (
-                        <img src={r.imagem_capa} alt="" className="h-14 w-20 shrink-0 rounded object-cover" />
-                      )}
-                      <div className="min-w-0">
-                        <div className="line-clamp-2 text-xs font-semibold text-foreground group-hover:text-primary">
-                          {r.titulo}
-                        </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {formatDataBR(r.publicado_em)}
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
+                  <PostCardSmall key={r.id} post={r as any} />
                 ))}
-              </ul>
+              </div>
             </div>
+
 
             {videoUrl && (
               <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
