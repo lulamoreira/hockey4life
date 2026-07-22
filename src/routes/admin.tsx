@@ -83,8 +83,13 @@ function AdminShell() {
       <div className="flex-1">
         <div className="border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex items-center justify-between">
-            <span className="h4l-title text-primary">H4L Admin</span>
-            <button onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }} className="text-sm text-muted-foreground">Sair</button>
+            <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
+              <LogoImg height={22} />
+            </Link>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button onClick={async () => { await supabase.auth.signOut(); router.invalidate(); }} className="text-sm text-muted-foreground">Sair</button>
+            </div>
           </div>
           <nav className="mt-3 flex flex-wrap gap-2">
             {nav.map((n) => (
