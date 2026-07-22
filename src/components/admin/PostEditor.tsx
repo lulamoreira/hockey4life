@@ -106,6 +106,7 @@ export function PostEditor({ id }: { id?: string }) {
           imagem_capa: imagemCapa || null, credito_imagem: creditoImagem || null,
           status: finalStatus, destaque, nao_perca: naoPerca,
           publicado_em: publicadoEm ? new Date(publicadoEm).toISOString() : null,
+          autor_id: autorId || null,
           temaIds: Array.from(selTemas),
         },
       });
