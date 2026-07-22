@@ -55,7 +55,10 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={alternar}
       aria-label={label}
       title={label}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${className}`}
+      className={cn(
+        "inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
     >
       {pronto ? <Icone className="h-4 w-4" /> : <span className="h-4 w-4" aria-hidden="true" />}
     </button>
