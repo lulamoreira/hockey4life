@@ -70,35 +70,48 @@ function toJogo(raw: any): NhlJogo {
   };
 }
 
-export const getNhlGames = createServerFn({ method: "GET" }).handler(async (): Promise<NhlDados> => {
-  const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), 8000);
-  try {
-    const r = await fetch("https://api-web.nhle.com/v1/scoreboard/now", {
-      signal: ctl.signal,
-      headers: { accept: "application/json" },
-    });
-    if (!r.ok) throw new Error(`NHL API ${r.status}`);
-    const json: any = await r.json();
-    const todos: NhlJogo[] = [];
-    for (const d of json?.gamesByDate ?? []) {
-      for (const g of d?.games ?? []) todos.push(toJogo(g));
+import { z } from "zod";
+
+const NhlInput = z
+  .object({
+    maxUltimos: z.number().int().min(1).max(20).optional(),
+    maxProximos: z.number().int().min(1).max(20).optional(),
+  })
+  .partial();
+
+export const getNhlGames = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) => NhlInput.parse(data ?? {}))
+  .handler(async ({ data }): Promise<NhlDados> => {
+    const maxU = data?.maxUltimos ?? 8;
+    const maxP = data?.maxProximos ?? 8;
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 8000);
+    try {
+      const r = await fetch("https://api-web.nhle.com/v1/scoreboard/now", {
+        signal: ctl.signal,
+        headers: { accept: "application/json" },
+      });
+      if (!r.ok) throw new Error(`NHL API ${r.status}`);
+      const json: any = await r.json();
+      const todos: NhlJogo[] = [];
+      for (const d of json?.gamesByDate ?? []) {
+        for (const g of d?.games ?? []) todos.push(toJogo(g));
+      }
+      const agora = Date.now();
+      const finalizados = todos
+        .filter((j) => j.estado === "FINAL" || j.estado === "LIVE")
+        .sort((a, b) => new Date(b.startUTC).getTime() - new Date(a.startUTC).getTime())
+        .slice(0, maxU);
+      const futuros = todos
+        .filter((j) => j.estado === "FUT" || j.estado === "PRE")
+        .filter((j) => new Date(j.startUTC).getTime() >= agora - 30 * 60_000)
+        .sort((a, b) => new Date(a.startUTC).getTime() - new Date(b.startUTC).getTime())
+        .slice(0, maxP);
+      return { ultimos: finalizados, proximos: futuros, atualizadoEm: new Date().toISOString() };
+    } catch (e) {
+      clearTimeout(t);
+      return { ultimos: [], proximos: [], atualizadoEm: new Date().toISOString() };
+    } finally {
+      clearTimeout(t);
     }
-    const agora = Date.now();
-    const finalizados = todos
-      .filter((j) => j.estado === "FINAL" || j.estado === "LIVE")
-      .sort((a, b) => new Date(b.startUTC).getTime() - new Date(a.startUTC).getTime())
-      .slice(0, 8);
-    const futuros = todos
-      .filter((j) => j.estado === "FUT" || j.estado === "PRE")
-      .filter((j) => new Date(j.startUTC).getTime() >= agora - 30 * 60_000)
-      .sort((a, b) => new Date(a.startUTC).getTime() - new Date(b.startUTC).getTime())
-      .slice(0, 8);
-    return { ultimos: finalizados, proximos: futuros, atualizadoEm: new Date().toISOString() };
-  } catch (e) {
-    clearTimeout(t);
-    return { ultimos: [], proximos: [], atualizadoEm: new Date().toISOString() };
-  } finally {
-    clearTimeout(t);
-  }
-});
+  });
