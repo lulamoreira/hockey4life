@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
-  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, config } = data;
+  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, placares, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
 
