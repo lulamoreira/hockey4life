@@ -264,6 +264,9 @@ export type AutorResumo = {
   bio_curta: string | null;
   bio_media: string | null;
   bio_longa: string | null;
+  cargo: string | null;
+  formacao: string | null;
+  competencias: string | null;
   linkedin_url: string | null;
   outros_links: Record<string, string> | null;
   fotos: string[] | null;
