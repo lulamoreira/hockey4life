@@ -91,6 +91,9 @@ function AutorForm({ id, onSaved, onDeleted, onCancel }: { id?: string; onSaved:
 
   const [nome, setNome] = useState("");
   const [slug, setSlug] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [formacao, setFormacao] = useState("");
+  const [competencias, setCompetencias] = useState("");
   const [bioCurta, setBioCurta] = useState("");
   const [bioMedia, setBioMedia] = useState("");
   const [bioLonga, setBioLonga] = useState("");
@@ -111,6 +114,7 @@ function AutorForm({ id, onSaved, onDeleted, onCancel }: { id?: string; onSaved:
     if (autorQ.data) {
       const a: any = autorQ.data;
       setNome(a.nome); setSlug(a.slug);
+      setCargo(a.cargo ?? ""); setFormacao(a.formacao ?? ""); setCompetencias(a.competencias ?? "");
       setBioCurta(a.bio_curta ?? ""); setBioMedia(a.bio_media ?? ""); setBioLonga(a.bio_longa ?? a.bio ?? "");
       setFoto(a.foto_url ?? "");
       setLinkedin(a.linkedin_url ?? "");
@@ -123,7 +127,8 @@ function AutorForm({ id, onSaved, onDeleted, onCancel }: { id?: string; onSaved:
       setFotos(Array.isArray(a.fotos) ? a.fotos : []);
       setLinhaDoTempo(Array.isArray(a.linha_do_tempo) ? a.linha_do_tempo : []);
     } else if (isNew) {
-      setNome(""); setSlug(""); setBioCurta(""); setBioMedia(""); setBioLonga(""); setFoto("");
+      setNome(""); setSlug(""); setCargo(""); setFormacao(""); setCompetencias("");
+      setBioCurta(""); setBioMedia(""); setBioLonga(""); setFoto("");
       setLinkedin(""); setTwitter(""); setInstagram(""); setSite(""); setEmail("");
       setFotos([]); setLinhaDoTempo([]);
     }
@@ -172,6 +177,9 @@ function AutorForm({ id, onSaved, onDeleted, onCancel }: { id?: string; onSaved:
           bio_curta: bioCurta || null,
           bio_media: bioMedia || null,
           bio_longa: bioLonga || null,
+          cargo: cargo || null,
+          formacao: formacao || null,
+          competencias: competencias || null,
           linkedin_url: linkedin || null,
           foto_url: foto || null,
           links: outros_links,
