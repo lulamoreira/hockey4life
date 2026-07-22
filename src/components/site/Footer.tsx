@@ -25,6 +25,7 @@ export function Footer({ config }: { config: Record<string, any> }) {
             <li><Link to="/" className="hover:text-primary">Início</Link></li>
             <li><Link to="/arquivo" className="hover:text-primary">Arquivo</Link></li>
             <li><Link to="/busca" className="hover:text-primary">Buscar</Link></li>
+            <li><Link to="/autor/$slug" params={{ slug: "diogo-finelli" }} className="hover:text-primary">Sobre o autor</Link></li>
             <li><Link to="/fale-conosco" className="hover:text-primary">Fale conosco</Link></li>
           </ul>
         </div>
