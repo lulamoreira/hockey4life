@@ -211,6 +211,21 @@ export function PostEditor({ id }: { id?: string }) {
           </div>
 
           <div className="rounded-lg border border-border bg-card p-4">
+            <div className="h4l-title mb-3 text-sm">Autor</div>
+            <select value={autorId} onChange={(e)=>setAutorId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground">
+              <option value="">— Sem autor —</option>
+              {(autoresQ.data ?? []).map((a: any) => (
+                <option key={a.id} value={a.id}>{a.nome}</option>
+              ))}
+            </select>
+            <Link to="/admin/autores" className="mt-2 inline-block text-[11px] text-primary hover:underline">
+              Gerenciar autores →
+            </Link>
+          </div>
+
+
+          <div className="rounded-lg border border-border bg-card p-4">
             <div className="h4l-title mb-3 text-sm">Temas</div>
             <div className="max-h-64 space-y-1 overflow-y-auto">
               {temas.map((t: any) => (
