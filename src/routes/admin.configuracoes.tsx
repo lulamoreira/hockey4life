@@ -888,6 +888,123 @@ function TimesEditor({
 }
 
 
+function PlacaresEditor({
+  value,
+  onChange,
+}: {
+  value: PlacaresSettings;
+  onChange: (v: PlacaresSettings) => void;
+}) {
+  const p = value;
+  const set = (patch: Partial<PlacaresSettings>) => onChange({ ...p, ...patch });
+
+  return (
+    <div className="space-y-4">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={p.ativo} onChange={(e) => set({ ativo: e.target.checked })} />
+        <span>Mostrar a faixa de placares na home</span>
+      </label>
+
+      <div className={p.ativo ? "space-y-4" : "space-y-4 opacity-50 pointer-events-none"}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={p.mostrarUltimos}
+              onChange={(e) => set({ mostrarUltimos: e.target.checked })}
+            />
+            <span>Mostrar “Últimos resultados” (lado esquerdo)</span>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={p.mostrarProximos}
+              onChange={(e) => set({ mostrarProximos: e.target.checked })}
+            />
+            <span>Mostrar “Próximos jogos” (lado direito)</span>
+          </label>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <NumField
+            label="Quantos resultados (3–20)"
+            value={p.quantidadeUltimos}
+            min={3}
+            max={20}
+            def={PLACARES_PADRAO.quantidadeUltimos}
+            onChange={(v) => set({ quantidadeUltimos: v })}
+          />
+          <NumField
+            label="Quantos próximos jogos (3–20)"
+            value={p.quantidadeProximos}
+            min={3}
+            max={20}
+            def={PLACARES_PADRAO.quantidadeProximos}
+            onChange={(v) => set({ quantidadeProximos: v })}
+          />
+        </div>
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Direção</div>
+          <div className="grid grid-cols-2 gap-1">
+            {([
+              { v: "rtl", l: "→ para ←" },
+              { v: "ltr", l: "← para →" },
+            ] as const).map((o) => (
+              <button
+                key={o.v}
+                onClick={() => set({ direcao: o.v as PlacaresDirecao })}
+                className={`rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                  p.direcao === o.v ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary"
+                }`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <NumField
+          label={`Segundos por volta (${p.velocidade}s)`}
+          value={p.velocidade}
+          min={10}
+          max={120}
+          def={PLACARES_PADRAO.velocidade}
+          onChange={(v) => set({ velocidade: v })}
+        />
+
+        <div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Onde exibir</div>
+          <div className="space-y-1">
+            <RadioRow
+              name="placares_pos"
+              value="apos_ultimas"
+              checked={p.posicao === "apos_ultimas"}
+              onChange={(v) => set({ posicao: v as PlacaresPosicao })}
+              label='Abaixo da grade “Últimas histórias” (padrão)'
+            />
+            <RadioRow
+              name="placares_pos"
+              value="acima_rodape"
+              checked={p.posicao === "acima_rodape"}
+              onChange={(v) => set({ posicao: v as PlacaresPosicao })}
+              label="Acima do rodapé"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Pré-visualização ao vivo */}
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pré-visualização</div>
+        <div className="overflow-hidden rounded-md border border-border">
+          <PlacaresLetreiros settings={p} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============================================================
  * ABA 3 — Aparência (fundo de arena)
  * ============================================================ */
