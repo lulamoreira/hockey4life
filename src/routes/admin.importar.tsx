@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink,
-  RotateCw, Unlock, ClipboardCheck, DownloadCloud,
+  RotateCw, Unlock, ClipboardCheck, DownloadCloud, Eraser,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/importar")({
@@ -33,6 +33,7 @@ type LoteResp = {
   log?: LogItem[];
   duracao_ms: number;
   erro?: string;
+  codigo?: string;
 };
 type ConferirResp = {
   origem_total: number;
@@ -41,13 +42,53 @@ type ConferirResp = {
   erro?: string;
 };
 
+// Traduz erros técnicos em mensagens amigáveis, mantendo o texto original em "detalhes".
+function traduzirErro(msgOriginal: string, codigo?: string): { amigavel: string; tecnico: string } {
+  const t = String(msgOriginal ?? "");
+  const low = t.toLowerCase();
+  let amigavel = "";
+  if (codigo === "sem_sessao" || low.includes("não autenticado") || low.includes("unauthorized") || low.includes("jwt")) {
+    amigavel = "Sua sessão expirou. Saia e entre de novo.";
+  } else if (codigo === "sem_permissao" || low.includes("acesso restrito") || low.includes("forbidden")) {
+    amigavel = "Você não tem permissão para importar. Peça acesso de administrador.";
+  } else if (codigo === "bloqueado") {
+    amigavel = "Uma importação anterior ainda está travada — clique em Destravar e tente de novo.";
+  } else if (
+    low.includes("non-2xx") ||
+    low.includes("timeout") || low.includes("timed out") || low.includes("504") ||
+    low.includes("cpu time exceeded") || low.includes("wall clock") || low.includes("time exceeded") ||
+    low.includes("worker exceeded") || low.includes("edge function")
+  ) {
+    amigavel = "O lote demorou demais e foi interrompido. Nenhuma matéria foi perdida — clique em Próximo lote para continuar de onde parou.";
+  } else if (low.includes("hockey4life.com.br") || low.includes("wp ") || low.includes("wordpress") || low.includes("502") || low.includes("503") || low.includes("network")) {
+    amigavel = "O site hockey4life.com.br não respondeu. Tente de novo em alguns minutos.";
+  } else {
+    amigavel = "A importação foi interrompida. Nada foi perdido; o progresso está salvo.";
+  }
+  return { amigavel, tecnico: t };
+}
+
 async function chamar(body: Record<string, unknown>): Promise<LoteResp> {
   const { data, error } = await supabase.functions.invoke<LoteResp>("importar-wp", { body });
-  if (error) throw new Error(error.message);
+  if (error) {
+    // extrai a resposta detalhada quando disponível
+    let extra: any = null;
+    try { extra = await (error as any).context?.json?.(); } catch { /* ignora */ }
+    const raw = extra?.erro ?? error.message ?? "erro desconhecido";
+    const codigo = extra?.codigo;
+    const err = new Error(raw) as Error & { codigo?: string };
+    err.codigo = codigo;
+    throw err;
+  }
   if (!data) throw new Error("resposta vazia");
-  if (data.erro) throw new Error(data.erro);
+  if (data.erro) {
+    const err = new Error(data.erro) as Error & { codigo?: string };
+    err.codigo = data.codigo;
+    throw err;
+  }
   return data;
 }
+
 
 const fmt = (n: number) => n.toLocaleString("pt-BR");
 const fmtBytes = (b: number) => {
