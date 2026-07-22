@@ -65,27 +65,60 @@ export type Database = {
       importacao_estado: {
         Row: {
           atualizado_em: string
+          batimento_em: string | null
+          bytes_baixados: number
           concluido: boolean
+          em_execucao: boolean
           id: number
+          imagem_atual: string | null
+          indice_pagina: number
+          materia_atual: string | null
           total_importados: number
           total_paginas: number
+          ult_atualizados: number
+          ult_erros: number
+          ult_importados: number
+          ult_pulados: number
           ultima_pagina: number
+          ultimo_wp_id: number | null
         }
         Insert: {
           atualizado_em?: string
+          batimento_em?: string | null
+          bytes_baixados?: number
           concluido?: boolean
+          em_execucao?: boolean
           id?: number
+          imagem_atual?: string | null
+          indice_pagina?: number
+          materia_atual?: string | null
           total_importados?: number
           total_paginas?: number
+          ult_atualizados?: number
+          ult_erros?: number
+          ult_importados?: number
+          ult_pulados?: number
           ultima_pagina?: number
+          ultimo_wp_id?: number | null
         }
         Update: {
           atualizado_em?: string
+          batimento_em?: string | null
+          bytes_baixados?: number
           concluido?: boolean
+          em_execucao?: boolean
           id?: number
+          imagem_atual?: string | null
+          indice_pagina?: number
+          materia_atual?: string | null
           total_importados?: number
           total_paginas?: number
+          ult_atualizados?: number
+          ult_erros?: number
+          ult_importados?: number
+          ult_pulados?: number
           ultima_pagina?: number
+          ultimo_wp_id?: number | null
         }
         Relationships: []
       }
