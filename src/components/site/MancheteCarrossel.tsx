@@ -261,21 +261,28 @@ function Slide({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black via-black/70 to-transparent" />
 
           {/* Conteúdo: chapéu gigante + resumo (2 linhas) */}
-          <div className="absolute inset-x-0 bottom-0 p-5 md:p-6" style={{ paddingLeft: 20, paddingRight: 20 }}>
+          <div
+            className="absolute inset-x-0 bottom-0"
+            style={{ paddingTop: 50, paddingBottom: 20, paddingLeft: 20, paddingRight: 20 }}
+          >
             <h2
               aria-hidden={chapeu ? "true" : undefined}
-              className="h4l-title uppercase leading-[0.95] text-white line-clamp-2"
+              className={`h4l-title uppercase font-bold text-white line-clamp-2 leading-[1.08] ${
+                chapeu
+                  ? "text-[28px] md:text-[34px] lg:text-[44px] xl:text-[58px]"
+                  : "text-[28px] md:text-[34px] lg:text-[38px]"
+              }`}
               style={{
-                fontSize: `clamp(${settings.tituloPx}px, ${(settings.tituloPx + settings.tituloPxLg) / 2}px, ${settings.tituloPxLg}px)`,
                 letterSpacing: "0.01em",
+                textShadow: "2px 2px 1px #000",
               }}
             >
               {destaque}
             </h2>
             {post.resumo && (
               <p
-                className="mt-2 line-clamp-2 max-w-3xl font-light text-white/90"
-                style={{ fontSize: `${settings.resumoPx}px` }}
+                className="mt-2 line-clamp-2 max-w-3xl font-light text-white text-[16px] md:text-[18px] leading-[1.33]"
+                style={{ textShadow: "2px 2px 1px #000" }}
               >
                 {post.resumo}
               </p>
