@@ -247,6 +247,7 @@ export type PostListItem = {
   id: string;
   titulo: string;
   slug: string;
+  chapeu: string | null;
   resumo: string | null;
   imagem_capa: string | null;
   credito_imagem: string | null;
