@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyRole } from "@/lib/admin.functions";
 import { useState } from "react";
 import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
+import { ThemeToggle } from "@/components/site/ThemeToggle";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
