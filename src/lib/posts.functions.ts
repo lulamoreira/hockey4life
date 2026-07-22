@@ -48,6 +48,19 @@ export type TimesCarrosselSettings = {
   pausarNoHover: boolean;
 };
 
+export type PlacaresPosicao = "apos_ultimas" | "acima_rodape";
+export type PlacaresDirecao = "rtl" | "ltr";
+export type PlacaresSettings = {
+  ativo: boolean;              // liga/desliga a faixa inteira
+  mostrarUltimos: boolean;     // lado esquerdo
+  mostrarProximos: boolean;    // lado direito
+  quantidadeUltimos: number;   // 3..20
+  quantidadeProximos: number;  // 3..20
+  direcao: PlacaresDirecao;    // rtl | ltr
+  velocidade: number;          // segundos por volta (10..120)
+  posicao: PlacaresPosicao;    // onde exibir na home
+};
+
 export type HomeSettings = {
   ordem: OrdemListagem;
   manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
@@ -64,6 +77,7 @@ export type HomeSettings = {
   nao_perca: { ativo: boolean; modo: "recentes" | "manual" };
   letreiro: LetreiroSettings;
   times: TimesCarrosselSettings;
+  placares: PlacaresSettings;
 };
 
 export const LETREIRO_PADRAO: LetreiroSettings = {
@@ -98,6 +112,17 @@ export const TIMES_CARROSSEL_PADRAO: TimesCarrosselSettings = {
   pausarNoHover: true,
 };
 
+export const PLACARES_PADRAO: PlacaresSettings = {
+  ativo: true,
+  mostrarUltimos: true,
+  mostrarProximos: true,
+  quantidadeUltimos: 8,
+  quantidadeProximos: 8,
+  direcao: "rtl",
+  velocidade: 40,
+  posicao: "apos_ultimas",
+};
+
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
   ordem: "desc",
   manchete: { modo: "auto", post_id: null, fixada_em: null },
@@ -106,6 +131,7 @@ export const HOME_SETTINGS_PADRAO: HomeSettings = {
   nao_perca: { ativo: true, modo: "recentes" },
   letreiro: LETREIRO_PADRAO,
   times: TIMES_CARROSSEL_PADRAO,
+  placares: PLACARES_PADRAO,
 };
 
 
@@ -158,6 +184,22 @@ function normalizeTimes(raw: any): TimesCarrosselSettings {
   };
 }
 
+function normalizePlacares(raw: any): PlacaresSettings {
+  const p = raw ?? {};
+  const dir = ["rtl", "ltr"].includes(p.direcao) ? p.direcao : PLACARES_PADRAO.direcao;
+  const pos = ["apos_ultimas", "acima_rodape"].includes(p.posicao) ? p.posicao : PLACARES_PADRAO.posicao;
+  return {
+    ativo: p.ativo !== false,
+    mostrarUltimos: p.mostrarUltimos !== false,
+    mostrarProximos: p.mostrarProximos !== false,
+    quantidadeUltimos: clamp(p.quantidadeUltimos, 3, 20, PLACARES_PADRAO.quantidadeUltimos),
+    quantidadeProximos: clamp(p.quantidadeProximos, 3, 20, PLACARES_PADRAO.quantidadeProximos),
+    direcao: dir as PlacaresDirecao,
+    velocidade: clamp(p.velocidade, 10, 120, PLACARES_PADRAO.velocidade),
+    posicao: pos as PlacaresPosicao,
+  };
+}
+
 function normalizeHomeSettings(raw: any): HomeSettings {
   const s = raw ?? {};
   const q = s.quantidades ?? {};
@@ -191,6 +233,7 @@ function normalizeHomeSettings(raw: any): HomeSettings {
     },
     letreiro: normalizeLetreiro(letreiroRaw, naoPercaModo),
     times: normalizeTimes(s.times),
+    placares: normalizePlacares(s.placares),
   };
 }
 
@@ -373,6 +416,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
     letreiro,
     temasMenu: (temasMenu ?? []) as Array<{ nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number }>,
     times: settings.times,
+    placares: settings.placares,
     config: configMap,
 
   };

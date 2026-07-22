@@ -6,7 +6,7 @@ import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
 import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
-import { NhlPlacar } from "@/components/site/NhlPlacar";
+import { PlacaresLetreiros } from "@/components/site/PlacaresLetreiros";
 
 const homeQuery = () =>
   queryOptions({
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
-  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, config } = data;
+  const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, placares, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
 
@@ -75,9 +75,6 @@ function HomePage() {
           </aside>
         </div>
       </section>
-
-      <NhlPlacar />
-
 
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
       {hfc.video_url && (
@@ -121,6 +118,10 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Placares: abaixo das últimas (padrão) ou acima do rodapé */}
+      {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
+      {placares.posicao === "acima_rodape" && <PlacaresLetreiros settings={placares} />}
 
     </SiteLayout>
   );
