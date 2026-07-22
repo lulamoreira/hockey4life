@@ -1,27 +1,47 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink, RotateCw } from "lucide-react";
+import {
+  Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink,
+  RotateCw, Unlock, ClipboardCheck, DownloadCloud,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/importar")({
   component: ImportarPage,
 });
 
+type Status = "IMPORTADA" | "ATUALIZADA" | "PULADA" | "ERRO";
+type LogItem = { ts: string; nivel: string; msg: string };
 type LoteResp = {
-  pagina: number;
-  total_paginas: number;
+  acao?: string;
+  pagina?: number;
+  total_paginas?: number;
+  indice_pagina_final?: number;
+  pagina_completa?: boolean;
+  concluido?: boolean;
+  parcial?: boolean;
+  bloqueado?: boolean;
+  batimento_em?: string;
   importados: number;
   atualizados: number;
   pulados: number;
   imagens_subidas: number;
+  bytes_baixados?: number;
   tags_importadas?: number;
   erros: { wp_id?: number; slug?: string; imagem?: string; erro: string }[];
+  log?: LogItem[];
   duracao_ms: number;
   erro?: string;
 };
+type ConferirResp = {
+  origem_total: number;
+  banco_total: number;
+  faltando: number[];
+  erro?: string;
+};
 
-async function chamarLote(body: Record<string, unknown>): Promise<LoteResp> {
+async function chamar(body: Record<string, unknown>): Promise<LoteResp> {
   const { data, error } = await supabase.functions.invoke<LoteResp>("importar-wp", { body });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("resposta vazia");
@@ -29,14 +49,34 @@ async function chamarLote(body: Record<string, unknown>): Promise<LoteResp> {
   return data;
 }
 
+const fmt = (n: number) => n.toLocaleString("pt-BR");
+const fmtBytes = (b: number) => {
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / 1024 / 1024).toFixed(2)} MB`;
+};
+const fmtDuracao = (s: number) => {
+  if (!isFinite(s) || s <= 0) return "—";
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  if (h) return `${h}h ${m}m`;
+  if (m) return `${m}m ${sec}s`;
+  return `${sec}s`;
+};
+
 function ImportarPage() {
   const qc = useQueryClient();
   const [rodando, setRodando] = useState(false);
   const [ultima, setUltima] = useState<LoteResp | null>(null);
-  const [logMsg, setLogMsg] = useState<string>("");
   const [erroGlobal, setErroGlobal] = useState<string>("");
   const [forcar, setForcar] = useState(false);
+  const [logs, setLogs] = useState<LogItem[]>([]);
+  const [conferir, setConferir] = useState<ConferirResp | null>(null);
+  const [conferindo, setConferindo] = useState(false);
   const stopRef = useRef(false);
+  // Histórico dos últimos lotes para ETA (últimos 5)
+  const historicoRef = useRef<{ processadas: number; ms: number }[]>([]);
 
   const estado = useQuery({
     queryKey: ["import-estado"],
@@ -45,10 +85,9 @@ function ImportarPage() {
       if (error) throw error;
       return data;
     },
-    refetchInterval: rodando ? 2000 : false,
+    refetchInterval: rodando ? 1500 : 4000,
   });
 
-  // Fonte única de verdade: conta linhas reais em posts
   const matBanco = useQuery({
     queryKey: ["import-materias-banco"],
     queryFn: async () => {
@@ -59,7 +98,6 @@ function ImportarPage() {
     },
     refetchInterval: rodando ? 2000 : false,
   });
-
 
   const erros = useQuery({
     queryKey: ["import-erros"],
@@ -109,19 +147,27 @@ function ImportarPage() {
       qc.invalidateQueries({ queryKey: ["import-erros"] }),
       qc.invalidateQueries({ queryKey: ["import-ultimas-materias"] }),
       qc.invalidateQueries({ queryKey: ["import-materias-banco"] }),
-      
     ]);
+  };
+
+  const mesclarLogs = (novos: LogItem[] | undefined) => {
+    if (!novos || !novos.length) return;
+    setLogs((prev) => [...novos, ...prev].slice(0, 300));
   };
 
   const rodarLote = async (extra: Record<string, unknown> = {}) => {
     setErroGlobal("");
-    setLogMsg("Chamando função…");
-    const pagina = (estado.data?.ultima_pagina ?? 0) + 1;
-    const resp = await chamarLote({ pagina, tamanho: 20, forcar, ...extra });
+    const resp = await chamar({ acao: "lote", tamanho: 25, forcar, ...extra });
     setUltima(resp);
-    setLogMsg(
-      `Página ${resp.pagina}/${resp.total_paginas} — importadas ${resp.importados}, atualizadas ${resp.atualizados}, puladas ${resp.pulados}, imagens ${resp.imagens_subidas}, erros ${resp.erros.length} (${resp.duracao_ms}ms)`,
-    );
+    mesclarLogs(resp.log);
+    if (resp.bloqueado) {
+      setErroGlobal("Execução anterior interrompida — clique em Destravar e continuar.");
+      return resp;
+    }
+    const processadas = resp.importados + resp.atualizados + resp.pulados + resp.erros.length;
+    if (processadas > 0) {
+      historicoRef.current = [...historicoRef.current, { processadas, ms: resp.duracao_ms }].slice(-5);
+    }
     await invalidarTudo();
     return resp;
   };
@@ -134,44 +180,81 @@ function ImportarPage() {
 
   const importarTudo = async () => {
     if (rodando) return;
-    stopRef.current = false; setRodando(true);
-    let falhasSeguidas = 0;
+    stopRef.current = false;
+    setRodando(true);
+    let falhas = 0;
     try {
       while (!stopRef.current) {
         let r: LoteResp;
         try {
           r = await rodarLote();
-          falhasSeguidas = 0;
+          falhas = 0;
         } catch (e: any) {
-          falhasSeguidas++;
-          setErroGlobal(`Falha no lote (${falhasSeguidas}/3): ${e.message}`);
-          if (falhasSeguidas >= 3) break;
+          falhas++;
+          setErroGlobal(`Falha no lote (${falhas}/3): ${e.message}`);
+          if (falhas >= 3) break;
           continue;
         }
-        // Parada 1: chegou ao fim de verdade
-        if (r.total_paginas > 0 && r.pagina >= r.total_paginas) break;
-        // Parada 2: lote sem qualquer atividade — algo mudou na origem
-        if (r.importados === 0 && r.atualizados === 0 && r.pulados === 0 && r.erros.length === 0) {
-          setErroGlobal("Lote voltou vazio (nada importado, atualizado, pulado ou com erro). Verifique a origem.");
+        if (r.bloqueado) break;
+        if (r.concluido) break;
+        if (!r.parcial && r.pagina_completa && r.total_paginas && r.pagina && r.pagina >= r.total_paginas) break;
+        if (r.importados === 0 && r.atualizados === 0 && r.pulados === 0 && r.erros.length === 0 && !r.parcial) {
+          setErroGlobal("Lote vazio — verifique a origem.");
           break;
         }
       }
-    } finally { setRodando(false); stopRef.current = false; }
+    } finally {
+      setRodando(false);
+      stopRef.current = false;
+    }
   };
 
-  const parar = () => { stopRef.current = true; setLogMsg("Parando após o lote atual…"); };
+  const parar = () => { stopRef.current = true; };
+
+  const destravar = async () => {
+    setErroGlobal("");
+    await chamar({ acao: "destravar" });
+    await invalidarTudo();
+  };
+
+  const rodarConferencia = async () => {
+    setConferindo(true);
+    setErroGlobal("");
+    try {
+      const r = await chamar({ acao: "conferir" });
+      setConferir(r as unknown as ConferirResp);
+    } catch (e: any) { setErroGlobal(e.message); }
+    finally { setConferindo(false); }
+  };
+
+  const importarFaltantes = async () => {
+    if (!conferir?.faltando?.length || rodando) return;
+    setRodando(true);
+    stopRef.current = false;
+    try {
+      const CHUNK = 25;
+      let restantes = [...conferir.faltando];
+      while (restantes.length && !stopRef.current) {
+        const parte = restantes.slice(0, CHUNK);
+        const r = await chamar({ acao: "importar_ids", ids: parte, forcar: true });
+        mesclarLogs(r.log);
+        setUltima(r);
+        restantes = restantes.slice(parte.length);
+        await invalidarTudo();
+      }
+      await rodarConferencia();
+    } catch (e: any) { setErroGlobal(e.message); }
+    finally { setRodando(false); stopRef.current = false; }
+  };
 
   const reprocessarErros = async () => {
     if (rodando || !erros.data?.itens.length) return;
     setRodando(true);
     try {
-      const ids = erros.data.itens.map((i) => i.wp_id).slice(0, 10);
-      setErroGlobal("");
-      const resp = await chamarLote({ reprocessar: ids, tamanho: ids.length, forcar: true });
-      setUltima(resp);
-      setLogMsg(
-        `Reprocessados ${ids.length} — importadas ${resp.importados}, atualizadas ${resp.atualizados}, erros ${resp.erros.length}`,
-      );
+      const ids = erros.data.itens.map((i) => i.wp_id).filter(Boolean).slice(0, 25);
+      const r = await chamar({ acao: "importar_ids", ids, forcar: true });
+      mesclarLogs(r.log);
+      setUltima(r);
       await invalidarTudo();
     } catch (e: any) { setErroGlobal(e.message); }
     finally { setRodando(false); }
@@ -181,7 +264,7 @@ function ImportarPage() {
     if (!confirm("Remover matérias de exemplo (posts sem wp_id)?")) return;
     const { error } = await supabase.from("posts").delete().is("wp_id", null);
     if (error) setErroGlobal(error.message);
-    else { setLogMsg("Matérias de exemplo removidas."); await invalidarTudo(); }
+    else await invalidarTudo();
   };
 
   const totalOrigem = origem?.total ?? 0;
@@ -189,31 +272,64 @@ function ImportarPage() {
   const ultimaPagina = estado.data?.ultima_pagina ?? 0;
   const feito = matBanco.data ?? 0;
   const pct = totalPaginas > 0 ? Math.min(100, Math.round((ultimaPagina / totalPaginas) * 100)) : 0;
-  const excede = totalOrigem > 0 && feito > totalOrigem;
+
+  // Detecção de execução morta
+  const emExecucao: boolean = !!estado.data?.em_execucao;
+  const batimento = estado.data?.batimento_em ? new Date(estado.data.batimento_em).getTime() : 0;
+  const [agora, setAgora] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAgora(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const execucaoMorta = emExecucao && batimento > 0 && agora - batimento > 3 * 60_000;
+
+  // Velocidade real e ETA (baseado nos últimos 5 lotes)
+  const { velMinuto, etaSeg } = useMemo(() => {
+    const h = historicoRef.current;
+    if (!h.length) return { velMinuto: 0, etaSeg: 0 };
+    const totMs = h.reduce((a, b) => a + b.ms, 0);
+    const totProc = h.reduce((a, b) => a + b.processadas, 0);
+    if (totMs === 0) return { velMinuto: 0, etaSeg: 0 };
+    const vel = (totProc / totMs) * 60_000;
+    const restam = Math.max(0, totalOrigem - feito);
+    const eta = vel > 0 ? restam / (vel / 60) : 0;
+    return { velMinuto: vel, etaSeg: eta };
+  }, [totalOrigem, feito, ultima]);
+
+  const materiaAtual = estado.data?.materia_atual as string | null | undefined;
+  const imagemAtual = estado.data?.imagem_atual as string | null | undefined;
+  const ultI = (estado.data?.ult_importados ?? 0) as number;
+  const ultA = (estado.data?.ult_atualizados ?? 0) as number;
+  const ultP = (estado.data?.ult_pulados ?? 0) as number;
+  const ultE = (estado.data?.ult_erros ?? 0) as number;
+  const bytesTot = (estado.data?.bytes_baixados ?? 0) as number;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="h4l-title text-3xl text-foreground md:text-4xl">Importar do WordPress</h1>
         <p className="text-sm text-muted-foreground">
-          Fonte: hockey4life.com.br. O progresso é medido por página processada. A contagem de matérias
-          vem direto da tabela de posts — a fonte única de verdade.
+          Fonte: hockey4life.com.br. Cursor por matéria: se um lote parar no meio, o próximo continua exatamente no próximo item.
         </p>
       </div>
 
-      {excede && (
-        <div className="flex items-start gap-3 rounded-md border border-destructive/60 bg-destructive/10 p-3 text-sm text-destructive">
+      {execucaoMorta && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-destructive/60 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <span>
-            Há <strong>{feito.toLocaleString("pt-BR")}</strong> matérias no banco, mas a origem tem apenas{" "}
-            <strong>{totalOrigem.toLocaleString("pt-BR")}</strong>. Isso é sintoma de bug — investigue antes de continuar.
+            Execução anterior interrompida (sem batimento há{" "}
+            <strong>{Math.round((agora - batimento) / 1000)}s</strong>).
           </span>
+          <button onClick={destravar}
+            className="ml-auto inline-flex items-center gap-2 rounded-md border border-destructive px-3 py-1 text-xs uppercase">
+            <Unlock className="h-4 w-4" /> Destravar e continuar
+          </button>
         </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <Card label="Matérias no banco" value={feito.toLocaleString("pt-BR")} />
-        <Card label="Na origem" value={totalOrigem.toLocaleString("pt-BR")} />
+        <Card label="Matérias no banco" value={fmt(feito)} />
+        <Card label="Na origem" value={fmt(totalOrigem)} />
         <Card label="Página" value={`${ultimaPagina} / ${totalPaginas || "—"}`} />
         <Card label="Progresso" value={`${pct}%`} />
       </div>
@@ -222,44 +338,146 @@ function ImportarPage() {
         <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>
 
+      {/* Contadores do último lote (sempre separados) */}
+      <div className="grid gap-3 sm:grid-cols-4">
+        <MiniCard cor="text-emerald-500" label="Importadas" value={ultI} />
+        <MiniCard cor="text-sky-500" label="Atualizadas" value={ultA} />
+        <MiniCard cor="text-muted-foreground" label="Puladas" value={ultP} />
+        <MiniCard cor="text-destructive" label="Erros" value={ultE} />
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        <strong>IMPORTADA:</strong> veio agora, pela primeira vez. ·{" "}
+        <strong>ATUALIZADA:</strong> já existia e foi editada no WordPress depois. ·{" "}
+        <strong>PULADA:</strong> já existia e nada mudou na origem — é o que acelera a importação. ·{" "}
+        <strong>ERRO:</strong> falhou, motivo no log abaixo.
+      </p>
+
+      {/* Painel de execução ao vivo */}
+      {(rodando || emExecucao) && (
+        <div className="rounded-md border border-border bg-card p-4 text-sm">
+          <div className="flex items-center gap-2 text-primary">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <strong>Executando…</strong>
+          </div>
+          <dl className="mt-2 grid gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2">
+            <div><dt className="inline font-semibold text-foreground">Lote:</dt> página {ultimaPagina || "?"} · índice {estado.data?.indice_pagina ?? 0}</div>
+            <div><dt className="inline font-semibold text-foreground">Velocidade:</dt> {velMinuto ? `${velMinuto.toFixed(1)} matérias/min` : "medindo…"}</div>
+            <div className="sm:col-span-2 truncate"><dt className="inline font-semibold text-foreground">Matéria atual:</dt> {materiaAtual ?? "—"}</div>
+            <div className="sm:col-span-2 truncate"><dt className="inline font-semibold text-foreground">Imagem atual:</dt> {imagemAtual ?? "—"}</div>
+            <div><dt className="inline font-semibold text-foreground">Baixado:</dt> {fmtBytes(bytesTot)}</div>
+            <div><dt className="inline font-semibold text-foreground">Tempo estimado:</dt> {fmtDuracao(etaSeg)}</div>
+          </dl>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={importarProximo} disabled={rodando}
+        <button onClick={importarProximo} disabled={rodando || execucaoMorta}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground disabled:opacity-50">
-          <Play className="h-4 w-4" /> Importar próximo lote
+          <Play className="h-4 w-4" /> Próximo lote
         </button>
-        <button onClick={importarTudo} disabled={rodando}
-          className="inline-flex items-center gap-2 rounded-md border border-primary bg-transparent px-4 py-2 text-sm font-semibold uppercase text-primary disabled:opacity-50">
+        <button onClick={importarTudo} disabled={rodando || execucaoMorta}
+          className="inline-flex items-center gap-2 rounded-md border border-primary px-4 py-2 text-sm font-semibold uppercase text-primary disabled:opacity-50">
           <Play className="h-4 w-4" /> Importar tudo
         </button>
         <button onClick={parar} disabled={!rodando}
-          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase text-foreground disabled:opacity-50">
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase disabled:opacity-50">
           <Square className="h-4 w-4" /> Parar
         </button>
+        <button onClick={destravar}
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase">
+          <Unlock className="h-4 w-4" /> Destravar
+        </button>
         <button onClick={reprocessarErros} disabled={rodando || !erros.data?.itens.length}
-          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase text-foreground disabled:opacity-50">
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase disabled:opacity-50">
           <RefreshCw className="h-4 w-4" /> Reprocessar erros
         </button>
         <button onClick={invalidarTudo}
-          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase text-foreground">
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm uppercase">
           <RotateCw className="h-4 w-4" /> Recontar
         </button>
-        <label className="ml-2 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">
+        <label className="ml-2 inline-flex cursor-pointer items-center gap-2 text-sm">
           <input type="checkbox" checked={forcar} onChange={(e) => setForcar(e.target.checked)} />
           Forçar reimportação
         </label>
         <button onClick={removerSeed}
           className="ml-auto inline-flex items-center gap-2 rounded-md border border-destructive/60 px-4 py-2 text-sm uppercase text-destructive">
-          <Trash2 className="h-4 w-4" /> Remover matérias de exemplo
+          <Trash2 className="h-4 w-4" /> Remover exemplos
         </button>
       </div>
 
-      {logMsg && <pre className="whitespace-pre-wrap rounded-md border border-border bg-card p-3 text-xs text-muted-foreground">{logMsg}</pre>}
       {erroGlobal && <p className="text-sm text-destructive">{erroGlobal}</p>}
-      {ultima && (
-        <p className="text-xs text-muted-foreground">
-          Último lote — importadas: <strong>{ultima.importados}</strong> · atualizadas: <strong>{ultima.atualizados}</strong> · puladas: <strong>{ultima.pulados}</strong> · imagens: <strong>{ultima.imagens_subidas}</strong> · erros: <strong>{ultima.erros.length}</strong>
-        </p>
-      )}
+
+      {/* Conferência com a origem */}
+      <div className="rounded-md border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="h4l-title text-xl text-foreground">Conferência com a origem</h2>
+          <button onClick={rodarConferencia} disabled={conferindo}
+            className="inline-flex items-center gap-2 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold uppercase text-primary disabled:opacity-50">
+            <ClipboardCheck className="h-4 w-4" /> {conferindo ? "Conferindo…" : "Conferir agora"}
+          </button>
+          {conferir?.faltando?.length ? (
+            <button onClick={importarFaltantes} disabled={rodando}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold uppercase text-primary-foreground disabled:opacity-50">
+              <DownloadCloud className="h-4 w-4" /> Importar as {conferir.faltando.length} faltantes
+            </button>
+          ) : null}
+        </div>
+        {conferir && (
+          <div className="mt-3 space-y-2 text-sm">
+            <p>
+              Na origem: <strong>{fmt(conferir.origem_total)}</strong> · No banco:{" "}
+              <strong>{fmt(conferir.banco_total)}</strong> · Faltando:{" "}
+              <strong className={conferir.faltando.length ? "text-destructive" : "text-emerald-500"}>
+                {fmt(conferir.faltando.length)}
+              </strong>
+            </p>
+            {conferir.faltando.length === 0 && (
+              <p className="text-emerald-500">Tudo em dia — importação completa.</p>
+            )}
+            {conferir.faltando.length > 0 && (
+              <div className="max-h-64 overflow-y-auto rounded border border-border bg-background p-2 font-mono text-xs">
+                {conferir.faltando.slice(0, 500).map((id) => (
+                  <div key={id}>
+                    <a href={`https://hockey4life.com.br/?p=${id}`} target="_blank" rel="noreferrer"
+                      className="text-primary hover:underline">#{id}</a>
+                  </div>
+                ))}
+                {conferir.faltando.length > 500 && (
+                  <p className="mt-2 text-muted-foreground">…e mais {conferir.faltando.length - 500}.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Log ao vivo */}
+      <div>
+        <h2 className="h4l-title text-xl text-foreground">Log ao vivo</h2>
+        <div className="mt-3 max-h-80 overflow-y-auto rounded-md border border-border bg-card font-mono text-xs">
+          {logs.length ? (
+            <ul className="divide-y divide-border">
+              {logs.map((l, i) => (
+                <li key={i} className="flex gap-2 p-2">
+                  <span className="shrink-0 text-muted-foreground">
+                    {new Date(l.ts).toLocaleTimeString("pt-BR")}
+                  </span>
+                  <span className={`shrink-0 font-semibold uppercase ${
+                    l.nivel === "importada" ? "text-emerald-500" :
+                    l.nivel === "atualizada" ? "text-sky-500" :
+                    l.nivel === "pulada" ? "text-muted-foreground" :
+                    l.nivel === "erro" ? "text-destructive" : "text-primary"
+                  }`}>{l.nivel}</span>
+                  <span className="truncate">{l.msg}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="p-4 text-muted-foreground">Sem eventos ainda.</p>
+          )}
+        </div>
+      </div>
 
       <div>
         <h2 className="h4l-title text-xl text-foreground">Últimas matérias importadas ({ultimasImportadas.data?.total ?? 0})</h2>
@@ -270,17 +488,13 @@ function ImportarPage() {
                 <li key={p.id} className="p-3 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     {p.status === "publicado" ? (
-                      <a
-                        href={`/${p.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary"
-                      >
+                      <a href={`/${p.slug}`} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary">
                         <span>{p.titulo}</span>
                         <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                       </a>
                     ) : (
-                      <span className="font-medium text-foreground">{p.titulo}</span>
+                      <span className="font-medium">{p.titulo}</span>
                     )}
                     <span className="font-mono text-xs text-muted-foreground">WP #{p.wp_id}</span>
                   </div>
@@ -328,6 +542,15 @@ function Card({ label, value }: { label: string; value: string | number }) {
     <div className="rounded-lg border border-border bg-card p-5">
       <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
       <div className="mt-2 h4l-title text-3xl text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function MiniCard({ label, value, cor }: { label: string; value: number; cor: string }) {
+  return (
+    <div className="rounded-md border border-border bg-card p-3">
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className={`h4l-title text-2xl ${cor}`}>{value.toLocaleString("pt-BR")}</div>
     </div>
   );
 }
