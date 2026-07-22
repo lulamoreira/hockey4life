@@ -153,7 +153,8 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
 
       </div>
 
-      {open && (
+    </header>
+    {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
           <aside className="absolute right-0 top-0 h-full w-80 max-w-[90%] overflow-y-auto bg-card p-6 shadow-2xl">
@@ -260,9 +261,10 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
           </aside>
         </div>
       )}
-    </header>
+    </>
   );
 }
+
 
 function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" | "/busca" | "/fale-conosco"; pathname: string; onClick: () => void; children: React.ReactNode }) {
   const ativo = pathname === to || (to === "/arquivo" && pathname.startsWith("/arquivo/"));
