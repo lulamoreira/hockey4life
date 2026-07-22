@@ -273,6 +273,14 @@ function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" 
   );
 }
 
+function SecaoMenu({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1 mt-1 px-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+      {children}
+    </div>
+  );
+}
+
 function SkeletonMenu() {
   // 4 placeholders com largura semelhante aos rótulos reais.
   return (
