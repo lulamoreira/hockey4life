@@ -100,6 +100,7 @@ export const savePost = createServerFn({ method: "POST" })
     const payload: any = {
       titulo: data.titulo,
       slug: data.slug,
+      chapeu: (data.chapeu ?? "").trim() || null,
       resumo: data.resumo || null,
       conteudo: data.conteudo || null,
       imagem_capa: data.imagem_capa || null,
