@@ -205,6 +205,37 @@ function PostPage() {
               <ShareButtons url={url} titulo={post.titulo} />
             </div>
 
+            {autor && (
+              <aside className="mt-10 rounded-lg border border-primary/40 bg-card/60 p-5 backdrop-blur-sm">
+                <div className="flex items-start gap-4">
+                  {autor.foto_url ? (
+                    <img src={autor.foto_url} alt={autor.nome} className="h-16 w-16 shrink-0 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-primary/20 text-xl font-bold text-primary">
+                      {autor.nome.charAt(0)}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block text-lg font-bold text-foreground hover:text-primary">
+                      {autor.nome}
+                    </Link>
+                    {(autor.bio_media || autor.bio_curta || autor.bio) && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {autor.bio_media ?? autor.bio_curta ?? autor.bio}
+                      </p>
+                    )}
+                    <Link
+                      to="/autor/$slug"
+                      params={{ slug: autor.slug }}
+                      className="mt-3 inline-block text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+                    >
+                      Todas as matérias de {autor.nome} →
+                    </Link>
+                  </div>
+                </div>
+              </aside>
+            )}
+
             {(anterior || proximo) && (
               <nav className="mt-8 grid gap-3 sm:grid-cols-2">
                 {anterior ? (
@@ -253,7 +284,7 @@ function PostPage() {
                     <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block font-bold text-foreground hover:text-primary">
                       {autor.nome}
                     </Link>
-                    {autor.bio && <p className="mt-1 text-xs text-muted-foreground line-clamp-4">{autor.bio}</p>}
+                    {(autor.bio_curta || autor.bio) && <p className="mt-1 text-xs text-muted-foreground line-clamp-4">{autor.bio_curta ?? autor.bio}</p>}
                   </div>
                 </div>
               </div>

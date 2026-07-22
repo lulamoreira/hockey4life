@@ -18,31 +18,52 @@ export type Database = {
         Row: {
           atualizado_em: string
           bio: string | null
+          bio_curta: string | null
+          bio_longa: string | null
+          bio_media: string | null
           criado_em: string
           foto_url: string | null
+          fotos: Json
           id: string
+          linha_do_tempo: Json
+          linkedin_url: string | null
           links: Json
           nome: string
+          outros_links: Json
           slug: string
         }
         Insert: {
           atualizado_em?: string
           bio?: string | null
+          bio_curta?: string | null
+          bio_longa?: string | null
+          bio_media?: string | null
           criado_em?: string
           foto_url?: string | null
+          fotos?: Json
           id?: string
+          linha_do_tempo?: Json
+          linkedin_url?: string | null
           links?: Json
           nome: string
+          outros_links?: Json
           slug: string
         }
         Update: {
           atualizado_em?: string
           bio?: string | null
+          bio_curta?: string | null
+          bio_longa?: string | null
+          bio_media?: string | null
           criado_em?: string
           foto_url?: string | null
+          fotos?: Json
           id?: string
+          linha_do_tempo?: Json
+          linkedin_url?: string | null
           links?: Json
           nome?: string
+          outros_links?: Json
           slug?: string
         }
         Relationships: []
@@ -309,7 +330,15 @@ export type Database = {
           titulo?: string
           wp_id?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "autores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -457,6 +486,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      autor_estatisticas: { Args: { _slug: string }; Returns: Json }
       buscar_posts: {
         Args: {
           _ordem?: string
