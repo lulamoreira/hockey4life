@@ -191,7 +191,10 @@ function AutorPage() {
               <p className="text-muted-foreground">Nenhuma matéria publicada ainda.</p>
             ) : (
               <>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="md:hidden">
+                  <UltimasCarrossel posts={data.ultimas as any} />
+                </div>
+                <div className="hidden gap-6 md:grid sm:grid-cols-2 lg:grid-cols-3">
                   {data.ultimas.map((p) => <PostCard key={p.id} post={p} />)}
                 </div>
                 {stats.total > data.ultimas.length && (
