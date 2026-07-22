@@ -162,6 +162,7 @@ function PostPage() {
           </div>
         </section>
       )}
+      </div>
     </SiteLayout>
   );
 }
