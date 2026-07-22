@@ -1,0 +1,5 @@
+
+ALTER TABLE public.autores
+  ADD COLUMN IF NOT EXISTS cargo TEXT,
+  ADD COLUMN IF NOT EXISTS formacao TEXT,
+  ADD COLUMN IF NOT EXISTS competencias TEXT;
