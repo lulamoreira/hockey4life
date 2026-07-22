@@ -26,6 +26,7 @@ const postInput = z.object({
   id: z.string().uuid().optional(),
   titulo: z.string().min(1).max(300),
   slug: z.string().min(1).max(200),
+  chapeu: z.string().max(30).optional().nullable(),
   resumo: z.string().max(1000).optional().nullable(),
   conteudo: z.string().optional().nullable(),
   imagem_capa: z.string().url().optional().nullable().or(z.literal("")),
