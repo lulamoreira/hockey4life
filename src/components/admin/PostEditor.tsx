@@ -20,6 +20,7 @@ export function PostEditor({ id }: { id?: string }) {
     enabled: !isNew,
   });
   const temasQ = useQuery({ queryKey: ["admin-temas"], queryFn: () => listTemas() });
+  const autoresQ = useQuery({ queryKey: ["admin-autores"], queryFn: () => listAutores() });
 
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
