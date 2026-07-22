@@ -10,6 +10,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SiteLayout } from "@/components/site/SiteLayout";
 
 function NotFoundComponent() {
   // Import dinâmico para evitar ciclos e manter o layout consistente com o site.
