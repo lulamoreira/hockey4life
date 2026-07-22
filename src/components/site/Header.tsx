@@ -138,9 +138,10 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
             </div>
             <nav className="mt-6 flex flex-col gap-1">
               <MobileLink to="/" pathname={pathname} onClick={() => setOpen(false)}>Início</MobileLink>
-              <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>
-              <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>
-              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
+              {m.arquivo && <MobileLink to="/arquivo" pathname={pathname} onClick={() => setOpen(false)}>Arquivo</MobileLink>}
+              {m.busca && <MobileLink to="/busca" pathname={pathname} onClick={() => setOpen(false)}>Buscar</MobileLink>}
+              {m.fale_conosco && <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>}
+
 
               {times.length > 0 && (
                 <div className="mt-4">
