@@ -4,7 +4,7 @@ import { useAuthSession } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { getMyRole } from "@/lib/admin.functions";
 import { useState } from "react";
-import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -36,6 +36,7 @@ function AdminShell() {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/materias", label: "Matérias", icon: FileText },
     { to: "/admin/temas", label: "Temas", icon: Tag },
+    { to: "/admin/autores", label: "Autores", icon: Users },
     { to: "/admin/contatos", label: "Contatos", icon: Mail },
     { to: "/admin/importar", label: "Importar WP", icon: Download },
     { to: "/admin/backup", label: "Backup", icon: Archive },
