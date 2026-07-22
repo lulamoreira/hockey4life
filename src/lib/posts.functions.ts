@@ -112,6 +112,17 @@ export const TIMES_CARROSSEL_PADRAO: TimesCarrosselSettings = {
   pausarNoHover: true,
 };
 
+export const PLACARES_PADRAO: PlacaresSettings = {
+  ativo: true,
+  mostrarUltimos: true,
+  mostrarProximos: true,
+  quantidadeUltimos: 8,
+  quantidadeProximos: 8,
+  direcao: "rtl",
+  velocidade: 40,
+  posicao: "apos_ultimas",
+};
+
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
   ordem: "desc",
   manchete: { modo: "auto", post_id: null, fixada_em: null },
@@ -120,6 +131,7 @@ export const HOME_SETTINGS_PADRAO: HomeSettings = {
   nao_perca: { ativo: true, modo: "recentes" },
   letreiro: LETREIRO_PADRAO,
   times: TIMES_CARROSSEL_PADRAO,
+  placares: PLACARES_PADRAO,
 };
 
 
