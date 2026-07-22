@@ -1,0 +1,1 @@
+UPDATE public.autores SET foto_url = '/__l5e/assets-v1/59cc8a1e-ac11-4c3d-8a61-2ff6b7af725c/diogo-finelli.png' WHERE slug = 'diogo-finelli';
