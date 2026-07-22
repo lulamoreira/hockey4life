@@ -637,13 +637,13 @@ function ImportarPage() {
             );
           }
           // Agrupa por mensagem — um erro repetido 155 vezes é UM problema, não 155.
-          const chave = (msg: string) => (msg ?? "")
+          const chave = (msg: string | null) => (msg ?? "")
             .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<uuid>")
             .replace(/\d+/g, "#").trim();
           const grupos = new Map<string, { amostra: string; itens: typeof itens }>();
           for (const it of itens) {
             const k = chave(it.erro);
-            if (!grupos.has(k)) grupos.set(k, { amostra: it.erro, itens: [] });
+            if (!grupos.has(k)) grupos.set(k, { amostra: it.erro ?? "(sem mensagem)", itens: [] });
             grupos.get(k)!.itens.push(it);
           }
           const arr = [...grupos.values()].sort((a, b) => b.itens.length - a.itens.length);
