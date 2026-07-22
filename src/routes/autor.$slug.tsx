@@ -3,6 +3,7 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getAutorPublico, getSiteConfig } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PostCard } from "@/components/site/PostCard";
+import { UltimasCarrossel } from "@/components/site/UltimasCarrossel";
 import { Linkedin, Mail, Instagram, Twitter, Globe } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
