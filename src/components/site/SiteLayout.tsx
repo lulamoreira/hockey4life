@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSiteConfig } from "@/lib/posts.functions";
-import { Header } from "./Header";
+import { Header, normalizeMenuCabecalho } from "./Header";
 import { Footer } from "./Footer";
 import { FundoArena, normalizeAparencia } from "./FundoArena";
 
@@ -17,23 +17,24 @@ export function SiteLayout({
   config?: Record<string, any>;
   temasMenu?: TemaMenu[];
 }) {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["site-config"],
     queryFn: () => getSiteConfig(),
     staleTime: 120_000,
-    // Se o caller já forneceu, não precisa refetch imediato.
     enabled: !configOverride || !temasMenuOverride,
   });
 
   const config = configOverride ?? data?.config ?? {};
   const temasMenu = (temasMenuOverride ?? (data?.temasMenu as TemaMenu[] | undefined) ?? []) as TemaMenu[];
   const aparencia = normalizeAparencia(config?.aparencia);
+  const menu = normalizeMenuCabecalho(config?.menu_cabecalho);
+  const loading = !configOverride && !temasMenuOverride && isLoading && !data;
 
   return (
     <>
       <FundoArena aparencia={aparencia} />
       <div className="relative z-10 flex min-h-screen flex-col text-foreground">
-        <Header temasMenu={temasMenu} />
+        <Header temasMenu={temasMenu} menu={menu} loading={loading} />
         <main className="flex-1">{children}</main>
         <Footer config={config} />
       </div>
