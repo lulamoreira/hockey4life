@@ -184,16 +184,6 @@ function normalizeTimes(raw: any): TimesCarrosselSettings {
   };
 }
 
-function normalizeHomeSettings(raw: any): HomeSettings {
-  const s = raw ?? {};
-  const q = s.quantidades ?? {};
-  const np = s.nao_perca ?? {};
-  const m = s.manchete ?? {};
-  // Migração suave: se letreiro não existir, herda do bloco antigo nao_perca
-  const letreiroRaw = s.letreiro ?? {
-    ativo: np.ativo,
-    origem: np.modo,
-  };
 function normalizePlacares(raw: any): PlacaresSettings {
   const p = raw ?? {};
   const dir = ["rtl", "ltr"].includes(p.direcao) ? p.direcao : PLACARES_PADRAO.direcao;
