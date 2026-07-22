@@ -27,7 +27,26 @@ const MAX_ASSUNTOS = 3;
 export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; menu?: MenuCabecalho; loading?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
   const m = menu ?? MENU_CABECALHO_PADRAO;
+
+  const { session } = useAuthSession();
+  const logado = !!session;
+  const roleQ = useQuery({
+    queryKey: ["my-role", session?.user.id ?? "anon"],
+    queryFn: () => getMyRole(),
+    enabled: logado,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const isAdmin = !!roleQ.data?.isAdmin;
+  const isEditor = !!roleQ.data?.isEditor;
+
+  async function sair() {
+    setOpen(false);
+    await supabase.auth.signOut();
+    router.invalidate();
+  }
 
   const times = temasMenu.filter((t) => t.tipo === "time" && t.destaque_menu).slice(0, MAX_TIMES);
   const assuntos = temasMenu.filter((t) => t.tipo === "assunto" && t.destaque_menu).slice(0, MAX_ASSUNTOS);
