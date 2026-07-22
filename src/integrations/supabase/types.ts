@@ -290,6 +290,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tema_merge_log: {
+        Row: {
+          executado_em: string
+          executado_por: string | null
+          id: string
+          matérias_movidas: number
+          principal_id: string
+          principal_nome: string
+          secundarios: Json
+        }
+        Insert: {
+          executado_em?: string
+          executado_por?: string | null
+          id?: string
+          matérias_movidas?: number
+          principal_id: string
+          principal_nome: string
+          secundarios: Json
+        }
+        Update: {
+          executado_em?: string
+          executado_por?: string | null
+          id?: string
+          matérias_movidas?: number
+          principal_id?: string
+          principal_nome?: string
+          secundarios?: Json
+        }
+        Relationships: []
+      }
       temas: {
         Row: {
           criado_em: string
@@ -298,6 +328,7 @@ export type Database = {
           nome: string
           ordem: number
           slug: string
+          sugestao_menu: boolean
           tipo: Database["public"]["Enums"]["tema_tipo"]
           wp_tag_id: number | null
         }
@@ -308,6 +339,7 @@ export type Database = {
           nome: string
           ordem?: number
           slug: string
+          sugestao_menu?: boolean
           tipo: Database["public"]["Enums"]["tema_tipo"]
           wp_tag_id?: number | null
         }
@@ -318,6 +350,7 @@ export type Database = {
           nome?: string
           ordem?: number
           slug?: string
+          sugestao_menu?: boolean
           tipo?: Database["public"]["Enums"]["tema_tipo"]
           wp_tag_id?: number | null
         }
@@ -420,6 +453,10 @@ export type Database = {
           total: number
           trecho: string
         }[]
+      }
+      mesclar_temas: {
+        Args: { _principal: string; _secundarios: string[] }
+        Returns: number
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
