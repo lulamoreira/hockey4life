@@ -45,56 +45,84 @@
 :root {
   --radius: 0.5rem;
 
-  /* Fundo preto-carvão */
+  /* --- Tema claro (padrão) ---
+   * Creme suave para leitura longa; dourado escurecido para texto/links
+   * (o amarelo puro #EDD91B é ilegível sobre fundo claro).
+   */
+  --background: #F4F2EC;
+  --foreground: #16150F;
+
+  --card: #FFFFFF;
+  --card-foreground: #16150F;
+  --popover: #FFFFFF;
+  --popover-foreground: #16150F;
+
+  /* Dourado escurecido — usado como cor "primary" para texto, links, ícones e botões. */
+  --primary: #9A7500;
+  --primary-foreground: #FFFFFF;
+
+  /* Amarelo oficial reservado para preenchimento de blocos/etiquetas com texto escuro. */
+  --brand-fill: #FFCA0A;
+  --brand-fill-foreground: #16150F;
+
+  --secondary: #EDEAE0;
+  --secondary-foreground: #16150F;
+  --muted: #EDEAE0;
+  --muted-foreground: #5C5949;
+  --accent: #FFCA0A;
+  --accent-foreground: #16150F;
+
+  --destructive: #C81E22;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #DDD8C4;
+  --input: #E2DED2;
+  --ring: rgba(154, 117, 0, 0.55);
+}
+
+.dark {
+  /* --- Tema escuro (original) --- */
   --background: oklch(0.145 0.005 260);
   --foreground: oklch(0.97 0.005 90);
-
-  /* Superfícies */
   --card: oklch(0.185 0.005 260);
   --card-foreground: oklch(0.97 0.005 90);
   --popover: oklch(0.185 0.005 260);
   --popover-foreground: oklch(0.97 0.005 90);
-
-  /* Amarelo oficial H4L #EDD91B */
   --primary: oklch(0.881 0.169 96.5);
   --primary-foreground: oklch(0.15 0.01 260);
-
+  --brand-fill: oklch(0.881 0.169 96.5);
+  --brand-fill-foreground: oklch(0.15 0.01 260);
   --secondary: oklch(0.24 0.008 260);
   --secondary-foreground: oklch(0.97 0.005 90);
   --muted: oklch(0.22 0.008 260);
   --muted-foreground: oklch(0.68 0.01 260);
   --accent: oklch(0.881 0.169 96.5);
   --accent-foreground: oklch(0.15 0.01 260);
-
-  /* Vermelho "última hora" */
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.98 0.005 90);
-
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
   --ring: oklch(0.881 0.169 96.5 / 0.6);
 }
 
-.dark {
-  --background: oklch(0.145 0.005 260);
-  --foreground: oklch(0.97 0.005 90);
-  --card: oklch(0.185 0.005 260);
-  --card-foreground: oklch(0.97 0.005 90);
-  --popover: oklch(0.185 0.005 260);
-  --popover-foreground: oklch(0.97 0.005 90);
-  --primary: oklch(0.881 0.169 96.5);
-  --primary-foreground: oklch(0.15 0.01 260);
-  --secondary: oklch(0.24 0.008 260);
-  --secondary-foreground: oklch(0.97 0.005 90);
-  --muted: oklch(0.22 0.008 260);
-  --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.881 0.169 96.5);
-  --accent-foreground: oklch(0.15 0.01 260);
-  --destructive: oklch(0.6 0.22 27);
-  --destructive-foreground: oklch(0.98 0.005 90);
-  --border: oklch(1 0 0 / 0.1);
-  --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.881 0.169 96.5 / 0.6);
+/* Transição suave entre temas — até 200ms; anulada com prefers-reduced-motion. */
+html {
+  transition: background-color 200ms ease, color 200ms ease;
+}
+body, header, footer, aside, main, nav, section, article,
+.h4l-card, [class*="bg-card"], [class*="bg-background"],
+[class*="bg-muted"], [class*="bg-secondary"], [class*="border-"] {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html, body, header, footer, aside, main, nav, section, article,
+  .h4l-card, [class*="bg-card"], [class*="bg-background"],
+  [class*="bg-muted"], [class*="bg-secondary"], [class*="border-"] {
+    transition: none !important;
+  }
 }
 
 @layer base {
