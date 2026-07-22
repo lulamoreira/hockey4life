@@ -128,7 +128,8 @@ function HomePage() {
               Ver arquivo →
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <UltimasCarrossel posts={ultimas.slice(0, 9)} />
+          <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
             {ultimas.slice(0, 9).map((p) => (
               <PostCard key={p.id} post={p} />
             ))}
