@@ -1,8 +1,12 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Search, X } from "lucide-react";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { LogIn, LogOut, Menu, PenSquare, Search, Shield, User, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth";
+import { getMyRole } from "@/lib/admin.functions";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
