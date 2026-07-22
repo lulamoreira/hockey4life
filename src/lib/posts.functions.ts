@@ -77,6 +77,7 @@ export type HomeSettings = {
   nao_perca: { ativo: boolean; modo: "recentes" | "manual" };
   letreiro: LetreiroSettings;
   times: TimesCarrosselSettings;
+  placares: PlacaresSettings;
 };
 
 export const LETREIRO_PADRAO: LetreiroSettings = {
