@@ -123,9 +123,8 @@ function PostPage() {
         {/* Breadcrumbs visíveis */}
         <nav aria-label="Trilha" className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
           <Link to="/" className="hover:text-primary">Início</Link>
-          <span className="mx-2 opacity-50">/</span>
-          <span className="text-foreground/80 line-clamp-1 inline-block max-w-[60vw] align-bottom">{post.titulo}</span>
         </nav>
+
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           {/* Coluna principal */}
