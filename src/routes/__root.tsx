@@ -13,10 +13,6 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteLayout } from "@/components/site/SiteLayout";
 
 function NotFoundComponent() {
-  // Import dinâmico para evitar ciclos e manter o layout consistente com o site.
-  const SiteLayout = require("@/components/site/SiteLayout").SiteLayout as (
-    p: { children: ReactNode }
-  ) => JSX.Element;
   return (
     <SiteLayout>
       <div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-4 py-24 text-center">
