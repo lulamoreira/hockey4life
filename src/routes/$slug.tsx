@@ -271,7 +271,7 @@ function PostPage() {
           </article>
 
           {/* Sidebar */}
-          <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <aside className="hidden space-y-6 lg:block lg:sticky lg:top-6 lg:self-start">
             {autor && (
               <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
                 <div className="h4l-title mb-3 text-sm text-primary">Sobre o autor</div>
