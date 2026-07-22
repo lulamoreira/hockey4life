@@ -126,6 +126,12 @@ function HomePage() {
       {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
       {placares.posicao === "acima_rodape" && <PlacaresLetreiros settings={placares} />}
 
+      {/* Letreiro "NÃO PERCA" logo acima do rodapé */}
+      <div className="mx-auto max-w-7xl px-4 pb-6">
+        <Letreiro items={naoPerca} settings={letreiro} redes={config?.redes_sociais} />
+      </div>
+
+
     </SiteLayout>
   );
 }
