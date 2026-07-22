@@ -81,7 +81,7 @@ export const getAdminPost = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: post, error } = await context.supabase
       .from("posts")
-      .select("id,titulo,slug,resumo,conteudo,imagem_capa,credito_imagem,status,destaque,nao_perca,publicado_em,atualizado_em,criado_em,autor_id,wp_id")
+      .select("id,titulo,slug,chapeu,resumo,conteudo,imagem_capa,credito_imagem,status,destaque,nao_perca,publicado_em,atualizado_em,criado_em,autor_id,wp_id")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw error;
