@@ -481,6 +481,10 @@ function ImportarPage() {
           <input type="checkbox" checked={forcar} onChange={(e) => setForcar(e.target.checked)} />
           Forçar reimportação
         </label>
+        <button onClick={zerarTotais}
+          className="ml-2 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1 text-xs uppercase text-muted-foreground">
+          Zerar totais
+        </button>
         <button onClick={removerSeed}
           className="ml-auto inline-flex items-center gap-2 rounded-md border border-destructive/60 px-4 py-2 text-sm uppercase text-destructive">
           <Trash2 className="h-4 w-4" /> Remover exemplos
