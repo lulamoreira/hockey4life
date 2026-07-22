@@ -421,32 +421,72 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // ---------- IMPORTAR IDS EXPLÍCITOS ----------
+      // ---------- IMPORTAR IDS EXPLÍCITOS (individual, resiliente) ----------
       if (acao === "importar_ids" || Array.isArray(body.reprocessar)) {
         const ids: number[] = (body.ids ?? body.reprocessar ?? []).map(Number).filter(Boolean);
         if (!ids.length) {
           return jsonResp({ erro: "sem ids", importados, atualizados, pulados, imagens_subidas: imagensSubidas, erros, log });
         }
         await carregarMapaTemas();
-        // WP aceita include= com múltiplos ids, per_page até 100
-        const CHUNK = 25;
-        for (let i = 0; i < ids.length; i += CHUNK) {
-          if (Date.now() - t0 > TEMPO_MAX_MS) { parcial = true; break; }
-          const parte = ids.slice(i, i + CHUNK);
-          const r = await fetch(`${WP}/posts?include=${parte.join(",")}&per_page=${parte.length}&_embed=1`);
-          if (!r.ok) { registrar("erro", `WP HTTP ${r.status}`); continue; }
-          const posts = await r.json();
-          const results = await paralelo(posts, 4, async (p: any) => {
-            const status = await processarPost(p);
-            registrar(status.toLowerCase(), `#${p.id} ${decodeEntities(p.title?.rendered ?? "")}`);
-            return status;
-          });
-          for (const s of results) {
-            if (s === "IMPORTADA") importados++;
-            else if (s === "ATUALIZADA") atualizados++;
-            else if (s === "PULADA") pulados++;
+        await gravarLog(admin, "lote", `Início lote por IDs (individual): ${ids.length} matérias`);
+
+        const processados: number[] = [];
+        const falhas: { wp_id: number; erro: string }[] = [];
+        const pendentes: number[] = [];
+
+        let idx = 0;
+        let parouPorTempo = false;
+        const CONCORRENCIA = 5;
+        const workers = Array.from({ length: CONCORRENCIA }, async () => {
+          while (true) {
+            if (parouPorTempo) return;
+            if (Date.now() - t0 > TEMPO_MAX_MS) { parouPorTempo = true; return; }
+            const meu = idx++;
+            if (meu >= ids.length) return;
+            const wp_id = ids[meu];
+            try {
+              await heartbeat({ materia_atual: `#${wp_id}`, imagem_atual: null });
+              const ctl = new AbortController();
+              const to = setTimeout(() => ctl.abort(), 15_000);
+              let r: Response;
+              try {
+                r = await fetch(`${WP}/posts/${wp_id}?_embed=1`, {
+                  signal: ctl.signal,
+                  headers: { "User-Agent": "H4L-Importer/2.1" },
+                });
+              } finally { clearTimeout(to); }
+              if (!r.ok) {
+                const txt = (await r.text().catch(() => "")).slice(0, 300);
+                throw new Error(`WP HTTP ${r.status}: ${txt || r.statusText}`);
+              }
+              const p = await r.json();
+              if (!p || !p.id) throw new Error("Resposta WP vazia");
+              const status = await processarPost(p);
+              if (status === "IMPORTADA") importados++;
+              else if (status === "ATUALIZADA") atualizados++;
+              else if (status === "PULADA") pulados++;
+              processados.push(wp_id);
+              await gravarLog(admin, status.toLowerCase(), `#${wp_id} ${decodeEntities(p.title?.rendered ?? "")}`, wp_id);
+            } catch (e: any) {
+              const msg = e?.name === "AbortError" ? "timeout 15s buscando WP" : (e?.message ?? String(e));
+              falhas.push({ wp_id, erro: msg });
+              erros.push({ wp_id, erro: msg });
+              try {
+                await admin.from("importacao_itens").upsert(
+                  { wp_id, status: "erro", erro: msg, importado_em: new Date().toISOString() },
+                  { onConflict: "wp_id" },
+                );
+              } catch (_) { /* ignora */ }
+              await gravarLog(admin, "erro", `#${wp_id} FALHOU: ${msg}`, wp_id);
+            }
           }
-        }
+        });
+        await Promise.all(workers);
+
+        const tocados = new Set<number>([...processados, ...falhas.map((f) => f.wp_id)]);
+        for (const id of ids) if (!tocados.has(id)) pendentes.push(id);
+        parcial = pendentes.length > 0;
+
         await admin.from("importacao_estado").update({
           em_execucao: false, materia_atual: null, imagem_atual: null,
           ult_importados: importados, ult_atualizados: atualizados,
@@ -457,10 +497,12 @@ Deno.serve(async (req) => {
           tot_erros: (estadoAtual?.tot_erros ?? 0) + erros.length,
           batimento_em: new Date().toISOString(),
         }).eq("id", 1);
-        await gravarLog(admin, "lote", `Lote de IDs finalizado: ${importados} importadas, ${atualizados} atualizadas, ${pulados} puladas, ${erros.length} erros`);
+        await gravarLog(admin, "lote", `Fim lote IDs: ${importados} imp, ${atualizados} atu, ${pulados} pul, ${falhas.length} erro, ${pendentes.length} pendentes`);
         return jsonResp({
-          acao, importados, atualizados, pulados, imagens_subidas: imagensSubidas,
-          bytes_baixados: bytes, erros, log, parcial, duracao_ms: Date.now() - t0,
+          acao, importados, atualizados, pulados,
+          imagens_subidas: imagensSubidas, bytes_baixados: bytes,
+          falhas, pendentes, erros, log, parcial,
+          duracao_ms: Date.now() - t0,
         });
       }
 
