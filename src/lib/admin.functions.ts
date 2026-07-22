@@ -105,7 +105,7 @@ export const savePost = createServerFn({ method: "POST" })
       destaque: data.destaque,
       nao_perca: data.nao_perca,
       publicado_em: data.publicado_em || (data.status === "publicado" ? new Date().toISOString() : null),
-      autor_id: context.userId,
+      autor_id: data.autor_id ?? null,
     };
     let postId = data.id;
     if (postId) {
