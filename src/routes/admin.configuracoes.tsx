@@ -1116,7 +1116,20 @@ function AparenciaTab() {
 
   return (
     <div className="space-y-6">
+      <Section title="Menu do cabeçalho">
+        <p className="text-sm text-muted-foreground">
+          Ative ou desative os itens fixos do menu. Os temas marcados como “no menu” continuam vindo da tela de Temas e aparecem antes destes itens.
+        </p>
+        <div className="mt-3 space-y-2">
+          <MenuToggle label="Arquivo" checked={menu.arquivo} onChange={(v) => toggleMenu("arquivo", v)} />
+          <MenuToggle label="Ícone de busca" checked={menu.busca} onChange={(v) => toggleMenu("busca", v)} />
+          <MenuToggle label="Botão Fale conosco" checked={menu.fale_conosco} onChange={(v) => toggleMenu("fale_conosco", v)} />
+        </div>
+        {menuMsg && <p className="mt-2 text-sm text-primary">{menuMsg}</p>}
+      </Section>
+
       <Section title="Fundo do site" onReset={() => doSave(APARENCIA_PADRAO)}>
+
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={s.ativo} onChange={(e) => setS({ ...s, ativo: e.target.checked })} />
           Fundo ativo
