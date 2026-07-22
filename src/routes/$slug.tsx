@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getPostBySlug, getSiteConfig, getRecentesFallback } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PostCard } from "@/components/site/PostCard";
+import { PostCard, PostCardSmall } from "@/components/site/PostCard";
 import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
