@@ -478,6 +478,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      autor_estatisticas: { Args: { _slug: string }; Returns: Json }
       buscar_posts: {
         Args: {
           _ordem?: string
