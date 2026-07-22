@@ -6,6 +6,7 @@ import { getMyRole } from "@/lib/admin.functions";
 import { useState } from "react";
 import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { LogoImg } from "@/components/site/Logo";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
