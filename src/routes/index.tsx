@@ -76,7 +76,8 @@ function HomePage() {
         </div>
       </section>
 
-      <NhlPlacar />
+      {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
+
 
 
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
