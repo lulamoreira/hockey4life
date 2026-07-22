@@ -117,7 +117,7 @@ export const savePost = createServerFn({ method: "POST" })
       if (error) throw error;
     } else {
       const { data: created, error } = await context.supabase
-        .from("posts").insert(payload).select("id").single();
+        .from("posts").insert({ ...payload, criado_por: context.userId }).select("id").single();
       if (error) throw error;
       postId = created.id;
     }
