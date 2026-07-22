@@ -52,6 +52,7 @@ export function PostCard({ post }: { post: PostListItem }) {
 export function PostCardSmall({ post }: { post: PostListItem }) {
   const tema = post.temas?.[0];
   const dataExtenso = (() => {
+    if (!post.publicado_em) return "";
     try {
       return new Intl.DateTimeFormat("pt-BR", {
         day: "2-digit",
@@ -63,6 +64,7 @@ export function PostCardSmall({ post }: { post: PostListItem }) {
       return formatDataBR(post.publicado_em);
     }
   })();
+
   return (
     <Link
       to="/$slug"
