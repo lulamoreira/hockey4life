@@ -33,7 +33,7 @@ function TemasIndex() {
   const assuntos = data.filter((t) => t.tipo === "assunto").sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
 
   return (
-    <SiteLayout config={site.config} temasMenu={site.temasMenu as any}>
+    <SiteLayout config={site.config}>
       <div className="mx-auto max-w-7xl px-4 py-10">
         <h1 className="h4l-title text-4xl text-foreground md:text-6xl">Temas</h1>
         <p className="mt-2 text-sm text-muted-foreground">

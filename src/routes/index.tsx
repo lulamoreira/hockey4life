@@ -41,7 +41,7 @@ function HomePage() {
   const times = temasMenu.filter((t) => t.tipo === "time");
 
   return (
-    <SiteLayout config={config} temasMenu={temasMenu}>
+    <SiteLayout config={config}>
       {times.length > 0 && <TimesCarrossel times={times} settings={timesSettings} />}
 
       <Letreiro items={naoPerca} settings={letreiro} />

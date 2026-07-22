@@ -70,7 +70,7 @@ function PostPage() {
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
 
   return (
-    <SiteLayout config={siteData.config} temasMenu={siteData.temasMenu as any}>
+    <SiteLayout config={siteData.config}>
       <div className="mx-auto my-8 max-w-5xl rounded-lg bg-black/50 px-2 py-6 backdrop-blur-sm md:my-10 md:px-6 md:py-10">
       <article className="mx-auto max-w-4xl px-4 py-4">
         <div className="mb-4 flex flex-wrap gap-2">
