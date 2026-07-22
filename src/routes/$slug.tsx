@@ -119,7 +119,7 @@ function PostPage() {
 
   return (
     <SiteLayout config={siteData.config}>
-      <div className="mx-auto my-6 max-w-7xl rounded-lg bg-black/50 px-3 py-6 backdrop-blur-sm md:my-10 md:px-6 md:py-10">
+      <div className="mx-auto my-6 max-w-7xl rounded-lg bg-white/80 px-3 py-6 backdrop-blur-sm dark:bg-black/50 md:my-10 md:px-6 md:py-10">
         {/* Breadcrumbs visíveis */}
         <nav aria-label="Trilha" className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
           <Link to="/" className="hover:text-primary">Início</Link>
