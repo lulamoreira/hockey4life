@@ -48,6 +48,19 @@ export type TimesCarrosselSettings = {
   pausarNoHover: boolean;
 };
 
+export type PlacaresPosicao = "apos_ultimas" | "acima_rodape";
+export type PlacaresDirecao = "rtl" | "ltr";
+export type PlacaresSettings = {
+  ativo: boolean;              // liga/desliga a faixa inteira
+  mostrarUltimos: boolean;     // lado esquerdo
+  mostrarProximos: boolean;    // lado direito
+  quantidadeUltimos: number;   // 3..20
+  quantidadeProximos: number;  // 3..20
+  direcao: PlacaresDirecao;    // rtl | ltr
+  velocidade: number;          // segundos por volta (10..120)
+  posicao: PlacaresPosicao;    // onde exibir na home
+};
+
 export type HomeSettings = {
   ordem: OrdemListagem;
   manchete: { modo: "auto" | "fixa"; post_id: string | null; fixada_em: string | null };
