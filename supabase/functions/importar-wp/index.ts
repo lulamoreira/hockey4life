@@ -401,7 +401,9 @@ Deno.serve(async (req) => {
         const registro = {
           wp_id, titulo, slug,
           resumo: stripTags(String(p.excerpt?.rendered ?? "")).slice(0, 500),
-          conteudo, imagem_capa, autor_id: uid,
+          conteudo, imagem_capa,
+          autor_id: autorImportId,   // quem escreveu (público)
+          criado_por: uid,           // quem importou (interno)
           status: "publicado" as const,
           publicado_em: p.date_gmt ? new Date(p.date_gmt + "Z").toISOString() : new Date(p.date).toISOString(),
         };
