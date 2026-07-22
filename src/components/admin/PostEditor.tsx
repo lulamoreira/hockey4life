@@ -47,6 +47,7 @@ export function PostEditor({ id }: { id?: string }) {
       setImagemCapa(p.imagem_capa ?? ""); setCreditoImagem(p.credito_imagem ?? "");
       setStatus(p.status); setDestaque(p.destaque); setNaoPerca(p.nao_perca);
       setPublicadoEm(p.publicado_em ? new Date(p.publicado_em).toISOString().slice(0, 16) : "");
+      setAutorId((p as any).autor_id ?? "");
       setSelTemas(new Set(postQ.data.temaIds));
     }
   }, [isNew, postQ.data]);
