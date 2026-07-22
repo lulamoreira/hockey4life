@@ -430,7 +430,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
 
   return (
     <section aria-label="Placares NHL" className="mx-auto max-w-7xl px-4">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className={`grid grid-cols-1 gap-2 ${temU && temP ? "sm:grid-cols-2" : ""}`}>
         {temU && (
           <FaixaNaoPerca
             rotulo="ÚLTIMOS RESULTADOS"
