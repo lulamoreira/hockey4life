@@ -256,9 +256,19 @@ export type PostListItem = {
   temas: Array<{ nome: string; slug: string; tipo: "time" | "assunto" }>;
 };
 
+export type AutorResumo = {
+  id: string;
+  nome: string;
+  slug: string;
+  bio: string | null;
+  foto_url: string | null;
+  links: Record<string, string> | null;
+};
+
 export type PostFull = PostListItem & {
   conteudo: string | null;
   atualizado_em: string;
+  autor_id: string | null;
 };
 
 const POST_COLS = "id,titulo,slug,resumo,imagem_capa,credito_imagem,publicado_em,destaque,nao_perca";
