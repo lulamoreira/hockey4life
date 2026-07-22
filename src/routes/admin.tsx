@@ -80,7 +80,7 @@ function AdminShell() {
           </button>
         </div>
       </aside>
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <div className="border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex items-center justify-between">
             <Link to="/" aria-label="Hockey4Life — página inicial" className="inline-block">
