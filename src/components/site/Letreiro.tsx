@@ -29,7 +29,7 @@ export function Letreiro({
     key: string;
     href: string;
     label: string;
-    icon: JSX.Element;
+    icon: ReactNode;
     external: boolean;
   }> = [];
   if (redes?.facebook) sociais.push({ key: "fb", href: redes.facebook, label: "Facebook", icon: <Facebook size={14} />, external: true });
