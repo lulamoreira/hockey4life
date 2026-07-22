@@ -92,25 +92,29 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            to="/busca"
-            className={`hidden rounded-md p-2 transition-colors hover:bg-muted hover:text-foreground md:inline-flex ${pathname === "/busca" ? "text-primary" : "text-muted-foreground"}`}
-            aria-label="Buscar"
-            aria-current={pathname === "/busca" ? "page" : undefined}
-          >
-            <Search className="h-4 w-4" />
-          </Link>
-          <Link
-            to="/fale-conosco"
-            aria-current={pathname === "/fale-conosco" ? "page" : undefined}
-            className={`hidden rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${
-              pathname === "/fale-conosco"
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
-            }`}
-          >
-            Fale conosco
-          </Link>
+          {m.busca && (
+            <Link
+              to="/busca"
+              className={`hidden rounded-md p-2 transition-colors hover:bg-muted hover:text-foreground md:inline-flex ${pathname === "/busca" ? "text-primary" : "text-muted-foreground"}`}
+              aria-label="Buscar"
+              aria-current={pathname === "/busca" ? "page" : undefined}
+            >
+              <Search className="h-4 w-4" />
+            </Link>
+          )}
+          {m.fale_conosco && (
+            <Link
+              to="/fale-conosco"
+              aria-current={pathname === "/fale-conosco" ? "page" : undefined}
+              className={`hidden rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${
+                pathname === "/fale-conosco"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
+              }`}
+            >
+              Fale conosco
+            </Link>
+          )}
           <button
             className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
             onClick={() => setOpen(true)}
@@ -119,6 +123,7 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
             <Menu className="h-5 w-5" />
           </button>
         </div>
+
       </div>
 
       {open && (
