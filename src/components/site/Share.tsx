@@ -62,7 +62,7 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
   const tg = { label: "Telegram", href: `https://t.me/share/url?url=${encoded}&text=${t}`, icon: Send };
 
   const linkClasses =
-    "inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/60 hover:text-primary";
+    "inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition-colors hover:border-primary/60 hover:text-primary";
 
   const StoriesBtn = (
     <button
@@ -70,23 +70,35 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
       onClick={() => setCartaoAberto(true)}
       className={linkClasses}
       aria-label="Gerar cartão para Stories do Instagram"
+      title="Cartão para Stories"
     >
-      <Instagram className="h-3.5 w-3.5" />
-      Cartão para Stories
+      <Instagram className="h-4 w-4" />
     </button>
   );
 
   const CopiarBtn = (
-    <button type="button" onClick={copy} className={linkClasses}>
-      <LinkIcon className="h-3.5 w-3.5" />
-      {copied ? "Copiado!" : "Copiar link"}
+    <button
+      type="button"
+      onClick={copy}
+      className={linkClasses}
+      aria-label={copied ? "Link copiado" : "Copiar link"}
+      title={copied ? "Copiado!" : "Copiar link"}
+    >
+      <LinkIcon className="h-4 w-4" />
     </button>
   );
 
   const AncoraBtn = (it: { label: string; href: string; icon: typeof MessageCircle }) => (
-    <a key={it.label} href={it.href} target="_blank" rel="noopener noreferrer" className={linkClasses}>
-      <it.icon className="h-3.5 w-3.5" />
-      {it.label}
+    <a
+      key={it.label}
+      href={it.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={linkClasses}
+      aria-label={`Compartilhar no ${it.label}`}
+      title={it.label}
+    >
+      <it.icon className="h-4 w-4" />
     </a>
   );
 
