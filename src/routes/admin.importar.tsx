@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Play, Square, RefreshCw, AlertTriangle, Trash2, ExternalLink,
-  RotateCw, Unlock, ClipboardCheck, DownloadCloud,
+  RotateCw, Unlock, ClipboardCheck, DownloadCloud, Eraser,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/importar")({
@@ -33,6 +33,7 @@ type LoteResp = {
   log?: LogItem[];
   duracao_ms: number;
   erro?: string;
+  codigo?: string;
 };
 type ConferirResp = {
   origem_total: number;
@@ -41,13 +42,53 @@ type ConferirResp = {
   erro?: string;
 };
 
+// Traduz erros técnicos em mensagens amigáveis, mantendo o texto original em "detalhes".
+function traduzirErro(msgOriginal: string, codigo?: string): { amigavel: string; tecnico: string } {
+  const t = String(msgOriginal ?? "");
+  const low = t.toLowerCase();
+  let amigavel = "";
+  if (codigo === "sem_sessao" || low.includes("não autenticado") || low.includes("unauthorized") || low.includes("jwt")) {
+    amigavel = "Sua sessão expirou. Saia e entre de novo.";
+  } else if (codigo === "sem_permissao" || low.includes("acesso restrito") || low.includes("forbidden")) {
+    amigavel = "Você não tem permissão para importar. Peça acesso de administrador.";
+  } else if (codigo === "bloqueado") {
+    amigavel = "Uma importação anterior ainda está travada — clique em Destravar e tente de novo.";
+  } else if (
+    low.includes("non-2xx") ||
+    low.includes("timeout") || low.includes("timed out") || low.includes("504") ||
+    low.includes("cpu time exceeded") || low.includes("wall clock") || low.includes("time exceeded") ||
+    low.includes("worker exceeded") || low.includes("edge function")
+  ) {
+    amigavel = "O lote demorou demais e foi interrompido. Nenhuma matéria foi perdida — clique em Próximo lote para continuar de onde parou.";
+  } else if (low.includes("hockey4life.com.br") || low.includes("wp ") || low.includes("wordpress") || low.includes("502") || low.includes("503") || low.includes("network")) {
+    amigavel = "O site hockey4life.com.br não respondeu. Tente de novo em alguns minutos.";
+  } else {
+    amigavel = "A importação foi interrompida. Nada foi perdido; o progresso está salvo.";
+  }
+  return { amigavel, tecnico: t };
+}
+
 async function chamar(body: Record<string, unknown>): Promise<LoteResp> {
   const { data, error } = await supabase.functions.invoke<LoteResp>("importar-wp", { body });
-  if (error) throw new Error(error.message);
+  if (error) {
+    // extrai a resposta detalhada quando disponível
+    let extra: any = null;
+    try { extra = await (error as any).context?.json?.(); } catch { /* ignora */ }
+    const raw = extra?.erro ?? error.message ?? "erro desconhecido";
+    const codigo = extra?.codigo;
+    const err = new Error(raw) as Error & { codigo?: string };
+    err.codigo = codigo;
+    throw err;
+  }
   if (!data) throw new Error("resposta vazia");
-  if (data.erro) throw new Error(data.erro);
+  if (data.erro) {
+    const err = new Error(data.erro) as Error & { codigo?: string };
+    err.codigo = data.codigo;
+    throw err;
+  }
   return data;
 }
+
 
 const fmt = (n: number) => n.toLocaleString("pt-BR");
 const fmtBytes = (b: number) => {
@@ -69,9 +110,8 @@ function ImportarPage() {
   const qc = useQueryClient();
   const [rodando, setRodando] = useState(false);
   const [ultima, setUltima] = useState<LoteResp | null>(null);
-  const [erroGlobal, setErroGlobal] = useState<string>("");
+  const [erroGlobal, setErroGlobal] = useState<{ amigavel: string; tecnico: string } | null>(null);
   const [forcar, setForcar] = useState(false);
-  const [logs, setLogs] = useState<LogItem[]>([]);
   const [conferir, setConferir] = useState<ConferirResp | null>(null);
   const [conferindo, setConferindo] = useState(false);
   const stopRef = useRef(false);
@@ -150,18 +190,21 @@ function ImportarPage() {
     ]);
   };
 
-  const mesclarLogs = (novos: LogItem[] | undefined) => {
-    if (!novos || !novos.length) return;
-    setLogs((prev) => [...novos, ...prev].slice(0, 300));
+  // Helper: transforma qualquer erro em par (amigavel, tecnico).
+  const contarErro = (e: any) => {
+    const codigo = (e as any)?.codigo as string | undefined;
+    setErroGlobal(traduzirErro(e?.message ?? String(e), codigo));
   };
 
   const rodarLote = async (extra: Record<string, unknown> = {}) => {
-    setErroGlobal("");
+    setErroGlobal(null);
     const resp = await chamar({ acao: "lote", tamanho: 25, forcar, ...extra });
     setUltima(resp);
-    mesclarLogs(resp.log);
     if (resp.bloqueado) {
-      setErroGlobal("Execução anterior interrompida — clique em Destravar e continuar.");
+      setErroGlobal({
+        amigavel: "Uma importação anterior ainda está travada — clique em Destravar e tente de novo.",
+        tecnico: `bloqueado desde ${resp.batimento_em ?? "?"}`,
+      });
       return resp;
     }
     const processadas = resp.importados + resp.atualizados + resp.pulados + resp.erros.length;
@@ -175,7 +218,7 @@ function ImportarPage() {
   const importarProximo = async () => {
     if (rodando) return;
     setRodando(true);
-    try { await rodarLote(); } catch (e: any) { setErroGlobal(e.message); } finally { setRodando(false); }
+    try { await rodarLote(); } catch (e: any) { contarErro(e); } finally { setRodando(false); }
   };
 
   const importarTudo = async () => {
@@ -191,7 +234,7 @@ function ImportarPage() {
           falhas = 0;
         } catch (e: any) {
           falhas++;
-          setErroGlobal(`Falha no lote (${falhas}/3): ${e.message}`);
+          contarErro(e);
           if (falhas >= 3) break;
           continue;
         }
@@ -199,7 +242,10 @@ function ImportarPage() {
         if (r.concluido) break;
         if (!r.parcial && r.pagina_completa && r.total_paginas && r.pagina && r.pagina >= r.total_paginas) break;
         if (r.importados === 0 && r.atualizados === 0 && r.pulados === 0 && r.erros.length === 0 && !r.parcial) {
-          setErroGlobal("Lote vazio — verifique a origem.");
+          setErroGlobal({
+            amigavel: "O lote voltou vazio. A origem pode ter mudado — rode a conferência.",
+            tecnico: "batch retornou sem posts",
+          });
           break;
         }
       }
@@ -212,18 +258,25 @@ function ImportarPage() {
   const parar = () => { stopRef.current = true; };
 
   const destravar = async () => {
-    setErroGlobal("");
-    await chamar({ acao: "destravar" });
+    setErroGlobal(null);
+    try { await chamar({ acao: "destravar" }); } catch (e: any) { contarErro(e); }
+    await invalidarTudo();
+  };
+
+  const zerarTotais = async () => {
+    if (!confirm("Zerar contadores acumulados desta importação?")) return;
+    setErroGlobal(null);
+    try { await chamar({ acao: "zerar_totais" }); } catch (e: any) { contarErro(e); }
     await invalidarTudo();
   };
 
   const rodarConferencia = async () => {
     setConferindo(true);
-    setErroGlobal("");
+    setErroGlobal(null);
     try {
       const r = await chamar({ acao: "conferir" });
       setConferir(r as unknown as ConferirResp);
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setConferindo(false); }
   };
 
@@ -237,13 +290,12 @@ function ImportarPage() {
       while (restantes.length && !stopRef.current) {
         const parte = restantes.slice(0, CHUNK);
         const r = await chamar({ acao: "importar_ids", ids: parte, forcar: true });
-        mesclarLogs(r.log);
         setUltima(r);
         restantes = restantes.slice(parte.length);
         await invalidarTudo();
       }
       await rodarConferencia();
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setRodando(false); stopRef.current = false; }
   };
 
@@ -253,25 +305,44 @@ function ImportarPage() {
     try {
       const ids = erros.data.itens.map((i) => i.wp_id).filter(Boolean).slice(0, 25);
       const r = await chamar({ acao: "importar_ids", ids, forcar: true });
-      mesclarLogs(r.log);
       setUltima(r);
       await invalidarTudo();
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setRodando(false); }
   };
 
   const removerSeed = async () => {
     if (!confirm("Remover matérias de exemplo (posts sem wp_id)?")) return;
     const { error } = await supabase.from("posts").delete().is("wp_id", null);
-    if (error) setErroGlobal(error.message);
+    if (error) setErroGlobal(traduzirErro(error.message));
     else await invalidarTudo();
   };
+
+  // ---------- Log ao vivo direto da tabela importacao_log ----------
+  const logQuery = useQuery({
+    queryKey: ["import-log"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("importacao_log")
+        .select("id, ts, nivel, wp_id, msg")
+        .order("id", { ascending: false })
+        .range(0, 199);
+      if (error) throw error;
+      return data ?? [];
+    },
+    refetchInterval: rodando ? 2000 : 5000,
+  });
+  const logs = logQuery.data ?? [];
 
   const totalOrigem = origem?.total ?? 0;
   const totalPaginas = estado.data?.total_paginas ?? origem?.totalPaginas ?? 0;
   const ultimaPagina = estado.data?.ultima_pagina ?? 0;
   const feito = matBanco.data ?? 0;
-  const pct = totalPaginas > 0 ? Math.min(100, Math.round((ultimaPagina / totalPaginas) * 100)) : 0;
+  const faltamMaterias = Math.max(0, totalOrigem - feito);
+  // Progresso REAL é matérias no banco / na origem — nunca chega a 100% enquanto faltarem matérias.
+  const pct = totalOrigem > 0 ? Math.min(100, Math.round((feito / totalOrigem) * 100)) : 0;
+  const concluidoLotes = !!estado.data?.concluido;
+  const alertaFaltantes = concluidoLotes && faltamMaterias > 0;
 
   // Detecção de execução morta
   const emExecucao: boolean = !!estado.data?.em_execucao;
@@ -327,6 +398,16 @@ function ImportarPage() {
         </div>
       )}
 
+      {alertaFaltantes && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-amber-500/60 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <span>
+            O cursor terminou, mas ainda faltam <strong>{fmt(faltamMaterias)}</strong> matérias no banco.
+            Rode a conferência abaixo para listar os wp_id que ficaram de fora e reimporte apenas eles.
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-4">
         <Card label="Matérias no banco" value={fmt(feito)} />
         <Card label="Na origem" value={fmt(totalOrigem)} />
@@ -346,7 +427,19 @@ function ImportarPage() {
         <MiniCard cor="text-destructive" label="Erros" value={ultE} />
       </div>
 
+      {/* Totais acumulados desta importação (persistem entre lotes) */}
+      <div className="rounded-md border border-border bg-card p-3">
+        <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Totais acumulados</p>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <MiniCard cor="text-emerald-500" label="Importadas" value={(estado.data?.tot_importados ?? 0) as number} />
+          <MiniCard cor="text-sky-500" label="Atualizadas" value={(estado.data?.tot_atualizados ?? 0) as number} />
+          <MiniCard cor="text-muted-foreground" label="Puladas" value={(estado.data?.tot_pulados ?? 0) as number} />
+          <MiniCard cor="text-destructive" label="Erros" value={(estado.data?.tot_erros ?? 0) as number} />
+        </div>
+      </div>
+
       <p className="text-xs text-muted-foreground">
+
         <strong>IMPORTADA:</strong> veio agora, pela primeira vez. ·{" "}
         <strong>ATUALIZADA:</strong> já existia e foi editada no WordPress depois. ·{" "}
         <strong>PULADA:</strong> já existia e nada mudou na origem — é o que acelera a importação. ·{" "}
@@ -400,13 +493,27 @@ function ImportarPage() {
           <input type="checkbox" checked={forcar} onChange={(e) => setForcar(e.target.checked)} />
           Forçar reimportação
         </label>
+        <button onClick={zerarTotais}
+          className="ml-2 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1 text-xs uppercase text-muted-foreground">
+          Zerar totais
+        </button>
         <button onClick={removerSeed}
           className="ml-auto inline-flex items-center gap-2 rounded-md border border-destructive/60 px-4 py-2 text-sm uppercase text-destructive">
           <Trash2 className="h-4 w-4" /> Remover exemplos
         </button>
       </div>
 
-      {erroGlobal && <p className="text-sm text-destructive">{erroGlobal}</p>}
+      {erroGlobal && (
+        <div className="rounded-md border border-destructive/60 bg-destructive/10 p-3 text-sm text-destructive">
+          <p>{erroGlobal.amigavel}</p>
+          {erroGlobal.tecnico && (
+            <details className="mt-1 text-xs text-destructive/80">
+              <summary className="cursor-pointer">ver detalhes técnicos</summary>
+              <pre className="mt-1 whitespace-pre-wrap font-mono">{erroGlobal.tecnico}</pre>
+            </details>
+          )}
+        </div>
+      )}
 
       {/* Conferência com a origem */}
       <div className="rounded-md border border-border bg-card p-4">

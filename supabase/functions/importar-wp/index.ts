@@ -6,7 +6,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const WP = "https://hockey4life.com.br/wp-json/wp/v2";
 const BUCKET = "midia";
-const TEMPO_MAX_MS = 50_000;
+const TEMPO_MAX_MS = 45_000;
 const HEARTBEAT_STALE_MS = 3 * 60_000;
 const TAM_PADRAO = 25;
 
@@ -192,27 +192,41 @@ async function coletarIdsOrigem(): Promise<number[]> {
   return ids;
 }
 
+// admin client compartilhado para logs mesmo em caminho de erro
+function makeAdmin() {
+  return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { persistSession: false },
+  });
+}
+
+async function gravarLog(admin: any, nivel: string, msg: string, wp_id: number | null = null, contexto: any = null) {
+  try {
+    await admin.from("importacao_log").insert({ nivel, msg: String(msg).slice(0, 2000), wp_id, contexto });
+  } catch (_) { /* nunca falhar por causa do log */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const t0 = Date.now();
   const jsonResp = (obj: any, status = 200) =>
     new Response(JSON.stringify(obj), { status, headers: { ...CORS, "content-type": "application/json" } });
 
+  const adminBoot = makeAdmin();
+
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const ANON = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    if (!token) return jsonResp({ erro: "sem token" }, 401);
+    if (!token) return jsonResp({ erro: "sem token", codigo: "sem_token" }, 401);
 
     const userClient = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: authHeader } } });
     const { data: userData, error: userErr } = await userClient.auth.getUser(token);
-    if (userErr || !userData?.user) return jsonResp({ erro: "não autenticado" }, 401);
+    if (userErr || !userData?.user) return jsonResp({ erro: "não autenticado", codigo: "sem_sessao" }, 401);
     const uid = userData.user.id;
-    const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } });
+    const admin = adminBoot;
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: uid, _role: "admin" });
-    if (!isAdmin) return jsonResp({ erro: "acesso restrito" }, 403);
+    if (!isAdmin) return jsonResp({ erro: "acesso restrito", codigo: "sem_permissao" }, 403);
 
     const body = await req.json().catch(() => ({}));
     const acao: string = String(body.acao ?? "lote");
@@ -224,15 +238,37 @@ Deno.serve(async (req) => {
         id: 1, em_execucao: false, materia_atual: null, imagem_atual: null,
         batimento_em: new Date().toISOString(),
       });
+      await gravarLog(admin, "info", "Execução destravada manualmente");
+      return jsonResp({ ok: true });
+    }
+
+    // ---------- ZERAR TOTAIS ----------
+    if (acao === "zerar_totais") {
+      await admin.from("importacao_estado").update({
+        tot_importados: 0, tot_atualizados: 0, tot_pulados: 0, tot_erros: 0,
+        iniciado_em: new Date().toISOString(),
+      }).eq("id", 1);
+      await gravarLog(admin, "info", "Contadores acumulados zerados");
       return jsonResp({ ok: true });
     }
 
     // ---------- CONFERIR ----------
     if (acao === "conferir") {
       const origem = await coletarIdsOrigem();
-      const { data: dbRows } = await admin.from("posts").select("wp_id").not("wp_id", "is", null);
-      const banco = new Set<number>((dbRows ?? []).map((r: any) => Number(r.wp_id)));
+      // paginado para evitar corte de 1000
+      const banco = new Set<number>();
+      let from = 0;
+      const PAG = 1000;
+      while (true) {
+        const { data, error } = await admin.from("posts").select("wp_id").not("wp_id", "is", null).range(from, from + PAG - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        for (const r of data) banco.add(Number((r as any).wp_id));
+        if (data.length < PAG) break;
+        from += PAG;
+      }
       const faltando = origem.filter((id) => !banco.has(id));
+      await gravarLog(admin, "info", `Conferência: origem=${origem.length}, banco=${banco.size}, faltando=${faltando.length}`);
       return jsonResp({
         origem_total: origem.length,
         banco_total: banco.size,
@@ -246,15 +282,17 @@ Deno.serve(async (req) => {
     if (estadoAtual?.em_execucao) {
       const hb = estadoAtual.batimento_em ? new Date(estadoAtual.batimento_em).getTime() : 0;
       if (Date.now() - hb < HEARTBEAT_STALE_MS) {
-        return jsonResp({ bloqueado: true, batimento_em: estadoAtual.batimento_em });
+        return jsonResp({ bloqueado: true, batimento_em: estadoAtual.batimento_em, codigo: "bloqueado" });
       }
     }
 
     // Reserva o lock
+    const iniciadoEm = estadoAtual?.iniciado_em ?? new Date().toISOString();
     await admin.from("importacao_estado").upsert({
       id: 1, em_execucao: true, batimento_em: new Date().toISOString(),
       materia_atual: null, imagem_atual: null,
       ult_importados: 0, ult_atualizados: 0, ult_pulados: 0, ult_erros: 0, bytes_baixados: 0,
+      iniciado_em: iniciadoEm,
     });
 
     const heartbeat = async (extra: Record<string, any> = {}) => {
@@ -273,9 +311,12 @@ Deno.serve(async (req) => {
     let ultimoWpId: number | null = null;
     let idxFinal = 0;
 
-    const registrar = (nivel: string, msg: string) => {
+    const registrar = (nivel: string, msg: string, wp_id: number | null = null) => {
       log.unshift({ ts: new Date().toISOString(), nivel, msg });
+      // grava assíncrono, sem esperar
+      gravarLog(admin, nivel, msg, wp_id);
     };
+
 
     // Mapa wp_tag -> tema uuid
     let temaByTagId = new Map<number, string>();
@@ -374,6 +415,7 @@ Deno.serve(async (req) => {
           { wp_id, slug, status: "erro", erro: msg, importado_em: new Date().toISOString() },
           { onConflict: "wp_id" },
         );
+        gravarLog(admin, "erro", `#${wp_id} ${slug}: ${msg}`, wp_id);
         return "ERRO";
       }
     }
@@ -409,8 +451,13 @@ Deno.serve(async (req) => {
           em_execucao: false, materia_atual: null, imagem_atual: null,
           ult_importados: importados, ult_atualizados: atualizados,
           ult_pulados: pulados, ult_erros: erros.length, bytes_baixados: bytes,
+          tot_importados: (estadoAtual?.tot_importados ?? 0) + importados,
+          tot_atualizados: (estadoAtual?.tot_atualizados ?? 0) + atualizados,
+          tot_pulados: (estadoAtual?.tot_pulados ?? 0) + pulados,
+          tot_erros: (estadoAtual?.tot_erros ?? 0) + erros.length,
           batimento_em: new Date().toISOString(),
         }).eq("id", 1);
+        await gravarLog(admin, "lote", `Lote de IDs finalizado: ${importados} importadas, ${atualizados} atualizadas, ${pulados} puladas, ${erros.length} erros`);
         return jsonResp({
           acao, importados, atualizados, pulados, imagens_subidas: imagensSubidas,
           bytes_baixados: bytes, erros, log, parcial, duracao_ms: Date.now() - t0,
@@ -448,6 +495,8 @@ Deno.serve(async (req) => {
       const posts = await r.json();
       registrar("info", `Página ${paginaAtual}/${totalPaginas} recebida (${posts.length} posts), iniciando no índice ${idxInicio}`);
 
+      await gravarLog(admin, "lote", `Início do lote — página ${paginaAtual}/${totalPaginas}, ${posts.length} posts, idx=${idxInicio}`);
+
       // Processa em paralelo com concorrência 4, respeitando tempo limite
       let cursorIdx = idxInicio;
       const fila = posts.slice(idxInicio).map((p: any, i: number) => ({ p, idx: idxInicio + i }));
@@ -455,7 +504,11 @@ Deno.serve(async (req) => {
       let pararLote = false;
       await paralelo(fila, 4, async (item: any) => {
         if (pararLote) return;
-        if (Date.now() - t0 > TEMPO_MAX_MS) { pararLote = true; parcial = true; return; }
+        if (Date.now() - t0 > TEMPO_MAX_MS) {
+          pararLote = true; parcial = true;
+          gravarLog(admin, "info", `Tempo limite atingido no lote — retomará no próximo`);
+          return;
+        }
         const status = await processarPost(item.p);
         if (status === "IMPORTADA") importados++;
         else if (status === "ATUALIZADA") atualizados++;
@@ -464,7 +517,7 @@ Deno.serve(async (req) => {
         cursorIdx = Math.max(cursorIdx, item.idx + 1);
         ultimoWpId = item.p.id;
         idxFinal = cursorIdx;
-        registrar(status.toLowerCase(), `#${item.p.id} ${decodeEntities(item.p.title?.rendered ?? "")}`);
+        registrar(status.toLowerCase(), `#${item.p.id} ${decodeEntities(item.p.title?.rendered ?? "")}`, item.p.id);
         // atualiza cursor no banco a cada matéria concluída
         await heartbeat({
           indice_pagina: cursorIdx, ultimo_wp_id: ultimoWpId,
@@ -487,8 +540,14 @@ Deno.serve(async (req) => {
         materia_atual: null, imagem_atual: null,
         ult_importados: importados, ult_atualizados: atualizados,
         ult_pulados: pulados, ult_erros: erros.length, bytes_baixados: bytes,
+        tot_importados: (estadoAtual?.tot_importados ?? 0) + importados,
+        tot_atualizados: (estadoAtual?.tot_atualizados ?? 0) + atualizados,
+        tot_pulados: (estadoAtual?.tot_pulados ?? 0) + pulados,
+        tot_erros: (estadoAtual?.tot_erros ?? 0) + erros.length,
         batimento_em: new Date().toISOString(),
       }).eq("id", 1);
+
+      await gravarLog(admin, "lote", `Fim do lote pág ${paginaAtual}: ${importados} imp, ${atualizados} atu, ${pulados} pul, ${erros.length} erros${parcial ? " (parcial — tempo)" : ""}`);
 
       const resp = {
         acao: "lote",
@@ -518,8 +577,19 @@ Deno.serve(async (req) => {
       }
     }
   } catch (e: any) {
-    console.error("[importar-wp] fatal", e?.message ?? e);
-    return new Response(JSON.stringify({ erro: e?.message ?? String(e) }), {
+    const msg = e?.message ?? String(e);
+    console.error("[importar-wp] fatal", msg);
+    // Grava fatal ANTES de retornar, e libera o lock
+    try {
+      await adminBoot.from("importacao_log").insert({
+        nivel: "fatal", msg: msg.slice(0, 2000), contexto: { stack: e?.stack ?? null },
+      });
+      await adminBoot.from("importacao_estado").update({
+        em_execucao: false, materia_atual: null, imagem_atual: null,
+        batimento_em: new Date().toISOString(),
+      }).eq("id", 1);
+    } catch (_) { /* ignora */ }
+    return new Response(JSON.stringify({ erro: msg, codigo: "fatal" }), {
       status: 500, headers: { ...CORS, "content-type": "application/json" },
     });
   }
