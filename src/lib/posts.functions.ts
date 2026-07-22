@@ -833,15 +833,27 @@ export const enviarContato = createServerFn({ method: "POST" })
 
 export const listAllPublishedSlugs = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
-  const { data } = await sb
-    .from("posts")
-    .select("slug,publicado_em,atualizado_em")
-    .eq("status", "publicado")
-    .lte("publicado_em", new Date().toISOString())
-    .order("publicado_em", { ascending: false })
-    .order("id", { ascending: false })
-    .limit(5000);
-  return data ?? [];
+  const nowIso = new Date().toISOString();
+  const PAG = 1000;
+  const todos: { slug: string; publicado_em: string | null; atualizado_em: string | null }[] = [];
+  let from = 0;
+  // Paginado com .range() — a Data API corta em 1000 sem avisar.
+  while (true) {
+    const { data, error } = await sb
+      .from("posts")
+      .select("slug,publicado_em,atualizado_em")
+      .eq("status", "publicado")
+      .lte("publicado_em", nowIso)
+      .order("publicado_em", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, from + PAG - 1);
+    if (error) break;
+    if (!data || data.length === 0) break;
+    todos.push(...data);
+    if (data.length < PAG) break;
+    from += PAG;
+  }
+  return todos;
 });
 
 export const listRecentForFeed = createServerFn({ method: "GET" }).handler(async () => {
