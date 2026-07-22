@@ -110,9 +110,8 @@ function ImportarPage() {
   const qc = useQueryClient();
   const [rodando, setRodando] = useState(false);
   const [ultima, setUltima] = useState<LoteResp | null>(null);
-  const [erroGlobal, setErroGlobal] = useState<string>("");
+  const [erroGlobal, setErroGlobal] = useState<{ amigavel: string; tecnico: string } | null>(null);
   const [forcar, setForcar] = useState(false);
-  const [logs, setLogs] = useState<LogItem[]>([]);
   const [conferir, setConferir] = useState<ConferirResp | null>(null);
   const [conferindo, setConferindo] = useState(false);
   const stopRef = useRef(false);
