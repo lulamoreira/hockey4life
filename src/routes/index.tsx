@@ -76,6 +76,11 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Placares NHL — estilo "NÃO PERCA", logo acima do vídeo destaque */}
+      <div className="pt-4">
+        <PlacaresNaoPerca settings={placares} />
+      </div>
+
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
       {hfc.video_url && (
         <section className="mx-auto max-w-7xl px-4 py-12">
@@ -102,9 +107,6 @@ function HomePage() {
         </section>
       )}
 
-      {/* Faixa amarela "Próximos jogos" logo acima de Últimas histórias */}
-      <ProximosJogosFaixa settings={placares} />
-
       {/* Últimas histórias */}
       {ultimas.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12">
@@ -122,9 +124,7 @@ function HomePage() {
         </section>
       )}
 
-      {/* Placares: abaixo das últimas (padrão) ou acima do rodapé */}
-      {placares.posicao === "apos_ultimas" && <PlacaresLetreiros settings={placares} />}
-      {placares.posicao === "acima_rodape" && <PlacaresLetreiros settings={placares} />}
+
 
       {/* Letreiro "NÃO PERCA" logo acima do rodapé */}
       <div className="mx-auto max-w-7xl px-4 pb-6">
