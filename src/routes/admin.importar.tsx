@@ -190,18 +190,21 @@ function ImportarPage() {
     ]);
   };
 
-  const mesclarLogs = (novos: LogItem[] | undefined) => {
-    if (!novos || !novos.length) return;
-    setLogs((prev) => [...novos, ...prev].slice(0, 300));
+  // Helper: transforma qualquer erro em par (amigavel, tecnico).
+  const contarErro = (e: any) => {
+    const codigo = (e as any)?.codigo as string | undefined;
+    setErroGlobal(traduzirErro(e?.message ?? String(e), codigo));
   };
 
   const rodarLote = async (extra: Record<string, unknown> = {}) => {
-    setErroGlobal("");
+    setErroGlobal(null);
     const resp = await chamar({ acao: "lote", tamanho: 25, forcar, ...extra });
     setUltima(resp);
-    mesclarLogs(resp.log);
     if (resp.bloqueado) {
-      setErroGlobal("Execução anterior interrompida — clique em Destravar e continuar.");
+      setErroGlobal({
+        amigavel: "Uma importação anterior ainda está travada — clique em Destravar e tente de novo.",
+        tecnico: `bloqueado desde ${resp.batimento_em ?? "?"}`,
+      });
       return resp;
     }
     const processadas = resp.importados + resp.atualizados + resp.pulados + resp.erros.length;
@@ -215,7 +218,7 @@ function ImportarPage() {
   const importarProximo = async () => {
     if (rodando) return;
     setRodando(true);
-    try { await rodarLote(); } catch (e: any) { setErroGlobal(e.message); } finally { setRodando(false); }
+    try { await rodarLote(); } catch (e: any) { contarErro(e); } finally { setRodando(false); }
   };
 
   const importarTudo = async () => {
@@ -231,7 +234,7 @@ function ImportarPage() {
           falhas = 0;
         } catch (e: any) {
           falhas++;
-          setErroGlobal(`Falha no lote (${falhas}/3): ${e.message}`);
+          contarErro(e);
           if (falhas >= 3) break;
           continue;
         }
@@ -239,7 +242,10 @@ function ImportarPage() {
         if (r.concluido) break;
         if (!r.parcial && r.pagina_completa && r.total_paginas && r.pagina && r.pagina >= r.total_paginas) break;
         if (r.importados === 0 && r.atualizados === 0 && r.pulados === 0 && r.erros.length === 0 && !r.parcial) {
-          setErroGlobal("Lote vazio — verifique a origem.");
+          setErroGlobal({
+            amigavel: "O lote voltou vazio. A origem pode ter mudado — rode a conferência.",
+            tecnico: "batch retornou sem posts",
+          });
           break;
         }
       }
@@ -252,18 +258,25 @@ function ImportarPage() {
   const parar = () => { stopRef.current = true; };
 
   const destravar = async () => {
-    setErroGlobal("");
-    await chamar({ acao: "destravar" });
+    setErroGlobal(null);
+    try { await chamar({ acao: "destravar" }); } catch (e: any) { contarErro(e); }
+    await invalidarTudo();
+  };
+
+  const zerarTotais = async () => {
+    if (!confirm("Zerar contadores acumulados desta importação?")) return;
+    setErroGlobal(null);
+    try { await chamar({ acao: "zerar_totais" }); } catch (e: any) { contarErro(e); }
     await invalidarTudo();
   };
 
   const rodarConferencia = async () => {
     setConferindo(true);
-    setErroGlobal("");
+    setErroGlobal(null);
     try {
       const r = await chamar({ acao: "conferir" });
       setConferir(r as unknown as ConferirResp);
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setConferindo(false); }
   };
 
@@ -277,13 +290,12 @@ function ImportarPage() {
       while (restantes.length && !stopRef.current) {
         const parte = restantes.slice(0, CHUNK);
         const r = await chamar({ acao: "importar_ids", ids: parte, forcar: true });
-        mesclarLogs(r.log);
         setUltima(r);
         restantes = restantes.slice(parte.length);
         await invalidarTudo();
       }
       await rodarConferencia();
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setRodando(false); stopRef.current = false; }
   };
 
@@ -293,25 +305,44 @@ function ImportarPage() {
     try {
       const ids = erros.data.itens.map((i) => i.wp_id).filter(Boolean).slice(0, 25);
       const r = await chamar({ acao: "importar_ids", ids, forcar: true });
-      mesclarLogs(r.log);
       setUltima(r);
       await invalidarTudo();
-    } catch (e: any) { setErroGlobal(e.message); }
+    } catch (e: any) { contarErro(e); }
     finally { setRodando(false); }
   };
 
   const removerSeed = async () => {
     if (!confirm("Remover matérias de exemplo (posts sem wp_id)?")) return;
     const { error } = await supabase.from("posts").delete().is("wp_id", null);
-    if (error) setErroGlobal(error.message);
+    if (error) setErroGlobal(traduzirErro(error.message));
     else await invalidarTudo();
   };
+
+  // ---------- Log ao vivo direto da tabela importacao_log ----------
+  const logQuery = useQuery({
+    queryKey: ["import-log"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("importacao_log")
+        .select("id, ts, nivel, wp_id, msg")
+        .order("id", { ascending: false })
+        .range(0, 199);
+      if (error) throw error;
+      return data ?? [];
+    },
+    refetchInterval: rodando ? 2000 : 5000,
+  });
+  const logs = logQuery.data ?? [];
 
   const totalOrigem = origem?.total ?? 0;
   const totalPaginas = estado.data?.total_paginas ?? origem?.totalPaginas ?? 0;
   const ultimaPagina = estado.data?.ultima_pagina ?? 0;
   const feito = matBanco.data ?? 0;
-  const pct = totalPaginas > 0 ? Math.min(100, Math.round((ultimaPagina / totalPaginas) * 100)) : 0;
+  const faltamMaterias = Math.max(0, totalOrigem - feito);
+  // Progresso REAL é matérias no banco / na origem — nunca chega a 100% enquanto faltarem matérias.
+  const pct = totalOrigem > 0 ? Math.min(100, Math.round((feito / totalOrigem) * 100)) : 0;
+  const concluidoLotes = !!estado.data?.concluido;
+  const alertaFaltantes = concluidoLotes && faltamMaterias > 0;
 
   // Detecção de execução morta
   const emExecucao: boolean = !!estado.data?.em_execucao;
