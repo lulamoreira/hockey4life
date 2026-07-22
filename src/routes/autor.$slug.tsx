@@ -104,7 +104,7 @@ function AutorPage() {
               {autor.nome.charAt(0)}
             </span>
           )}
-          <div className="min-w-0 flex-1">
+          <div className="mx-auto w-full max-w-[92%] min-w-0 flex-1 md:max-w-none">
             <h1 className="h4l-title text-4xl leading-tight text-foreground md:text-6xl">{autor.nome}</h1>
             <p className="mt-2 text-sm uppercase tracking-widest text-primary">
               {autor.cargo ?? "Jornalista esportivo · Hockey4Life"}
@@ -115,13 +115,13 @@ function AutorPage() {
             {(autor.formacao || autor.competencias) && (
               <dl className="mt-4 space-y-1 text-sm text-foreground/85">
                 {autor.formacao && (
-                  <div className="flex flex-wrap gap-x-2">
+                  <div className="flex flex-wrap justify-center gap-x-2 md:justify-start">
                     <dt className="font-semibold uppercase tracking-wider text-muted-foreground">Formação:</dt>
                     <dd>{autor.formacao}</dd>
                   </div>
                 )}
                 {autor.competencias && (
-                  <div className="flex flex-wrap gap-x-2">
+                  <div className="flex flex-wrap justify-center gap-x-2 md:justify-start">
                     <dt className="font-semibold uppercase tracking-wider text-muted-foreground">Competências:</dt>
                     <dd>{autor.competencias}</dd>
                   </div>
@@ -134,7 +134,7 @@ function AutorPage() {
 
         {/* Bio longa */}
         {autor.bio_longa && (
-          <section className="mx-auto mt-10 max-w-2xl">
+          <section className="mx-auto mt-10 max-w-[92%] text-center md:max-w-2xl md:text-left">
             <p className="text-base leading-relaxed text-foreground/90 md:text-lg md:leading-loose whitespace-pre-line">
               {autor.bio_longa}
             </p>
