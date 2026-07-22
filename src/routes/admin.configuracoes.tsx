@@ -1250,3 +1250,20 @@ function AparenciaTab() {
     </div>
   );
 }
+
+function MenuToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center justify-between gap-4 rounded-md border border-border px-3 py-2 text-sm">
+      <span>{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"}`}
+      >
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
+      </button>
+    </label>
+  );
+}
