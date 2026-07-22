@@ -24,6 +24,7 @@ export function PostEditor({ id }: { id?: string }) {
 
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
+  const [chapeu, setChapeu] = useState("");
   const [resumo, setResumo] = useState("");
   const [conteudo, setConteudo] = useState("");
   const [imagemCapa, setImagemCapa] = useState("");
@@ -43,6 +44,7 @@ export function PostEditor({ id }: { id?: string }) {
     if (!isNew && postQ.data?.post) {
       const p = postQ.data.post;
       setTitulo(p.titulo); setSlug(p.slug);
+      setChapeu((p as any).chapeu ?? "");
       setResumo(p.resumo ?? ""); setConteudo(p.conteudo ?? "");
       setImagemCapa(p.imagem_capa ?? ""); setCreditoImagem(p.credito_imagem ?? "");
       setStatus(p.status); setDestaque(p.destaque); setNaoPerca(p.nao_perca);
