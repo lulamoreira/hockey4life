@@ -103,7 +103,7 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               <Search className="h-4 w-4" />
             </Link>
           )}
-          <ThemeToggle className="hidden md:inline-flex" />
+          <ThemeToggle />
           {m.fale_conosco && (
             <Link
               to="/fale-conosco"
@@ -117,7 +117,6 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               Fale conosco
             </Link>
           )}
-          <ThemeToggle className="md:hidden" />
           <button
             className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
             onClick={() => setOpen(true)}
