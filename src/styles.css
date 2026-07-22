@@ -38,6 +38,8 @@
 
   --font-display: "Anton", "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-list: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-list-cond: "Open Sans Condensed", "Oswald", "Arial Narrow", ui-sans-serif, sans-serif;
 }
 
 :root {
