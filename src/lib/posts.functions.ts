@@ -264,6 +264,9 @@ export type AutorResumo = {
   bio_curta: string | null;
   bio_media: string | null;
   bio_longa: string | null;
+  cargo: string | null;
+  formacao: string | null;
+  competencias: string | null;
   linkedin_url: string | null;
   outros_links: Record<string, string> | null;
   fotos: string[] | null;
@@ -475,7 +478,7 @@ export const getPostBySlug = createServerFn({ method: "GET" })
     if ((post as any).autor_id) {
       const { data: aut } = await sb
         .from("autores")
-        .select("id,nome,slug,bio,bio_curta,bio_media,bio_longa,linkedin_url,outros_links,fotos,linha_do_tempo,foto_url,links")
+        .select("id,nome,slug,bio,bio_curta,bio_media,bio_longa,cargo,formacao,competencias,linkedin_url,outros_links,fotos,linha_do_tempo,foto_url,links")
         .eq("id", (post as any).autor_id)
         .maybeSingle();
       if (aut) autor = aut as AutorResumo;
@@ -586,7 +589,7 @@ export const getAutorPublico = createServerFn({ method: "GET" })
     const now = new Date().toISOString();
     const { data: autor, error } = await sb
       .from("autores")
-      .select("id,nome,slug,bio,bio_curta,bio_media,bio_longa,linkedin_url,outros_links,fotos,linha_do_tempo,foto_url,links")
+      .select("id,nome,slug,bio,bio_curta,bio_media,bio_longa,cargo,formacao,competencias,linkedin_url,outros_links,fotos,linha_do_tempo,foto_url,links")
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw error;

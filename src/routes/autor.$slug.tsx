@@ -106,9 +106,27 @@ function AutorPage() {
           )}
           <div className="min-w-0 flex-1">
             <h1 className="h4l-title text-4xl leading-tight text-foreground md:text-6xl">{autor.nome}</h1>
-            <p className="mt-2 text-sm uppercase tracking-widest text-primary">Jornalista esportivo · Hockey4Life</p>
+            <p className="mt-2 text-sm uppercase tracking-widest text-primary">
+              {autor.cargo ?? "Jornalista esportivo · Hockey4Life"}
+            </p>
             {autor.bio_curta && (
               <p className="mt-4 text-base text-foreground/90 md:text-lg">{autor.bio_curta}</p>
+            )}
+            {(autor.formacao || autor.competencias) && (
+              <dl className="mt-4 space-y-1 text-sm text-foreground/85">
+                {autor.formacao && (
+                  <div className="flex flex-wrap gap-x-2">
+                    <dt className="font-semibold uppercase tracking-wider text-muted-foreground">Formação:</dt>
+                    <dd>{autor.formacao}</dd>
+                  </div>
+                )}
+                {autor.competencias && (
+                  <div className="flex flex-wrap gap-x-2">
+                    <dt className="font-semibold uppercase tracking-wider text-muted-foreground">Competências:</dt>
+                    <dd>{autor.competencias}</dd>
+                  </div>
+                )}
+              </dl>
             )}
             <SocialLinks autor={autor} />
           </div>
@@ -123,19 +141,18 @@ function AutorPage() {
           </section>
         )}
 
+        {/* Destaques de carreira */}
+        <section className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-3">
+          <HighlightCard destaque="25" unidade="anos" descricao="de imprensa esportiva" />
+          <HighlightCard destaque="6" unidade="anos" descricao="na Rede Globo" />
+          <HighlightCard destaque={stats.total.toLocaleString("pt-BR")} unidade="matérias" descricao="assinadas no Hockey4Life" />
+        </section>
+
         {/* Linha do tempo */}
         {(autor.linha_do_tempo?.length ?? 0) > 0 && (
           <section className="mx-auto mt-14 max-w-2xl">
             <h2 className="h4l-title mb-6 text-2xl text-foreground md:text-3xl">Linha do tempo</h2>
-            <ol className="relative border-l-2 border-primary/40 pl-6">
-              {autor.linha_do_tempo!.map((item, i) => (
-                <li key={i} className="relative mb-6 last:mb-0">
-                  <span className="absolute -left-[33px] top-1.5 h-4 w-4 rounded-full bg-primary ring-4 ring-background" />
-                  <div className="h4l-title text-2xl text-primary">{item.ano}</div>
-                  <p className="mt-1 text-sm text-foreground/90 md:text-base">{item.texto}</p>
-                </li>
-              ))}
-            </ol>
+            <LinhaDoTempo itens={autor.linha_do_tempo!} />
           </section>
         )}
 
@@ -252,6 +269,46 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <div className="h4l-title text-3xl text-primary md:text-4xl">{value}</div>
       <div className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>
     </div>
+  );
+}
+
+function HighlightCard({ destaque, unidade, descricao }: { destaque: string; unidade: string; descricao: string }) {
+  return (
+    <div className="rounded-lg border border-primary/40 bg-primary/5 p-5 text-center backdrop-blur-sm">
+      <div className="h4l-title text-4xl leading-none text-primary md:text-5xl">{destaque}</div>
+      <div className="mt-1 text-xs uppercase tracking-widest text-primary/80">{unidade}</div>
+      <div className="mt-2 text-sm text-foreground/90">{descricao}</div>
+    </div>
+  );
+}
+
+function LinhaDoTempo({ itens }: { itens: Array<{ ano: string; texto: string }> }) {
+  const [expandido, setExpandido] = useState(false);
+  const visiveis = expandido ? itens : itens.slice(0, 4);
+  const resto = itens.length - 4;
+  return (
+    <>
+      <ol className="relative border-l-2 border-primary/40 pl-6">
+        {visiveis.map((item, i) => (
+          <li key={i} className="relative mb-6 last:mb-0">
+            <span className="absolute -left-[33px] top-1.5 h-4 w-4 rounded-full bg-primary ring-4 ring-background" />
+            <div className="h4l-title text-2xl text-primary">{item.ano}</div>
+            <p className="mt-1 text-sm text-foreground/90 md:text-base">{item.texto}</p>
+          </li>
+        ))}
+      </ol>
+      {resto > 0 && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => setExpandido((v) => !v)}
+            className="inline-flex items-center gap-2 rounded-md border border-primary/50 bg-transparent px-5 py-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            {expandido ? "Recolher" : `Ver carreira completa (+${resto})`}
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 

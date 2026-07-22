@@ -21,7 +21,10 @@ export type Database = {
           bio_curta: string | null
           bio_longa: string | null
           bio_media: string | null
+          cargo: string | null
+          competencias: string | null
           criado_em: string
+          formacao: string | null
           foto_url: string | null
           fotos: Json
           id: string
@@ -38,7 +41,10 @@ export type Database = {
           bio_curta?: string | null
           bio_longa?: string | null
           bio_media?: string | null
+          cargo?: string | null
+          competencias?: string | null
           criado_em?: string
+          formacao?: string | null
           foto_url?: string | null
           fotos?: Json
           id?: string
@@ -55,7 +61,10 @@ export type Database = {
           bio_curta?: string | null
           bio_longa?: string | null
           bio_media?: string | null
+          cargo?: string | null
+          competencias?: string | null
           criado_em?: string
+          formacao?: string | null
           foto_url?: string | null
           fotos?: Json
           id?: string
