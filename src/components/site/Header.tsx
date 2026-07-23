@@ -184,13 +184,6 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
           >
             <Menu className="h-5 w-5" />
           </button>
-          <button
-            className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
-            onClick={() => setOpen(true)}
-            aria-label="Abrir menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
         </div>
 
       </div>
