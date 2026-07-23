@@ -34,7 +34,7 @@ function StaffCheck() {
 
 function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
   const router = useRouter();
-  const nav: Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }> = [
+  const nav: Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }> = ([
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/materias", label: "Matérias", icon: FileText, requer: "escrever" },
     { to: "/admin/aprovacoes", label: "Aprovações", icon: CheckSquare, requer: "aprovar" },
