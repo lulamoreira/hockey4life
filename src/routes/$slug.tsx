@@ -111,6 +111,7 @@ function PostPage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(postQuery(slug));
   const { data: siteData } = useSuspenseQuery(configQuery());
+  const articleBodyRef = useRef<HTMLDivElement | null>(null);
   if (!data) return null;
   const { post, autor, recentes, relacionados, anterior, proximo } = data;
   const dataObj = post.publicado_em ? new Date(post.publicado_em) : null;
@@ -118,9 +119,11 @@ function PostPage() {
   const mes = dataObj ? dataObj.getMonth() + 1 : null;
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
   const videoUrl: string | undefined = siteData.config?.hockey_fights_cancer?.video_url;
+  const minutosLeitura = tempoLeitura(post.conteudo);
 
   return (
     <SiteLayout config={siteData.config}>
+      <ReadingProgress targetRef={articleBodyRef} />
       <div className="mx-auto my-6 max-w-7xl rounded-lg bg-white/80 px-3 py-6 backdrop-blur-sm dark:bg-black/50 md:my-10 md:px-6 md:py-10">
         {/* Breadcrumbs visíveis */}
         <nav aria-label="Trilha" className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
