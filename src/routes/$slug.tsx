@@ -134,43 +134,93 @@ function PostPage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           {/* Coluna principal */}
           <article className="min-w-0">
-            <div className="mb-3 flex flex-wrap gap-2">
-              {post.temas.map((t) => (
-                <Link
-                  key={t.slug}
-                  to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
-                  params={{ slug: t.slug }}
-                  className="rounded bg-primary/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-primary/25"
-                >
-                  {t.nome}
-                </Link>
-              ))}
-            </div>
+            <div ref={articleBodyRef}>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {post.temas.map((t) => (
+                  <Link
+                    key={t.slug}
+                    to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
+                    params={{ slug: t.slug }}
+                    className="rounded bg-primary/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-primary/25"
+                  >
+                    {t.nome}
+                  </Link>
+                ))}
+              </div>
 
-            <h1 className="h4l-title text-3xl leading-tight text-foreground md:text-5xl">{post.titulo}</h1>
+              <h1 className="h4l-title text-3xl leading-tight text-foreground md:text-5xl">{post.titulo}</h1>
 
-            {/* Linha do autor */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-border py-3 text-sm text-muted-foreground">
-              {autor && (
-                <Link to="/autor/$slug" params={{ slug: autor.slug }} className="flex items-center gap-2 hover:text-primary">
-                  {autor.foto_url ? (
-                    <img src={autor.foto_url} alt={autor.nome} className="h-8 w-8 rounded-full object-cover" />
-                  ) : (
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
-                      {autor.nome.charAt(0)}
-                    </span>
+              {/* Linha do autor — mobile: autor em cima, metadados abaixo; desktop: tudo em linha */}
+              <div className="mt-4 border-y border-border py-3 text-sm text-muted-foreground">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
+                  {autor && (
+                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="flex min-w-0 items-center gap-2 hover:text-primary">
+                      {autor.foto_url ? (
+                        <img src={autor.foto_url} alt={autor.nome} className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                      ) : (
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                          {autor.nome.charAt(0)}
+                        </span>
+                      )}
+                      <span className="truncate font-semibold text-foreground">{autor.nome}</span>
+                    </Link>
                   )}
-                  <span className="font-semibold text-foreground">{autor.nome}</span>
-                </Link>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
+                    <span>{formatDataBR(post.publicado_em)}</span>
+                    <span aria-hidden="true" className="text-muted-foreground/50">·</span>
+                    <span className="whitespace-nowrap">{minutosLeitura} min de leitura</span>
+                    {ano && mes && (
+                      <>
+                        <span aria-hidden="true" className="text-muted-foreground/50">·</span>
+                        <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
+                          ver mês
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                  <div className="sm:ml-auto">
+                    <ShareButtons
+                      url={url}
+                      titulo={post.titulo}
+                      resumo={post.resumo}
+                      chapeu={post.chapeu}
+                      imagemCapa={post.imagem_capa}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {post.imagem_capa && (
+                <figure className="mt-6">
+                  <img src={post.imagem_capa} alt={post.titulo} className="w-full rounded-lg" />
+                  {post.credito_imagem && (
+                    <figcaption className="mt-2 text-xs italic text-muted-foreground">
+                      Foto: {post.credito_imagem}
+                    </figcaption>
+                  )}
+                </figure>
               )}
-              <span>{formatDataBR(post.publicado_em)}</span>
-              <span>{tempoLeitura(post.conteudo)} min de leitura</span>
-              {ano && mes && (
-                <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
-                  ver mês
-                </Link>
+
+              {post.resumo && (
+                <p className="mt-6 border-l-2 border-primary pl-4 text-lg font-medium text-foreground/90">
+                  {post.resumo}
+                </p>
               )}
-              <div className="ml-auto">
+
+              {post.conteudo && (
+                <div
+                  className="prose-h4l mt-6"
+                  // eslint-disable-next-line react/no-danger
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(post.conteudo, {
+                      ADD_TAGS: ["iframe"],
+                      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
+                    }),
+                  }}
+                />
+              )}
+
+              <div className="mt-10 border-t border-border pt-6">
                 <ShareButtons
                   url={url}
                   titulo={post.titulo}
@@ -179,46 +229,6 @@ function PostPage() {
                   imagemCapa={post.imagem_capa}
                 />
               </div>
-            </div>
-
-            {post.imagem_capa && (
-              <figure className="mt-6">
-                <img src={post.imagem_capa} alt={post.titulo} className="w-full rounded-lg" />
-                {post.credito_imagem && (
-                  <figcaption className="mt-2 text-xs italic text-muted-foreground">
-                    Foto: {post.credito_imagem}
-                  </figcaption>
-                )}
-              </figure>
-            )}
-
-            {post.resumo && (
-              <p className="mt-6 border-l-2 border-primary pl-4 text-lg font-medium text-foreground/90">
-                {post.resumo}
-              </p>
-            )}
-
-            {post.conteudo && (
-              <div
-                className="prose-h4l mt-6"
-                // eslint-disable-next-line react/no-danger
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(post.conteudo, {
-                    ADD_TAGS: ["iframe"],
-                    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
-                  }),
-                }}
-              />
-            )}
-
-            <div className="mt-10 border-t border-border pt-6">
-              <ShareButtons
-                url={url}
-                titulo={post.titulo}
-                resumo={post.resumo}
-                chapeu={post.chapeu}
-                imagemCapa={post.imagem_capa}
-              />
             </div>
 
             {autor && (
@@ -269,6 +279,13 @@ function PostPage() {
               </nav>
             )}
 
+            <ContinueLendo
+              currentSlug={post.slug}
+              currentTemaSlugs={post.temas.map((t) => t.slug)}
+              relacionados={relacionados}
+              recentes={recentes as any}
+            />
+
             {relacionados.length > 0 && (
               <section className="mt-12">
                 <div className="overflow-hidden rounded-lg border border-border bg-card/60">
@@ -286,6 +303,7 @@ function PostPage() {
               </section>
             )}
           </article>
+
 
           {/* Sidebar */}
           <aside className="hidden space-y-6 lg:block lg:sticky lg:top-6 lg:self-start">
