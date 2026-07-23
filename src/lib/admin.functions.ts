@@ -43,7 +43,7 @@ export const listAdminPosts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) =>
     z.object({
-      status: z.enum(["todos", "rascunho", "publicado"]).default("todos"),
+      status: z.enum(["todos", "rascunho", "publicado", "em_revisao", "rejeitado", "meus"]).default("todos"),
       q: z.string().default(""),
       page: z.number().int().min(1).default(1),
       ordem: z.enum(["desc", "asc"]).default("desc"),
@@ -57,11 +57,15 @@ export const listAdminPosts = createServerFn({ method: "GET" })
     const asc = data.ordem === "asc";
     let q = context.supabase
       .from("posts")
-      .select("id,titulo,slug,chapeu,status,destaque,nao_perca,publicado_em,atualizado_em", { count: "exact" })
+      .select("id,titulo,slug,chapeu,status,destaque,nao_perca,publicado_em,atualizado_em,criado_por,motivo_rejeicao", { count: "exact" })
       .order("publicado_em", { ascending: asc, nullsFirst: asc })
       .order("id", { ascending: asc })
       .range(from, to);
-    if (data.status !== "todos") q = q.eq("status", data.status);
+    if (data.status === "meus") {
+      q = q.eq("criado_por", context.userId);
+    } else if (data.status !== "todos") {
+      q = q.eq("status", data.status as any);
+    }
     if (data.q) q = q.ilike("titulo", `%${data.q}%`);
     if (data.sem_chapeu) q = q.or("chapeu.is.null,chapeu.eq.");
     const { data: items, count, error } = await q;
