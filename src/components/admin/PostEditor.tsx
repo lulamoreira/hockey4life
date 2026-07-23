@@ -43,10 +43,14 @@ export function PostEditor({ id }: { id?: string }) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadInfo, setUploadInfo] = useState<string>("");
+  const [dirty, setDirty] = useState(false);
+  const hidratadoRef = useRef(false);
+  const ignorarProximaMudancaRef = useRef(true);
 
   useEffect(() => {
-    if (!isNew && postQ.data?.post) {
+    if (!isNew && postQ.data?.post && !hidratadoRef.current) {
       const p = postQ.data.post;
+      ignorarProximaMudancaRef.current = true;
       setTitulo(p.titulo); setSlug(p.slug);
       setChapeu((p as any).chapeu ?? "");
       setResumo(p.resumo ?? ""); setConteudo(p.conteudo ?? "");
@@ -55,8 +59,39 @@ export function PostEditor({ id }: { id?: string }) {
       setPublicadoEm(p.publicado_em ? new Date(p.publicado_em).toISOString().slice(0, 16) : "");
       setAutorId((p as any).autor_id ?? "");
       setSelTemas(new Set(postQ.data.temaIds));
+      hidratadoRef.current = true;
     }
   }, [isNew, postQ.data]);
+
+  // Marca como sujo quando qualquer campo editável muda depois da hidratação inicial.
+  useEffect(() => {
+    if (ignorarProximaMudancaRef.current) {
+      ignorarProximaMudancaRef.current = false;
+      return;
+    }
+    setDirty(true);
+  }, [titulo, slug, chapeu, resumo, conteudo, imagemCapa, creditoImagem, status, destaque, naoPerca, publicadoEm, autorId, selTemas]);
+
+  // Aviso do navegador ao fechar/recarregar a aba com alterações não salvas.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  // Bloqueia navegação interna do TanStack Router com confirmação.
+  useBlocker({
+    shouldBlockFn: () => {
+      if (!dirty) return false;
+      return !window.confirm("Você tem alterações não salvas. Sair mesmo assim?");
+    },
+    enableBeforeUnload: false,
+  });
+
 
   // Estados de carregamento e "não encontrada"
   if (!isNew && postQ.isLoading) {
