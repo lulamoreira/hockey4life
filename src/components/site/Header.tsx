@@ -140,6 +140,30 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
             </Link>
           )}
           <ThemeToggle />
+          {logado ? (
+            <Link
+              to="/conta"
+              aria-label="Minha conta"
+              title="Minha conta"
+              aria-current={pathname === "/conta" ? "page" : undefined}
+              className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+            >
+              {fotoUrl ? (
+                <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+            </Link>
+          ) : (
+            <Link
+              to="/entrar"
+              aria-label="Entrar"
+              aria-current={pathname === "/entrar" ? "page" : undefined}
+              className={`hidden min-h-9 items-center rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${pathname === "/entrar" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Entrar
+            </Link>
+          )}
           {m.fale_conosco && (
             <Link
               to="/fale-conosco"
@@ -153,6 +177,13 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               Fale conosco
             </Link>
           )}
+          <button
+            className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
+            onClick={() => setOpen(true)}
+            aria-label="Abrir menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
           <button
             className="rounded-md p-2 text-foreground hover:bg-muted md:hidden"
             onClick={() => setOpen(true)}
