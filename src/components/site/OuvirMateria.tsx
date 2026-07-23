@@ -365,7 +365,7 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     sessaoRef.current += 1;
     const sessao = sessaoRef.current;
     synth.cancel();
-    const voz = escolherVoz();
+    const voz = escolherVoz(vozURIRef.current);
     idxRef.current = inicio;
     setIdxAtual(inicio);
     definirStatus("lendo");
