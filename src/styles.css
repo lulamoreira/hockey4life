@@ -217,6 +217,16 @@ body, header, footer, aside, main, nav, section, article,
   margin: 1.5rem 0;
 }
 
+/* Destaque da frase atual durante a leitura por voz */
+.h4l-frase { transition: background-color 200ms ease, color 200ms ease; border-radius: 3px; }
+.h4l-frase-atual {
+  background-color: color-mix(in srgb, hsl(var(--primary)) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--primary)) 30%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .h4l-frase { transition: none; }
+}
+
 /* NEXUS-PRO:WATERMARK-HIDE:START */
 /* Overlay do badge oficial ocultado por conflito com UI custom.
    Bloco idempotente gerenciado pela extensão Nexus Pro.

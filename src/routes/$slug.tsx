@@ -195,7 +195,7 @@ function PostPage() {
                 </div>
               </div>
 
-              {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} />}
+              {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} corpoId="materia-corpo" />}
 
               {post.imagem_capa && (
                 <figure className="mt-6">
@@ -216,6 +216,7 @@ function PostPage() {
 
               {post.conteudo && (
                 <div
+                  id="materia-corpo"
                   className="prose-h4l mt-6"
                   // eslint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{
