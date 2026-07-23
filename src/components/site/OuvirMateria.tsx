@@ -481,6 +481,17 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     if (estado !== "parado") tocarDe(idxRef.current);
   }
 
+  function trocarVoz(uri: string) {
+    setVozURI(uri);
+    vozURIRef.current = uri;
+    try {
+      localStorage.setItem(VOZ_KEY, uri);
+    } catch {
+      /* noop */
+    }
+    if (estado !== "parado") tocarDe(idxRef.current);
+  }
+
   function alternarAcompanhar() {
     const novo = !acompanhar;
     setAcompanhar(novo);
