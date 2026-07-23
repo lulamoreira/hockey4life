@@ -195,7 +195,7 @@ function PostPage() {
                 </div>
               </div>
 
-              {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} />}
+              {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} corpoId="materia-corpo" />}
 
               {post.imagem_capa && (
                 <figure className="mt-6">
