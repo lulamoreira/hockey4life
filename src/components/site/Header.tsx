@@ -42,6 +42,17 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
   const isAdmin = !!roleQ.data?.isAdmin;
   const isEditor = !!roleQ.data?.isEditor;
 
+  const perfilQ = useQuery({
+    queryKey: ["header-perfil", session?.user.id ?? "anon"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("foto_url,nome").eq("id", session!.user.id).maybeSingle();
+      return data as { foto_url: string | null; nome: string | null } | null;
+    },
+    enabled: logado,
+    staleTime: 60_000,
+  });
+  const fotoUrl = perfilQ.data?.foto_url ?? null;
+
   async function sair() {
     setOpen(false);
     await supabase.auth.signOut();
@@ -129,6 +140,30 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
             </Link>
           )}
           <ThemeToggle />
+          {logado ? (
+            <Link
+              to="/conta"
+              aria-label="Minha conta"
+              title="Minha conta"
+              aria-current={pathname === "/conta" ? "page" : undefined}
+              className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+            >
+              {fotoUrl ? (
+                <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+            </Link>
+          ) : (
+            <Link
+              to="/entrar"
+              aria-label="Entrar"
+              aria-current={pathname === "/entrar" ? "page" : undefined}
+              className={`hidden min-h-9 items-center rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors md:inline-flex ${pathname === "/entrar" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Entrar
+            </Link>
+          )}
           {m.fale_conosco && (
             <Link
               to="/fale-conosco"
@@ -216,11 +251,20 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                 <SecaoMenu>Conta</SecaoMenu>
                 {!logado && (
                   <Link
-                    to="/admin"
+                    to="/entrar"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
                   >
-                    <LogIn className="h-4 w-4" /> Login
+                    <LogIn className="h-4 w-4" /> Entrar
+                  </Link>
+                )}
+                {logado && (
+                  <Link
+                    to="/conta"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <User className="h-4 w-4" /> Minha conta
                   </Link>
                 )}
                 {logado && isEditor && (
