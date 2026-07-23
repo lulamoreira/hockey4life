@@ -10,6 +10,7 @@ type Props = {
 
 const VEL_KEY = "h4l-voz-velocidade";
 const ACOMP_KEY = "h4l-voz-acompanhar";
+const VOZ_KEY = "h4l-voz-uri";
 const VELOCIDADES = [0.8, 1, 1.25, 1.5] as const;
 type StatusLeitura = "parado" | "lendo" | "pausado";
 
@@ -36,9 +37,27 @@ function dividirFrases(texto: string): string[] {
   return brutas.length ? brutas : [texto];
 }
 
-function escolherVoz(): SpeechSynthesisVoice | null {
+function listarVozesPt(): SpeechSynthesisVoice[] {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return [];
+  const todas = window.speechSynthesis.getVoices();
+  const pt = todas.filter((v) => /^pt/i.test(v.lang));
+  // pt-BR primeiro, depois demais pt
+  pt.sort((a, b) => {
+    const aBr = /^pt-BR/i.test(a.lang) ? 0 : 1;
+    const bBr = /^pt-BR/i.test(b.lang) ? 0 : 1;
+    if (aBr !== bBr) return aBr - bBr;
+    return a.name.localeCompare(b.name);
+  });
+  return pt;
+}
+
+function escolherVoz(preferidaURI?: string | null): SpeechSynthesisVoice | null {
   const vozes = window.speechSynthesis.getVoices();
   if (!vozes.length) return null;
+  if (preferidaURI) {
+    const escolhida = vozes.find((v) => v.voiceURI === preferidaURI);
+    if (escolhida) return escolhida;
+  }
   return (
     vozes.find((v) => /^pt-BR/i.test(v.lang)) ??
     vozes.find((v) => /^pt/i.test(v.lang)) ??
@@ -170,6 +189,10 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
   const sessaoRef = useRef(0);
   const utteranceAtualRef = useRef<SpeechSynthesisUtterance | null>(null);
 
+  const [vozesPt, setVozesPt] = useState<SpeechSynthesisVoice[]>([]);
+  const [vozURI, setVozURI] = useState<string>("");
+  const vozURIRef = useRef<string>("");
+
   // auto-scroll
   const acompanharRef = useRef(true);
   const usuarioMexeuRef = useRef(false);
@@ -199,7 +222,21 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
       acompanharRef.current = false;
     }
     reducedMotionRef.current = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    const carregar = () => window.speechSynthesis.getVoices();
+
+    const uriSalva = localStorage.getItem(VOZ_KEY) ?? "";
+    if (uriSalva) {
+      setVozURI(uriSalva);
+      vozURIRef.current = uriSalva;
+    }
+    const carregar = () => {
+      const pt = listarVozesPt();
+      setVozesPt(pt);
+      // Se a voz salva não existe mais neste aparelho, cai no padrão silenciosamente.
+      if (vozURIRef.current && !pt.some((v) => v.voiceURI === vozURIRef.current)) {
+        vozURIRef.current = "";
+        setVozURI("");
+      }
+    };
     carregar();
     window.speechSynthesis.onvoiceschanged = carregar;
     return () => {
@@ -328,7 +365,7 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     sessaoRef.current += 1;
     const sessao = sessaoRef.current;
     synth.cancel();
-    const voz = escolherVoz();
+    const voz = escolherVoz(vozURIRef.current);
     idxRef.current = inicio;
     setIdxAtual(inicio);
     definirStatus("lendo");
@@ -444,6 +481,17 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     if (estado !== "parado") tocarDe(idxRef.current);
   }
 
+  function trocarVoz(uri: string) {
+    setVozURI(uri);
+    vozURIRef.current = uri;
+    try {
+      localStorage.setItem(VOZ_KEY, uri);
+    } catch {
+      /* noop */
+    }
+    if (estado !== "parado") tocarDe(idxRef.current);
+  }
+
   function alternarAcompanhar() {
     const novo = !acompanhar;
     setAcompanhar(novo);
@@ -547,6 +595,25 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
           />
           Acompanhar a leitura (rolar até a frase atual)
         </label>
+
+        {vozesPt.length >= 2 && (
+          <label className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>Voz:</span>
+            <select
+              value={vozURI}
+              onChange={(e) => trocarVoz(e.target.value)}
+              aria-label="Escolher a voz da leitura"
+              className="min-h-[36px] max-w-full flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+            >
+              <option value="">Automática (pt-BR)</option>
+              {vozesPt.map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name} ({v.lang})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         {estado !== "parado" && (
           <>
