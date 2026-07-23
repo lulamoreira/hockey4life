@@ -195,6 +195,8 @@ function PostPage() {
                 </div>
               </div>
 
+              {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} />}
+
               {post.imagem_capa && (
                 <figure className="mt-6">
                   <img src={post.imagem_capa} alt={post.titulo} className="w-full rounded-lg" />
