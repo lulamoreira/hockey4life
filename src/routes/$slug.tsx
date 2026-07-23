@@ -13,6 +13,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { ContinueLendo } from "@/components/site/ContinueLendo";
 import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
+import { OuvirMateria } from "@/components/site/OuvirMateria";
 
 
 const postQuery = (slug: string) =>
