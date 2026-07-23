@@ -258,11 +258,20 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                 <SecaoMenu>Conta</SecaoMenu>
                 {!logado && (
                   <Link
-                    to="/admin"
+                    to="/entrar"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
                   >
-                    <LogIn className="h-4 w-4" /> Login
+                    <LogIn className="h-4 w-4" /> Entrar
+                  </Link>
+                )}
+                {logado && (
+                  <Link
+                    to="/conta"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                  >
+                    <User className="h-4 w-4" /> Minha conta
                   </Link>
                 )}
                 {logado && isEditor && (
