@@ -45,7 +45,7 @@ function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
     { to: "/admin/importar", label: "Importar WP", icon: Download, requer: "gerenciar_configuracoes" },
     { to: "/admin/backup", label: "Backup", icon: Archive, requer: "gerenciar_configuracoes" },
     { to: "/admin/configuracoes", label: "Configurações", icon: Settings, requer: "gerenciar_configuracoes" },
-  ].filter((n) => !n.requer || perms[n.requer]);
+  ] as Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }>).filter((n) => !n.requer || perms[n.requer]);
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 shrink-0 border-r border-border bg-card md:block">
