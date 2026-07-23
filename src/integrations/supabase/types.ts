@@ -357,19 +357,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          atualizado_em: string
+          consentimento_em: string | null
           criado_em: string
+          data_nascimento: string | null
+          foto_url: string | null
           id: string
+          metodo_login: string | null
           nome: string | null
+          telefone: string | null
         }
         Insert: {
+          atualizado_em?: string
+          consentimento_em?: string | null
           criado_em?: string
+          data_nascimento?: string | null
+          foto_url?: string | null
           id: string
+          metodo_login?: string | null
           nome?: string | null
+          telefone?: string | null
         }
         Update: {
+          atualizado_em?: string
+          consentimento_em?: string | null
           criado_em?: string
+          data_nascimento?: string | null
+          foto_url?: string | null
           id?: string
+          metodo_login?: string | null
           nome?: string | null
+          telefone?: string | null
         }
         Relationships: []
       }
@@ -501,6 +519,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anonimizar_minha_conta: { Args: never; Returns: undefined }
       autor_estatisticas: { Args: { _slug: string }; Returns: Json }
       buscar_posts: {
         Args: {
@@ -578,6 +597,7 @@ export type Database = {
         Args: { _principal: string; _secundarios: string[] }
         Returns: number
       }
+      perfil_completo: { Args: { _id: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       unaccent: { Args: { "": string }; Returns: string }
