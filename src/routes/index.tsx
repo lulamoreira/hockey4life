@@ -149,6 +149,13 @@ function HomePage() {
         </section>
       )}
 
+      {/* Neste dia, anos atrás */}
+      {nesteDiaQ.data && nesteDiaQ.data.posts.length > 0 && (
+        <NesteDia posts={nesteDiaQ.data.posts} vizinhos={nesteDiaQ.data.vizinhos} />
+      )}
+
+
+
 
 
       {/* Letreiro "NÃO PERCA" logo acima do rodapé */}
