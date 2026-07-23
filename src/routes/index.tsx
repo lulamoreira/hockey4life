@@ -48,9 +48,11 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
+  const nesteDiaQ = useQuery(nesteDiaQuery());
   const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, placares, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
+
 
   return (
     <SiteLayout config={config}>
