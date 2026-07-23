@@ -32,7 +32,7 @@ export function PostEditor({ id }: { id?: string }) {
   const [conteudo, setConteudo] = useState("");
   const [imagemCapa, setImagemCapa] = useState("");
   const [creditoImagem, setCreditoImagem] = useState("");
-  const [status, setStatus] = useState<"rascunho" | "publicado">("rascunho");
+  const [status, setStatus] = useState<StatusPost>("rascunho");
   const [destaque, setDestaque] = useState(false);
   const [naoPerca, setNaoPerca] = useState(false);
   const [publicadoEm, setPublicadoEm] = useState("");
