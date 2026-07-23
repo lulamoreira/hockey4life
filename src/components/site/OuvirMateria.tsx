@@ -10,6 +10,7 @@ type Props = {
 
 const VEL_KEY = "h4l-voz-velocidade";
 const ACOMP_KEY = "h4l-voz-acompanhar";
+const VOZ_KEY = "h4l-voz-uri";
 const VELOCIDADES = [0.8, 1, 1.25, 1.5] as const;
 type StatusLeitura = "parado" | "lendo" | "pausado";
 
@@ -36,9 +37,27 @@ function dividirFrases(texto: string): string[] {
   return brutas.length ? brutas : [texto];
 }
 
-function escolherVoz(): SpeechSynthesisVoice | null {
+function listarVozesPt(): SpeechSynthesisVoice[] {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return [];
+  const todas = window.speechSynthesis.getVoices();
+  const pt = todas.filter((v) => /^pt/i.test(v.lang));
+  // pt-BR primeiro, depois demais pt
+  pt.sort((a, b) => {
+    const aBr = /^pt-BR/i.test(a.lang) ? 0 : 1;
+    const bBr = /^pt-BR/i.test(b.lang) ? 0 : 1;
+    if (aBr !== bBr) return aBr - bBr;
+    return a.name.localeCompare(b.name);
+  });
+  return pt;
+}
+
+function escolherVoz(preferidaURI?: string | null): SpeechSynthesisVoice | null {
   const vozes = window.speechSynthesis.getVoices();
   if (!vozes.length) return null;
+  if (preferidaURI) {
+    const escolhida = vozes.find((v) => v.voiceURI === preferidaURI);
+    if (escolhida) return escolhida;
+  }
   return (
     vozes.find((v) => /^pt-BR/i.test(v.lang)) ??
     vozes.find((v) => /^pt/i.test(v.lang)) ??
