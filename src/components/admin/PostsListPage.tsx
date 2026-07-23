@@ -7,7 +7,7 @@ import { formatDataBR } from "@/lib/slugify";
 import { ExternalLink, Pin, PinOff, Plus, Trash2, Edit3, Clock, ArrowDown, ArrowUp } from "lucide-react";
 
 export function PostsListPage() {
-  const [status, setStatus] = useState<"todos" | "rascunho" | "publicado">("todos");
+  const [status, setStatus] = useState<"todos" | "rascunho" | "publicado" | "em_revisao" | "rejeitado" | "meus">("todos");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [ordem, setOrdem] = useState<"desc" | "asc">("desc");
@@ -79,10 +79,10 @@ export function PostsListPage() {
 
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {(["todos","publicado","rascunho"] as const).map((s) => (
+        {(["todos","meus","publicado","em_revisao","rascunho","rejeitado"] as const).map((s) => (
           <button key={s} onClick={() => { setStatus(s); setPage(1); }}
             className={`rounded border px-3 py-1.5 text-xs uppercase tracking-wide ${status===s?"border-primary bg-primary/10 text-primary":"border-border text-muted-foreground"}`}>
-            {s === "todos" ? "Todos" : s}
+            {s === "todos" ? "Todos" : s === "meus" ? "Minhas" : s === "em_revisao" ? "Em revisão" : s}
           </button>
         ))}
         <button
