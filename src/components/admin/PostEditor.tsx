@@ -1,7 +1,8 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useBlocker } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { getAdminPost, listTemas, listAutores, savePost, criarUploadUrl } from "@/lib/admin.functions";
 import { getMyPermissions, enviarParaRevisao, aprovarPost, rejeitarPost } from "@/lib/equipe.functions";
 import { slugify } from "@/lib/slugify";
