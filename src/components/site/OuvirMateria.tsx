@@ -189,6 +189,10 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
   const sessaoRef = useRef(0);
   const utteranceAtualRef = useRef<SpeechSynthesisUtterance | null>(null);
 
+  const [vozesPt, setVozesPt] = useState<SpeechSynthesisVoice[]>([]);
+  const [vozURI, setVozURI] = useState<string>("");
+  const vozURIRef = useRef<string>("");
+
   // auto-scroll
   const acompanharRef = useRef(true);
   const usuarioMexeuRef = useRef(false);
