@@ -265,9 +265,12 @@ export function PostEditor({ id }: { id?: string }) {
         <aside className="space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="h4l-title mb-3 text-sm">Status</div>
-            <select value={status} onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground">
+            <select value={status} onChange={(e) => setStatus(e.target.value as StatusPost)}
+              disabled={!podeEditarQualquer && !podePublicar && status === "em_revisao"}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground disabled:opacity-60">
               <option value="rascunho">Rascunho</option>
+              <option value="em_revisao">Em revisão</option>
+              <option value="rejeitado">Rejeitado</option>
               <option value="publicado">Publicado</option>
             </select>
             <label className="mt-3 flex items-center gap-2 text-sm">
