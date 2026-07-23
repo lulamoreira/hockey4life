@@ -3,9 +3,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { getAdminPost, listTemas, listAutores, savePost, criarUploadUrl } from "@/lib/admin.functions";
+import { getMyPermissions, enviarParaRevisao, aprovarPost, rejeitarPost } from "@/lib/equipe.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+
+type StatusPost = "rascunho" | "publicado" | "em_revisao" | "rejeitado";
 
 export function PostEditor({ id }: { id?: string }) {
   const isNew = !id;
