@@ -18,7 +18,7 @@ export function formatDataBR(iso: string | null | undefined): string {
 
 export function tempoLeitura(html: string | null | undefined): number {
   if (!html) return 1;
-  const text = html.replace(/<[^>]*>/g, " ");
-  const palavras = text.trim().split(/\s+/).length;
-  return Math.max(1, Math.round(palavras / 200));
+  const text = html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ");
+  const palavras = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(palavras / 200));
 }
