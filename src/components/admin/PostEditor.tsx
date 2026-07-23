@@ -156,7 +156,10 @@ export function PostEditor({ id }: { id?: string }) {
       qc.invalidateQueries({ queryKey: ["admin-post", id] });
       setStatus(finalStatus);
       if (isNew && result.id) navigate({ to: "/admin/posts/$id", params: { id: result.id } });
+      ignorarProximaMudancaRef.current = true;
+      setDirty(false);
       setMsg("Salvo com sucesso.");
+
     } catch (e: any) {
       setMsg(e?.message ?? "Erro ao salvar.");
     } finally { setSaving(false); }
@@ -196,7 +199,10 @@ export function PostEditor({ id }: { id?: string }) {
       qc.invalidateQueries({ queryKey: ["admin-post", id] });
       qc.invalidateQueries({ queryKey: ["fila-aprovacoes"] });
       setStatus(novo);
+      ignorarProximaMudancaRef.current = true;
+      setDirty(false);
       setMsg("Feito.");
+
     } catch (e: any) {
       setMsg(e?.message ?? "Erro.");
     } finally { setSaving(false); }
