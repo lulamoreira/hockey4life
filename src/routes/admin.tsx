@@ -2,9 +2,9 @@ import { createFileRoute, Outlet, Link, useRouter } from "@tanstack/react-router
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { getMyRole } from "@/lib/admin.functions";
+import { getMyPermissions, type Permissao } from "@/lib/equipe.functions";
 import { useState } from "react";
-import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { LogoImg } from "@/components/site/Logo";
 
