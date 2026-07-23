@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import { getHomeData } from "@/lib/posts.functions";
+import { getNesteDia } from "@/lib/descoberta.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Letreiro } from "@/components/site/Letreiro";
 import { MancheteCarrossel } from "@/components/site/MancheteCarrossel";
@@ -9,6 +10,7 @@ import { UltimasCarrossel } from "@/components/site/UltimasCarrossel";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 import { PlacaresNaoPerca } from "@/components/site/PlacaresLetreiros";
 import { YouTubeFacade } from "@/components/site/YouTubeFacade";
+import { NesteDia } from "@/components/site/NesteDia";
 import { parseYouTube } from "@/lib/youtube";
 
 const homeQuery = () =>
@@ -16,6 +18,13 @@ const homeQuery = () =>
     queryKey: ["home"],
     queryFn: () => getHomeData(),
     staleTime: 60_000,
+  });
+
+const nesteDiaQuery = () =>
+  queryOptions({
+    queryKey: ["neste-dia"],
+    queryFn: () => getNesteDia(),
+    staleTime: 5 * 60_000,
   });
 
 export const Route = createFileRoute("/")({
@@ -39,9 +48,11 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery());
+  const nesteDiaQ = useQuery(nesteDiaQuery());
   const { manchetes, leiaAgora, ultimas, naoPerca, letreiro, carrossel, temasMenu, times: timesSettings, placares, config } = data;
   const hfc = config?.hockey_fights_cancer ?? {};
   const times = temasMenu.filter((t) => t.tipo === "time");
+
 
   return (
     <SiteLayout config={config}>
@@ -137,6 +148,13 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Neste dia, anos atrás */}
+      {nesteDiaQ.data && nesteDiaQ.data.posts.length > 0 && (
+        <NesteDia posts={nesteDiaQ.data.posts} vizinhos={nesteDiaQ.data.vizinhos} />
+      )}
+
+
 
 
 

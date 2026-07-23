@@ -656,9 +656,46 @@ export type Database = {
         Args: { _principal: string; _secundarios: string[] }
         Returns: number
       }
+      neste_dia: {
+        Args: { _hoje?: string; _limite?: number; _vizinhos?: number }
+        Returns: {
+          ano: number
+          chapeu: string
+          id: string
+          imagem_capa: string
+          publicado_em: string
+          resumo: string
+          slug: string
+          titulo: string
+        }[]
+      }
       perfil_completo: { Args: { _id: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      sortear_post: {
+        Args: { _excluir_id?: string }
+        Returns: {
+          chapeu: string
+          id: string
+          imagem_capa: string
+          publicado_em: string
+          resumo: string
+          slug: string
+          titulo: string
+        }[]
+      }
+      sortear_post_seguro: {
+        Args: { _excluir_id?: string }
+        Returns: {
+          chapeu: string
+          id: string
+          imagem_capa: string
+          publicado_em: string
+          resumo: string
+          slug: string
+          titulo: string
+        }[]
+      }
       tem_permissao: {
         Args: { _permissao: string; _user_id: string }
         Returns: boolean
