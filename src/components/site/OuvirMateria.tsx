@@ -222,7 +222,21 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
       acompanharRef.current = false;
     }
     reducedMotionRef.current = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    const carregar = () => window.speechSynthesis.getVoices();
+
+    const uriSalva = localStorage.getItem(VOZ_KEY) ?? "";
+    if (uriSalva) {
+      setVozURI(uriSalva);
+      vozURIRef.current = uriSalva;
+    }
+    const carregar = () => {
+      const pt = listarVozesPt();
+      setVozesPt(pt);
+      // Se a voz salva não existe mais neste aparelho, cai no padrão silenciosamente.
+      if (vozURIRef.current && !pt.some((v) => v.voiceURI === vozURIRef.current)) {
+        vozURIRef.current = "";
+        setVozURI("");
+      }
+    };
     carregar();
     window.speechSynthesis.onvoiceschanged = carregar;
     return () => {
