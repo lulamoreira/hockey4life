@@ -12,6 +12,8 @@ import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { ContinueLendo } from "@/components/site/ContinueLendo";
+import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
+
 
 const postQuery = (slug: string) =>
   queryOptions({
@@ -165,6 +167,8 @@ function PostPage() {
                       <span className="truncate font-semibold text-foreground">{autor.nome}</span>
                     </Link>
                   )}
+                  {autor && <EditarMateriaLink postId={post.id} />}
+
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
                     <span>{formatDataBR(post.publicado_em)}</span>
                     <span aria-hidden="true" className="text-muted-foreground/50">·</span>
