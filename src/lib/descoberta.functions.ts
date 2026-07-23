@@ -30,10 +30,11 @@ export const sortearPost = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const excluir = data.excluirIds ?? [];
+    const primeiro = excluir[0];
     // Tenta até 6 vezes evitar cair num dos ids recém-vistos
     for (let i = 0; i < 6; i++) {
       const { data: rows, error } = await sb.rpc("sortear_post_seguro", {
-        _excluir_id: excluir[0] ?? null,
+        _excluir_id: primeiro,
       });
       if (error) throw error;
       const post = (rows ?? [])[0] as PostSorteado | undefined;
@@ -41,18 +42,19 @@ export const sortearPost = createServerFn({ method: "GET" })
       if (!excluir.includes(post.id)) return post;
     }
     // Aceita mesmo se repetir depois de 6 tentativas
-    const { data: rows } = await sb.rpc("sortear_post_seguro", { _excluir_id: excluir[0] ?? null });
+    const { data: rows } = await sb.rpc("sortear_post_seguro", { _excluir_id: primeiro });
     return ((rows ?? [])[0] as PostSorteado | undefined) ?? null;
   });
 
 export const getNesteDia = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
   // Tenta o dia exato; se vazio, tenta 3 dias vizinhos
-  const { data: exato, error } = await sb.rpc("neste_dia", { _hoje: null, _vizinhos: 0, _limite: 6 });
+  const { data: exato, error } = await sb.rpc("neste_dia", { _hoje: undefined, _vizinhos: 0, _limite: 6 });
   if (error) throw error;
   if ((exato ?? []).length > 0) {
     return { posts: exato as PostNesteDia[], vizinhos: false };
   }
-  const { data: viz } = await sb.rpc("neste_dia", { _hoje: null, _vizinhos: 3, _limite: 6 });
+  const { data: viz } = await sb.rpc("neste_dia", { _hoje: undefined, _vizinhos: 3, _limite: 6 });
   return { posts: (viz ?? []) as PostNesteDia[], vizinhos: true };
 });
+
