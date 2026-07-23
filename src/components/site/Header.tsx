@@ -4,6 +4,7 @@ import { LogIn, LogOut, Menu, PenSquare, Search, Shield, User, X } from "lucide-
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { MeSurpreenda } from "./MeSurpreenda";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth";
 import { getMyRole } from "@/lib/admin.functions";
