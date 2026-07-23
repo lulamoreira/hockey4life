@@ -57,7 +57,7 @@ export function ReadingProgress({ targetRef }: ReadingProgressProps) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[3px] bg-transparent"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[6px] bg-transparent"
     >
       <div
         className="h-full origin-left bg-primary"
