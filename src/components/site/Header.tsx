@@ -42,6 +42,17 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
   const isAdmin = !!roleQ.data?.isAdmin;
   const isEditor = !!roleQ.data?.isEditor;
 
+  const perfilQ = useQuery({
+    queryKey: ["header-perfil", session?.user.id ?? "anon"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("foto_url,nome").eq("id", session!.user.id).maybeSingle();
+      return data as { foto_url: string | null; nome: string | null } | null;
+    },
+    enabled: logado,
+    staleTime: 60_000,
+  });
+  const fotoUrl = perfilQ.data?.foto_url ?? null;
+
   async function sair() {
     setOpen(false);
     await supabase.auth.signOut();
