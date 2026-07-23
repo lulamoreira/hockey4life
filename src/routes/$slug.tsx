@@ -8,8 +8,10 @@ import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import DOMPurify from "isomorphic-dompurify";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { ReadingProgress } from "@/components/site/ReadingProgress";
+import { ContinueLendo } from "@/components/site/ContinueLendo";
 
 const postQuery = (slug: string) =>
   queryOptions({
