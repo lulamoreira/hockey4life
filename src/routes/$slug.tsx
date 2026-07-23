@@ -14,6 +14,7 @@ import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { ContinueLendo } from "@/components/site/ContinueLendo";
 import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
 import { OuvirMateria } from "@/components/site/OuvirMateria";
+import { MeSurpreenda } from "@/components/site/MeSurpreenda";
 
 
 const postQuery = (slug: string) =>
@@ -293,6 +294,13 @@ function PostPage() {
               relacionados={relacionados}
               recentes={recentes as any}
             />
+
+            <div className="mt-6 flex justify-center">
+              <MeSurpreenda excluirIdAtual={post.id} variant="link">
+                Ler uma história ao acaso
+              </MeSurpreenda>
+            </div>
+
 
             {relacionados.length > 0 && (
               <section className="mt-12">

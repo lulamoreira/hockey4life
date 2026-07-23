@@ -215,7 +215,10 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                 Sobre o autor
               </Link>
               <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Fale conosco</MobileLink>
-              <MobileLink to="/fale-conosco" pathname={pathname} onClick={() => setOpen(false)}>Contato</MobileLink>
+              <div className="px-1 pt-1">
+                <MeSurpreenda variant="menu" onNavegar={() => setOpen(false)}>Me surpreenda</MeSurpreenda>
+              </div>
+
 
               {times.length > 0 && (
                 <div className="mt-4">

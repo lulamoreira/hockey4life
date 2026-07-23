@@ -13,6 +13,7 @@ import iconeAsset from "../assets/icone.png.asset.json";
 import logoEscuroAsset from "../assets/logo-escuro.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { MeSurpreenda } from "@/components/site/MeSurpreenda";
 
 function NotFoundComponent() {
   return (
@@ -33,7 +34,9 @@ function NotFoundComponent() {
           <a href="/" className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-primary-foreground hover:bg-primary/90">Início</a>
           <a href="/arquivo" className="rounded-md border border-border px-5 py-2.5 text-sm font-semibold uppercase tracking-wide hover:border-primary">Arquivo</a>
           <a href="/temas" className="rounded-md border border-border px-5 py-2.5 text-sm font-semibold uppercase tracking-wide hover:border-primary">Temas</a>
+          <MeSurpreenda />
         </div>
+
       </div>
     </SiteLayout>
   );
