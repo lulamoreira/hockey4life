@@ -8,6 +8,7 @@ type Props = {
 
 const VEL_KEY = "h4l-voz-velocidade";
 const VELOCIDADES = [0.8, 1, 1.25, 1.5] as const;
+type StatusLeitura = "parado" | "lendo" | "pausado";
 
 /** Extrai texto puro do HTML da matéria, na ordem, pulando figuras/legendas/scripts/iframes. */
 function extrairTexto(html: string): string {
@@ -45,7 +46,7 @@ function escolherVoz(): SpeechSynthesisVoice | null {
 
 export function OuvirMateria({ titulo, html }: Props) {
   const [suportado, setSuportado] = useState(false);
-  const [estado, setEstado] = useState<"parado" | "lendo" | "pausado">("parado");
+  const [estado, setEstado] = useState<StatusLeitura>("parado");
   const [idxAtual, setIdxAtual] = useState(0);
   const [velocidade, setVelocidade] = useState<number>(1);
   const frases = useMemo(() => {
@@ -55,7 +56,19 @@ export function OuvirMateria({ titulo, html }: Props) {
 
   const idxRef = useRef(0);
   const velRef = useRef(1);
-  const pararRef = useRef<() => void>(() => {});
+  const statusRef = useRef<StatusLeitura>("parado");
+  const sessaoRef = useRef(0);
+  const utteranceAtualRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  function definirStatus(status: StatusLeitura) {
+    statusRef.current = status;
+    setEstado(status);
+  }
+
+  function cancelarLeitura() {
+    if (!suportado) return;
+    window.speechSynthesis.cancel();
+  }
 
   // Detecta suporte + carrega velocidade salva
   useEffect(() => {
@@ -79,12 +92,23 @@ export function OuvirMateria({ titulo, html }: Props) {
   // Para ao desmontar / trocar de rota / fechar aba
   useEffect(() => {
     if (!suportado) return;
-    const onHide = () => window.speechSynthesis.cancel();
+    const onHide = () => {
+      statusRef.current = "parado";
+      setEstado("parado");
+      idxRef.current = 0;
+      setIdxAtual(0);
+      utteranceAtualRef.current = null;
+      sessaoRef.current += 1;
+      window.speechSynthesis.cancel();
+    };
     window.addEventListener("beforeunload", onHide);
     window.addEventListener("pagehide", onHide);
     return () => {
       window.removeEventListener("beforeunload", onHide);
       window.removeEventListener("pagehide", onHide);
+      statusRef.current = "parado";
+      utteranceAtualRef.current = null;
+      sessaoRef.current += 1;
       window.speechSynthesis.cancel();
     };
   }, [suportado]);
@@ -92,44 +116,50 @@ export function OuvirMateria({ titulo, html }: Props) {
   function tocarDe(inicio: number) {
     if (!suportado) return;
     const synth = window.speechSynthesis;
+    sessaoRef.current += 1;
+    const sessao = sessaoRef.current;
+    // Limpa qualquer fala/fila pendente da sessão anterior antes de iniciar uma nova.
     synth.cancel();
     const voz = escolherVoz();
-    let cancelado = false;
     idxRef.current = inicio;
     setIdxAtual(inicio);
-    setEstado("lendo");
+    definirStatus("lendo");
 
-    const falarProxima = () => {
-      if (cancelado) return;
+    const falarFraseAtual = () => {
+      if (statusRef.current !== "lendo" || sessaoRef.current !== sessao) return;
       const i = idxRef.current;
       if (i >= frases.length) {
-        setEstado("parado");
+        definirStatus("parado");
         setIdxAtual(0);
         idxRef.current = 0;
+        utteranceAtualRef.current = null;
         return;
       }
+      if (utteranceAtualRef.current) return;
       setIdxAtual(i);
       const u = new SpeechSynthesisUtterance(frases[i]);
+      utteranceAtualRef.current = u;
       if (voz) u.voice = voz;
       u.lang = voz?.lang ?? "pt-BR";
       u.rate = velRef.current;
       u.onend = () => {
+        if (utteranceAtualRef.current !== u) return;
+        utteranceAtualRef.current = null;
+        if (statusRef.current !== "lendo" || sessaoRef.current !== sessao) return;
         idxRef.current = i + 1;
-        // pequena pausa evita bugs de fila em alguns navegadores
-        setTimeout(falarProxima, 10);
+        falarFraseAtual();
       };
       u.onerror = () => {
+        if (utteranceAtualRef.current !== u) return;
+        utteranceAtualRef.current = null;
+        if (statusRef.current !== "lendo" || sessaoRef.current !== sessao) return;
         idxRef.current = i + 1;
-        setTimeout(falarProxima, 10);
+        falarFraseAtual();
       };
       synth.speak(u);
     };
 
-    pararRef.current = () => {
-      cancelado = true;
-      synth.cancel();
-    };
-    falarProxima();
+    falarFraseAtual();
   }
 
   function iniciar() {
@@ -138,30 +168,33 @@ export function OuvirMateria({ titulo, html }: Props) {
 
   function pausar() {
     if (!suportado) return;
+    definirStatus("pausado");
     window.speechSynthesis.pause();
-    setEstado("pausado");
   }
 
   function continuar() {
     if (!suportado) return;
     const synth = window.speechSynthesis;
+    definirStatus("lendo");
     synth.resume();
     // fallback: se não retomar em ~250ms, reinicia da frase atual
     setTimeout(() => {
+      if (statusRef.current !== "lendo") return;
       if (!synth.speaking || synth.paused) {
         tocarDe(idxRef.current);
       } else {
-        setEstado("lendo");
+        definirStatus("lendo");
       }
     }, 250);
-    setEstado("lendo");
   }
 
   function parar() {
-    pararRef.current();
-    setEstado("parado");
+    definirStatus("parado");
     setIdxAtual(0);
     idxRef.current = 0;
+    utteranceAtualRef.current = null;
+    sessaoRef.current += 1;
+    cancelarLeitura();
   }
 
   function trocarVelocidade(v: number) {
