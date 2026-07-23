@@ -34,6 +34,7 @@ export type Database = {
           nome: string
           outros_links: Json
           slug: string
+          user_id: string | null
         }
         Insert: {
           atualizado_em?: string
@@ -54,6 +55,7 @@ export type Database = {
           nome: string
           outros_links?: Json
           slug: string
+          user_id?: string | null
         }
         Update: {
           atualizado_em?: string
@@ -74,6 +76,7 @@ export type Database = {
           nome?: string
           outros_links?: Json
           slug?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -254,6 +257,39 @@ export type Database = {
         }
         Relationships: []
       }
+      papeis: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          descricao: string | null
+          id: string
+          nome: string
+          permissoes: Json
+          sistema: boolean
+          slug: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          permissoes?: Json
+          sistema?: boolean
+          slug: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          permissoes?: Json
+          sistema?: boolean
+          slug?: string
+        }
+        Relationships: []
+      }
       post_temas: {
         Row: {
           post_id: string
@@ -295,11 +331,15 @@ export type Database = {
           criado_em: string
           criado_por: string | null
           destaque: boolean
+          enviado_revisao_em: string | null
           id: string
           imagem_capa: string | null
+          motivo_rejeicao: string | null
           nao_perca: boolean
           publicado_em: string | null
           resumo: string | null
+          revisado_em: string | null
+          revisor_id: string | null
           slug: string
           status: Database["public"]["Enums"]["post_status"]
           titulo: string
@@ -315,11 +355,15 @@ export type Database = {
           criado_em?: string
           criado_por?: string | null
           destaque?: boolean
+          enviado_revisao_em?: string | null
           id?: string
           imagem_capa?: string | null
+          motivo_rejeicao?: string | null
           nao_perca?: boolean
           publicado_em?: string | null
           resumo?: string | null
+          revisado_em?: string | null
+          revisor_id?: string | null
           slug: string
           status?: Database["public"]["Enums"]["post_status"]
           titulo: string
@@ -335,11 +379,15 @@ export type Database = {
           criado_em?: string
           criado_por?: string | null
           destaque?: boolean
+          enviado_revisao_em?: string | null
           id?: string
           imagem_capa?: string | null
+          motivo_rejeicao?: string | null
           nao_perca?: boolean
           publicado_em?: string | null
           resumo?: string | null
+          revisado_em?: string | null
+          revisor_id?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["post_status"]
           titulo?: string
@@ -497,22 +545,33 @@ export type Database = {
         Row: {
           criado_em: string
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          papel_id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
           user_id: string
         }
         Insert: {
           criado_em?: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          papel_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           user_id: string
         }
         Update: {
           criado_em?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          papel_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_papel_id_fkey"
+            columns: ["papel_id"]
+            isOneToOne: false
+            referencedRelation: "papeis"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -600,12 +659,16 @@ export type Database = {
       perfil_completo: { Args: { _id: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      tem_permissao: {
+        Args: { _permissao: string; _user_id: string }
+        Returns: boolean
+      }
       unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "editor"
       importacao_status: "ok" | "erro"
-      post_status: "rascunho" | "publicado"
+      post_status: "rascunho" | "publicado" | "em_revisao" | "rejeitado"
       tema_tipo: "time" | "assunto"
     }
     CompositeTypes: {
@@ -736,7 +799,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "editor"],
       importacao_status: ["ok", "erro"],
-      post_status: ["rascunho", "publicado"],
+      post_status: ["rascunho", "publicado", "em_revisao", "rejeitado"],
       tema_tipo: ["time", "assunto"],
     },
   },
