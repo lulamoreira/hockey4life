@@ -31,7 +31,7 @@ const postInput = z.object({
   conteudo: z.string().optional().nullable(),
   imagem_capa: z.string().url().optional().nullable().or(z.literal("")),
   credito_imagem: z.string().max(200).optional().nullable(),
-  status: z.enum(["rascunho", "publicado"]),
+  status: z.enum(["rascunho", "publicado", "em_revisao", "rejeitado"]),
   destaque: z.boolean().default(false),
   nao_perca: z.boolean().default(false),
   publicado_em: z.string().nullable().optional(),
