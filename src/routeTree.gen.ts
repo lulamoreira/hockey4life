@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemasRouteImport } from './routes/temas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as ContaRouteImport } from './routes/conta'
+import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
 import { Route as BuscaRouteImport } from './routes/busca'
 import { Route as ArquivoRouteImport } from './routes/arquivo'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -51,6 +55,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeedRoute = FeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -59,6 +68,21 @@ const FeedRoute = FeedRouteImport.update({
 const FaleConoscoRoute = FaleConoscoRouteImport.update({
   id: '/fale-conosco',
   path: '/fale-conosco',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
+  id: '/completar-perfil',
+  path: '/completar-perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuscaRoute = BuscaRouteImport.update({
@@ -204,8 +228,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
+  '/completar-perfil': typeof CompletarPerfilRoute
+  '/conta': typeof ContaRoute
+  '/entrar': typeof EntrarRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
   '/admin/autores': typeof AdminAutoresRoute
@@ -236,8 +264,12 @@ export interface FileRoutesByTo {
   '/$slug': typeof SlugRoute
   '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
+  '/completar-perfil': typeof CompletarPerfilRoute
+  '/conta': typeof ContaRoute
+  '/entrar': typeof EntrarRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
   '/admin/autores': typeof AdminAutoresRoute
@@ -268,8 +300,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/arquivo': typeof ArquivoRouteWithChildren
   '/busca': typeof BuscaRoute
+  '/completar-perfil': typeof CompletarPerfilRoute
+  '/conta': typeof ContaRoute
+  '/entrar': typeof EntrarRoute
   '/fale-conosco': typeof FaleConoscoRoute
   '/feed': typeof FeedRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
   '/admin/autores': typeof AdminAutoresRoute
@@ -303,8 +339,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arquivo'
     | '/busca'
+    | '/completar-perfil'
+    | '/conta'
+    | '/entrar'
     | '/fale-conosco'
     | '/feed'
+    | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
     | '/admin/autores'
@@ -335,8 +375,12 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/arquivo'
     | '/busca'
+    | '/completar-perfil'
+    | '/conta'
+    | '/entrar'
     | '/fale-conosco'
     | '/feed'
+    | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
     | '/admin/autores'
@@ -366,8 +410,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/arquivo'
     | '/busca'
+    | '/completar-perfil'
+    | '/conta'
+    | '/entrar'
     | '/fale-conosco'
     | '/feed'
+    | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
     | '/admin/autores'
@@ -400,8 +448,12 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ArquivoRoute: typeof ArquivoRouteWithChildren
   BuscaRoute: typeof BuscaRoute
+  CompletarPerfilRoute: typeof CompletarPerfilRoute
+  ContaRoute: typeof ContaRoute
+  EntrarRoute: typeof EntrarRoute
   FaleConoscoRoute: typeof FaleConoscoRoute
   FeedRoute: typeof FeedRoute
+  PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TemasRoute: typeof TemasRoute
   AdminCriarContaRoute: typeof AdminCriarContaRoute
@@ -427,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/feed': {
       id: '/feed'
       path: '/feed'
@@ -439,6 +498,27 @@ declare module '@tanstack/react-router' {
       path: '/fale-conosco'
       fullPath: '/fale-conosco'
       preLoaderRoute: typeof FaleConoscoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completar-perfil': {
+      id: '/completar-perfil'
+      path: '/completar-perfil'
+      fullPath: '/completar-perfil'
+      preLoaderRoute: typeof CompletarPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/busca': {
@@ -720,8 +800,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ArquivoRoute: ArquivoRouteWithChildren,
   BuscaRoute: BuscaRoute,
+  CompletarPerfilRoute: CompletarPerfilRoute,
+  ContaRoute: ContaRoute,
+  EntrarRoute: EntrarRoute,
   FaleConoscoRoute: FaleConoscoRoute,
   FeedRoute: FeedRoute,
+  PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TemasRoute: TemasRoute,
   AdminCriarContaRoute: AdminCriarContaRoute,
