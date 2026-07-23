@@ -216,6 +216,7 @@ function PostPage() {
 
               {post.conteudo && (
                 <div
+                  id="materia-corpo"
                   className="prose-h4l mt-6"
                   // eslint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{
