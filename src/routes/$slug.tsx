@@ -323,11 +323,15 @@ function PostPage() {
                     </span>
                   )}
                   <div className="min-w-0">
-                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block font-bold text-foreground hover:text-primary">
-                      {autor.nome}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block font-bold text-foreground hover:text-primary">
+                        {autor.nome}
+                      </Link>
+                      <EditarMateriaLink postId={post.id} />
+                    </div>
                     {(autor.bio_curta || autor.bio) && <p className="mt-1 text-xs text-muted-foreground line-clamp-4">{autor.bio_curta ?? autor.bio}</p>}
                   </div>
+
                 </div>
               </div>
             )}
