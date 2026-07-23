@@ -28,6 +28,7 @@ import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
 import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
 import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
@@ -36,6 +37,7 @@ import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
+import { Route as AdminAprovacoesRouteImport } from './routes/admin.aprovacoes'
 import { Route as AdminPostsIndexRouteImport } from './routes/admin.posts.index'
 import { Route as AdminMateriasIndexRouteImport } from './routes/admin.materias.index'
 import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
@@ -140,6 +142,11 @@ const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
   path: '/admin/criar-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTemasRoute = AdminTemasRouteImport.update({
   id: '/temas',
   path: '/temas',
@@ -178,6 +185,11 @@ const AdminBackupRoute = AdminBackupRouteImport.update({
 const AdminAutoresRoute = AdminAutoresRouteImport.update({
   id: '/autores',
   path: '/autores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAprovacoesRoute = AdminAprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPostsIndexRoute = AdminPostsIndexRouteImport.update({
@@ -236,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -244,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -272,12 +286,14 @@ export interface FileRoutesByTo {
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
   '/admin/temas': typeof AdminTemasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -308,6 +324,7 @@ export interface FileRoutesById {
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/temas': typeof TemasRoute
+  '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -316,6 +333,7 @@ export interface FileRoutesById {
   '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin_/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -347,6 +365,7 @@ export interface FileRouteTypes {
     | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
@@ -355,6 +374,7 @@ export interface FileRouteTypes {
     | '/admin/materias'
     | '/admin/posts'
     | '/admin/temas'
+    | '/admin/usuarios'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -383,12 +403,14 @@ export interface FileRouteTypes {
     | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
     | '/admin/temas'
+    | '/admin/usuarios'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -418,6 +440,7 @@ export interface FileRouteTypes {
     | '/politica-de-privacidade'
     | '/sitemap.xml'
     | '/temas'
+    | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/configuracoes'
@@ -426,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/materias'
     | '/admin/posts'
     | '/admin/temas'
+    | '/admin/usuarios'
     | '/admin_/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -598,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCriarContaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/temas': {
       id: '/admin/temas'
       path: '/temas'
@@ -652,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/autores'
       fullPath: '/admin/autores'
       preLoaderRoute: typeof AdminAutoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/aprovacoes': {
+      id: '/admin/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/admin/aprovacoes'
+      preLoaderRoute: typeof AdminAprovacoesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/posts/': {
@@ -746,6 +784,7 @@ const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAprovacoesRoute: typeof AdminAprovacoesRoute
   AdminAutoresRoute: typeof AdminAutoresRoute
   AdminBackupRoute: typeof AdminBackupRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
@@ -754,10 +793,12 @@ interface AdminRouteChildren {
   AdminMateriasRoute: typeof AdminMateriasRouteWithChildren
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAprovacoesRoute: AdminAprovacoesRoute,
   AdminAutoresRoute: AdminAutoresRoute,
   AdminBackupRoute: AdminBackupRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
@@ -766,6 +807,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMateriasRoute: AdminMateriasRouteWithChildren,
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
+  AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

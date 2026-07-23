@@ -2,9 +2,9 @@ import { createFileRoute, Outlet, Link, useRouter } from "@tanstack/react-router
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { getMyRole } from "@/lib/admin.functions";
+import { getMyPermissions, type Permissao } from "@/lib/equipe.functions";
 import { useState } from "react";
-import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { LogoImg } from "@/components/site/Logo";
 
@@ -26,24 +26,26 @@ function AdminGate() {
 }
 
 function StaffCheck() {
-  const role = useQuery({ queryKey: ["my-role"], queryFn: () => getMyRole(), retry: false });
+  const role = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions(), retry: false });
   if (role.isLoading) return <FullScreen text="Verificando permissões…" />;
   if (role.error || !role.data?.isStaff) return <NoAccessScreen />;
-  return <AdminShell />;
+  return <AdminShell perms={role.data.perms} />;
 }
 
-function AdminShell() {
+function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
   const router = useRouter();
-  const nav = [
+  const nav: Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }> = ([
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/admin/materias", label: "Matérias", icon: FileText },
-    { to: "/admin/temas", label: "Temas", icon: Tag },
-    { to: "/admin/autores", label: "Autores", icon: Users },
-    { to: "/admin/contatos", label: "Contatos", icon: Mail },
-    { to: "/admin/importar", label: "Importar WP", icon: Download },
-    { to: "/admin/backup", label: "Backup", icon: Archive },
-    { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
-  ];
+    { to: "/admin/materias", label: "Matérias", icon: FileText, requer: "escrever" },
+    { to: "/admin/aprovacoes", label: "Aprovações", icon: CheckSquare, requer: "aprovar" },
+    { to: "/admin/temas", label: "Temas", icon: Tag, requer: "gerenciar_temas" },
+    { to: "/admin/autores", label: "Autores", icon: Users, requer: "gerenciar_usuarios" },
+    { to: "/admin/usuarios", label: "Usuários", icon: Users, requer: "gerenciar_usuarios" },
+    { to: "/admin/contatos", label: "Contatos", icon: Mail, requer: "gerenciar_configuracoes" },
+    { to: "/admin/importar", label: "Importar WP", icon: Download, requer: "gerenciar_configuracoes" },
+    { to: "/admin/backup", label: "Backup", icon: Archive, requer: "gerenciar_configuracoes" },
+    { to: "/admin/configuracoes", label: "Configurações", icon: Settings, requer: "gerenciar_configuracoes" },
+  ] as Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }>).filter((n) => !n.requer || perms[n.requer]);
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 shrink-0 border-r border-border bg-card md:block">

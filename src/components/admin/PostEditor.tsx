@@ -3,9 +3,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { getAdminPost, listTemas, listAutores, savePost, criarUploadUrl } from "@/lib/admin.functions";
+import { getMyPermissions, enviarParaRevisao, aprovarPost, rejeitarPost } from "@/lib/equipe.functions";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+
+type StatusPost = "rascunho" | "publicado" | "em_revisao" | "rejeitado";
 
 export function PostEditor({ id }: { id?: string }) {
   const isNew = !id;
@@ -29,7 +32,7 @@ export function PostEditor({ id }: { id?: string }) {
   const [conteudo, setConteudo] = useState("");
   const [imagemCapa, setImagemCapa] = useState("");
   const [creditoImagem, setCreditoImagem] = useState("");
-  const [status, setStatus] = useState<"rascunho" | "publicado">("rascunho");
+  const [status, setStatus] = useState<StatusPost>("rascunho");
   const [destaque, setDestaque] = useState(false);
   const [naoPerca, setNaoPerca] = useState(false);
   const [publicadoEm, setPublicadoEm] = useState("");
@@ -96,10 +99,10 @@ export function PostEditor({ id }: { id?: string }) {
     }
   };
 
-  const onSave = async (novoStatus?: "rascunho" | "publicado") => {
+  const onSave = async (novoStatus?: StatusPost) => {
     setSaving(true); setMsg("");
     try {
-      const finalStatus = novoStatus ?? status;
+      const finalStatus: StatusPost = novoStatus ?? status;
       const result = await save({
         data: {
           id: isNew ? undefined : id,
@@ -123,28 +126,100 @@ export function PostEditor({ id }: { id?: string }) {
     } finally { setSaving(false); }
   };
 
+  const permsQ = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions() });
+  const perms = permsQ.data?.perms;
+  const meuPost = !isNew && (postQ.data?.post as any)?.criado_por === permsQ.data?.userId;
+  const podePublicar = !!perms?.publicar_qualquer || (meuPost && !!perms?.publicar_propria);
+  const podeAprovar = !!perms?.aprovar;
+  const podeEditarQualquer = !!perms?.editar_qualquer;
+
+  const enviarFn = useServerFn(enviarParaRevisao);
+  const aprovarFn = useServerFn(aprovarPost);
+  const rejeitarFn = useServerFn(rejeitarPost);
+
+  const acaoRevisao = async (fn: () => Promise<any>, novo: StatusPost) => {
+    setSaving(true); setMsg("");
+    try {
+      // salva primeiro para não perder edições
+      if (!isNew) {
+        await save({
+          data: {
+            id, titulo, slug: slug || slugify(titulo),
+            chapeu: chapeu.trim() || null,
+            resumo: resumo || null, conteudo: conteudo || null,
+            imagem_capa: imagemCapa || null, credito_imagem: creditoImagem || null,
+            status, destaque, nao_perca: naoPerca,
+            publicado_em: publicadoEm ? new Date(publicadoEm).toISOString() : null,
+            autor_id: autorId || null,
+            temaIds: Array.from(selTemas),
+          },
+        });
+      }
+      await fn();
+      qc.invalidateQueries({ queryKey: ["admin-posts"] });
+      qc.invalidateQueries({ queryKey: ["admin-post", id] });
+      qc.invalidateQueries({ queryKey: ["fila-aprovacoes"] });
+      setStatus(novo);
+      setMsg("Feito.");
+    } catch (e: any) {
+      setMsg(e?.message ?? "Erro.");
+    } finally { setSaving(false); }
+  };
+
   const temas = temasQ.data ?? [];
+  const motivo = (postQ.data?.post as any)?.motivo_rejeicao ?? null;
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="h4l-title text-3xl text-foreground md:text-4xl">
             {isNew ? "Nova matéria" : "Editar matéria"}
           </h1>
+          {status === "rejeitado" && motivo && (
+            <div className="mt-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <b>Rejeitada:</b> {motivo}
+            </div>
+          )}
           {msg && <p className="mt-2 text-sm text-primary">{msg}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => onSave("rascunho")} disabled={saving}
-            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold uppercase text-foreground disabled:opacity-50">
+            className="rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold uppercase text-foreground disabled:opacity-50">
             Salvar rascunho
           </button>
-          <button onClick={() => onSave("publicado")} disabled={saving}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground disabled:opacity-50">
-            Publicar
-          </button>
+          {perms?.enviar_para_revisao && status !== "em_revisao" && !podePublicar && (
+            <button onClick={() => acaoRevisao(() => enviarFn({ data: { id: id! } }), "em_revisao")} disabled={saving || isNew}
+              className="rounded-md bg-accent px-3 py-2 text-xs font-semibold uppercase text-accent-foreground disabled:opacity-50">
+              Enviar para revisão
+            </button>
+          )}
+          {podeAprovar && status === "em_revisao" && (
+            <>
+              <button onClick={() => acaoRevisao(() => aprovarFn({ data: { id: id! } }), "publicado")} disabled={saving || isNew}
+                className="rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase text-primary-foreground disabled:opacity-50">
+                Aprovar e publicar
+              </button>
+              <button onClick={async () => {
+                const m = prompt("Motivo da rejeição (obrigatório):");
+                if (!m || m.trim().length < 3) return;
+                await acaoRevisao(() => rejeitarFn({ data: { id: id!, motivo: m.trim() } }), "rejeitado");
+              }} disabled={saving || isNew}
+                className="rounded-md border border-destructive px-3 py-2 text-xs font-semibold uppercase text-destructive disabled:opacity-50">
+                Rejeitar
+              </button>
+            </>
+          )}
+          {podePublicar && (
+            <button onClick={() => onSave("publicado")} disabled={saving}
+              className="rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase text-primary-foreground disabled:opacity-50">
+              Publicar
+            </button>
+          )}
         </div>
       </div>
+
+
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
@@ -190,9 +265,12 @@ export function PostEditor({ id }: { id?: string }) {
         <aside className="space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="h4l-title mb-3 text-sm">Status</div>
-            <select value={status} onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground">
+            <select value={status} onChange={(e) => setStatus(e.target.value as StatusPost)}
+              disabled={!podeEditarQualquer && !podePublicar && status === "em_revisao"}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground disabled:opacity-60">
               <option value="rascunho">Rascunho</option>
+              <option value="em_revisao">Em revisão</option>
+              <option value="rejeitado">Rejeitado</option>
               <option value="publicado">Publicado</option>
             </select>
             <label className="mt-3 flex items-center gap-2 text-sm">
