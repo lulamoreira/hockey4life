@@ -596,6 +596,25 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
           Acompanhar a leitura (rolar até a frase atual)
         </label>
 
+        {vozesPt.length >= 2 && (
+          <label className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>Voz:</span>
+            <select
+              value={vozURI}
+              onChange={(e) => trocarVoz(e.target.value)}
+              aria-label="Escolher a voz da leitura"
+              className="min-h-[36px] max-w-full flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+            >
+              <option value="">Automática (pt-BR)</option>
+              {vozesPt.map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name} ({v.lang})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         {estado !== "parado" && (
           <>
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-border" aria-hidden="true">
