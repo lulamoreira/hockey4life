@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import { getHomeData } from "@/lib/posts.functions";
@@ -28,7 +29,7 @@ const nesteDiaQuery = () =>
   });
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Hockey4Life — histórias de vida, superação e gentileza" },
       {
@@ -38,9 +39,9 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "Hockey4Life — histórias de vida, superação e gentileza" },
       { property: "og:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: `${origemDe(matches)}/` },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/` }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery()),
   component: HomePage,

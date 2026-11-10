@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
@@ -18,14 +19,14 @@ const cfg = () =>
 export const Route = createFileRoute("/busca")({
   validateSearch: searchSchema,
   loader: ({ context }) => context.queryClient.ensureQueryData(cfg()),
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Buscar — Hockey4Life" },
       { name: "description", content: "Busque matérias no portal Hockey4Life." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "/busca" },
+      { property: "og:url", content: `${origemDe(matches)}/busca` },
     ],
-    links: [{ rel: "canonical", href: "/busca" }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/busca` }],
   }),
   component: BuscaPage,
 });

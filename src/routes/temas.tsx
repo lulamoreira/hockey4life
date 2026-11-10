@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { listTemasParaFiltro, getSiteConfig } from "@/lib/posts.functions";
@@ -13,15 +14,15 @@ export const Route = createFileRoute("/temas")({
       context.queryClient.ensureQueryData(cfg()),
     ]);
   },
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Temas — Hockey4Life" },
       { name: "description", content: "Índice completo de times e assuntos cobertos pelo Hockey4Life." },
       { property: "og:title", content: "Temas — Hockey4Life" },
       { property: "og:description", content: "Índice completo de times e assuntos cobertos pelo Hockey4Life." },
-      { property: "og:url", content: "/temas" },
+      { property: "og:url", content: `${origemDe(matches)}/temas` },
     ],
-    links: [{ rel: "canonical", href: "/temas" }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/temas` }],
   }),
   component: TemasIndex,
 });

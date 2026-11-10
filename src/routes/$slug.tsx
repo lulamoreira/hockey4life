@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getPostBySlug, getSiteConfig, getRecentesFallback } from "@/lib/posts.functions";
@@ -41,13 +42,14 @@ export const Route = createFileRoute("/$slug")({
     await context.queryClient.ensureQueryData(configQuery());
     return result;
   },
-  head: ({ loaderData, params }) => {
+  head: ({ loaderData, params, matches }) => {
+    const o = origemDe(matches);
     if (!loaderData) {
       return { meta: [{ title: "Matéria não encontrada — Hockey4Life" }, { name: "robots", content: "noindex" }] };
     }
     const { post, autor } = loaderData;
     const desc = post.resumo ?? `${post.titulo} — Hockey4Life`;
-    const url = `https://hockey4life.com.br/${post.slug}`;
+    const url = `${o}/${post.slug}`;
     const meta: Array<Record<string, string>> = [
       { title: `${post.titulo} — Hockey4Life` },
       { name: "description", content: desc.slice(0, 160) },
@@ -80,13 +82,13 @@ export const Route = createFileRoute("/$slug")({
       jsonLd.author = {
         "@type": "Person",
         name: autor.nome,
-        url: `https://hockey4life.com.br/autor/${autor.slug}`,
+        url: `${o}/autor/${autor.slug}`,
       };
     }
     jsonLd.publisher = {
       "@type": "Organization",
       name: "Hockey4Life",
-      url: "https://hockey4life.com.br",
+      url: o,
     };
 
     // Breadcrumbs JSON-LD
@@ -94,14 +96,14 @@ export const Route = createFileRoute("/$slug")({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Início", item: "https://hockey4life.com.br/" },
+        { "@type": "ListItem", position: 1, name: "Início", item: `${o}/` },
         { "@type": "ListItem", position: 2, name: post.titulo, item: url },
       ],
     };
 
     return {
       meta,
-      links: [{ rel: "canonical", href: `/${params.slug}` }],
+      links: [{ rel: "canonical", href: `${o}/${params.slug}` }],
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(jsonLd) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },

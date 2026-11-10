@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
@@ -56,15 +57,15 @@ export const Route = createFileRoute("/arquivo")({
       context.queryClient.ensureQueryData(navQ()),
     ]);
   },
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Arquivo — Hockey4Life" },
       { name: "description", content: "Todas as matérias do Hockey4Life. Filtre por time, assunto, ano e mês." },
       { property: "og:title", content: "Arquivo — Hockey4Life" },
       { property: "og:description", content: "Todas as matérias do Hockey4Life. Filtre por time, assunto, ano e mês." },
-      { property: "og:url", content: "/arquivo" },
+      { property: "og:url", content: `${origemDe(matches)}/arquivo` },
     ],
-    links: [{ rel: "canonical", href: "/arquivo" }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/arquivo` }],
   }),
   component: ArquivoPage,
 });

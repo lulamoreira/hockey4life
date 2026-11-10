@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
@@ -10,14 +11,14 @@ const cfg = () =>
 
 export const Route = createFileRoute("/fale-conosco")({
   loader: ({ context }) => context.queryClient.ensureQueryData(cfg()),
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Fale conosco — Hockey4Life" },
       { name: "description", content: "Entre em contato com a redação do Hockey4Life." },
       { property: "og:title", content: "Fale conosco — Hockey4Life" },
-      { property: "og:url", content: "/fale-conosco" },
+      { property: "og:url", content: `${origemDe(matches)}/fale-conosco` },
     ],
-    links: [{ rel: "canonical", href: "/fale-conosco" }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/fale-conosco` }],
   }),
   component: ContatoPage,
 });
