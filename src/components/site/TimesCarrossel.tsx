@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { nhlLogoUrl } from "@/lib/nhl-logos";
+import { nhlLogoUrl, nhlLogoViewBox } from "@/lib/nhl-logos";
 import type { TimesCarrosselSettings } from "@/lib/posts.functions";
 import { TIMES_CARROSSEL_PADRAO } from "@/lib/posts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -149,6 +149,7 @@ export function TimesCarrossel({
                       src={logo}
                       alt={`Logo ${t.nome}`}
                       loading="lazy"
+                      style={{ objectViewBox: nhlLogoViewBox(t.slug) } as React.CSSProperties}
                       className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-110"
                     />
                     <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/55 to-transparent px-2 pb-1 pt-5 text-center text-[10px] font-semibold uppercase tracking-wide text-white group-hover:text-primary">
