@@ -4,7 +4,7 @@ import { useAuthSession } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { getMyPermissions, type Permissao } from "@/lib/equipe.functions";
 import { useState } from "react";
-import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare, Search, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { LogoImg } from "@/components/site/Logo";
 
@@ -38,6 +38,8 @@ function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/materias", label: "Matérias", icon: FileText, requer: "escrever" },
     { to: "/admin/aprovacoes", label: "Aprovações", icon: CheckSquare, requer: "aprovar" },
+    { to: "/admin/legendas", label: "Legendas IA", icon: Sparkles, requer: "escrever" },
+    { to: "/admin/busca-google", label: "Busca no Google", icon: Search, requer: "ver_painel" },
     { to: "/admin/temas", label: "Temas", icon: Tag, requer: "gerenciar_temas" },
     { to: "/admin/autores", label: "Autores", icon: Users, requer: "gerenciar_usuarios" },
     { to: "/admin/usuarios", label: "Usuários", icon: Users, requer: "gerenciar_usuarios" },
