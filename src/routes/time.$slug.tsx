@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
@@ -27,14 +28,14 @@ export const Route = createFileRoute("/time/$slug")({
     if (!data.tema) throw notFound();
     return data;
   },
-  head: ({ loaderData, params }) => ({
+  head: ({ loaderData, params, matches }) => ({
     meta: [
       { title: `${loaderData?.tema?.nome ?? "Time"} — Hockey4Life` },
       { name: "description", content: `Matérias do time ${loaderData?.tema?.nome ?? params.slug} no Hockey4Life.` },
       { property: "og:title", content: `${loaderData?.tema?.nome ?? "Time"} — Hockey4Life` },
-      { property: "og:url", content: `/time/${params.slug}` },
+      { property: "og:url", content: `${origemDe(matches)}/time/${params.slug}` },
     ],
-    links: [{ rel: "canonical", href: `/time/${params.slug}` }],
+    links: [{ rel: "canonical", href: `${origemDe(matches)}/time/${params.slug}` }],
   }),
   component: TemaTimePage,
 });

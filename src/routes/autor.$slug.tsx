@@ -1,3 +1,4 @@
+import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, notFound, type SearchSchemaInput } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getAutorPublico, getSiteConfig } from "@/lib/posts.functions";
@@ -31,11 +32,12 @@ export const Route = createFileRoute("/autor/$slug")({
     await context.queryClient.ensureQueryData(configQuery());
     return result;
   },
-  head: ({ loaderData, params }) => {
+  head: ({ loaderData, params, matches }) => {
+    const o = origemDe(matches);
     if (!loaderData) return { meta: [{ title: "Autor não encontrado — Hockey4Life" }, { name: "robots", content: "noindex" }] };
     const { autor } = loaderData;
     const desc = autor.bio_curta ?? autor.bio ?? `Matérias de ${autor.nome} no Hockey4Life.`;
-    const url = `https://hockey4life.com.br/autor/${params.slug}`;
+    const url = `${o}/autor/${params.slug}`;
     const meta: Array<Record<string, string>> = [
       { title: `${autor.nome} — Hockey4Life` },
       { name: "description", content: desc.slice(0, 160) },
@@ -62,14 +64,14 @@ export const Route = createFileRoute("/autor/$slug")({
       description: desc,
       url,
       jobTitle: "Jornalista esportivo",
-      worksFor: { "@type": "Organization", name: "Hockey4Life", url: "https://hockey4life.com.br" },
+      worksFor: { "@type": "Organization", name: "Hockey4Life", url: o },
     };
     if (autor.foto_url) jsonLd.image = autor.foto_url;
     if (sameAs.length) jsonLd.sameAs = sameAs;
 
     return {
       meta,
-      links: [{ rel: "canonical", href: `/autor/${params.slug}` }],
+      links: [{ rel: "canonical", href: `${o}/autor/${params.slug}` }],
       scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }],
     };
   },

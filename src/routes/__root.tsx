@@ -15,6 +15,7 @@ import logoEscuroAsset from "../assets/logo-escuro.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { MeSurpreenda } from "@/components/site/MeSurpreenda";
+import { getOrigem } from "@/lib/origem";
 
 function NotFoundComponent() {
   return (
@@ -80,6 +81,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Origem absoluta (host real da requisição) para canonical/og:url de todas as páginas.
+  loader: async () => ({
+    origem: typeof window !== "undefined" ? window.location.origin : await getOrigem(),
+  }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
