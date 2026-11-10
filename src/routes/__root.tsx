@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import iconeAsset from "../assets/icone.png.asset.json";
-import logoEscuroAsset from "../assets/logo-escuro.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { MeSurpreenda } from "@/components/site/MeSurpreenda";
