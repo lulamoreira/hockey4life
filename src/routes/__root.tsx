@@ -95,6 +95,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC.",
       },
       { name: "author", content: "Hockey4Life" },
+      // Verificação de propriedade do site no Google Search Console (endereço https).
+      {
+        name: "google-site-verification",
+        content: "un4y-SrqV0Zd4cICX05RIxon91TJ1ycCN5ElA-qtSh8",
+      },
       { property: "og:site_name", content: "Hockey4Life" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
