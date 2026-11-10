@@ -1,3 +1,4 @@
+import { FotoPreenchida } from "@/components/site/FotoPreenchida";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostListItem, CarrosselSettings } from "@/lib/posts.functions";
@@ -236,7 +237,7 @@ function Slide({
           {post.imagem_capa ? (
             // Foto preenchendo o frame inteiro: escala na proporção,
             // centralizada, cortando o que sobrar (sem faixas pretas).
-            <img
+            <FotoPreenchida
               src={post.imagem_capa}
               alt={post.titulo}
               loading={eager ? "eager" : "lazy"}
