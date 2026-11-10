@@ -26,9 +26,11 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAprovacoesRouteImport } from './routes/admin.aprovacoes'
 import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
+import { Route as AdminBuscaGoogleRouteImport } from './routes/admin.busca-google'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
+import { Route as AdminLegendasRouteImport } from './routes/admin.legendas'
 import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
@@ -132,6 +134,11 @@ const AdminBackupRoute = AdminBackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBuscaGoogleRoute = AdminBuscaGoogleRouteImport.update({
+  id: '/busca-google',
+  path: '/busca-google',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -145,6 +152,11 @@ const AdminContatosRoute = AdminContatosRouteImport.update({
 const AdminImportarRoute = AdminImportarRouteImport.update({
   id: '/importar',
   path: '/importar',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLegendasRoute = AdminLegendasRouteImport.update({
+  id: '/legendas',
+  path: '/legendas',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMateriasRoute = AdminMateriasRouteImport.update({
@@ -251,9 +263,11 @@ export interface FileRoutesByFullPath {
   '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
+  '/admin/busca-google': typeof AdminBuscaGoogleRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/legendas': typeof AdminLegendasRoute
   '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
@@ -289,9 +303,11 @@ export interface FileRoutesByTo {
   '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
+  '/admin/busca-google': typeof AdminBuscaGoogleRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/legendas': typeof AdminLegendasRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
@@ -327,9 +343,11 @@ export interface FileRoutesById {
   '/admin/aprovacoes': typeof AdminAprovacoesRoute
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
+  '/admin/busca-google': typeof AdminBuscaGoogleRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
+  '/admin/legendas': typeof AdminLegendasRoute
   '/admin/materias': typeof AdminMateriasRouteWithChildren
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
@@ -368,9 +386,11 @@ export interface FileRouteTypes {
     | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
+    | '/admin/busca-google'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/legendas'
     | '/admin/materias'
     | '/admin/posts'
     | '/admin/temas'
@@ -406,9 +426,11 @@ export interface FileRouteTypes {
     | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
+    | '/admin/busca-google'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/legendas'
     | '/admin/temas'
     | '/admin/usuarios'
     | '/admin/criar-conta'
@@ -443,9 +465,11 @@ export interface FileRouteTypes {
     | '/admin/aprovacoes'
     | '/admin/autores'
     | '/admin/backup'
+    | '/admin/busca-google'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
+    | '/admin/legendas'
     | '/admin/materias'
     | '/admin/posts'
     | '/admin/temas'
@@ -608,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBackupRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/busca-google': {
+      id: '/admin/busca-google'
+      path: '/busca-google'
+      fullPath: '/admin/busca-google'
+      preLoaderRoute: typeof AdminBuscaGoogleRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/configuracoes': {
       id: '/admin/configuracoes'
       path: '/configuracoes'
@@ -627,6 +658,13 @@ declare module '@tanstack/react-router' {
       path: '/importar'
       fullPath: '/admin/importar'
       preLoaderRoute: typeof AdminImportarRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/legendas': {
+      id: '/admin/legendas'
+      path: '/legendas'
+      fullPath: '/admin/legendas'
+      preLoaderRoute: typeof AdminLegendasRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/materias': {
@@ -787,9 +825,11 @@ interface AdminRouteChildren {
   AdminAprovacoesRoute: typeof AdminAprovacoesRoute
   AdminAutoresRoute: typeof AdminAutoresRoute
   AdminBackupRoute: typeof AdminBackupRoute
+  AdminBuscaGoogleRoute: typeof AdminBuscaGoogleRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
   AdminImportarRoute: typeof AdminImportarRoute
+  AdminLegendasRoute: typeof AdminLegendasRoute
   AdminMateriasRoute: typeof AdminMateriasRouteWithChildren
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
@@ -801,9 +841,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAprovacoesRoute: AdminAprovacoesRoute,
   AdminAutoresRoute: AdminAutoresRoute,
   AdminBackupRoute: AdminBackupRoute,
+  AdminBuscaGoogleRoute: AdminBuscaGoogleRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
   AdminImportarRoute: AdminImportarRoute,
+  AdminLegendasRoute: AdminLegendasRoute,
   AdminMateriasRoute: AdminMateriasRouteWithChildren,
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
