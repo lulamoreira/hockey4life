@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { nhlLogoUrl, nhlLogoCoverStyle } from "@/lib/nhl-logos";
+import { nhlLogoUrl } from "@/lib/nhl-logos";
 import type { TimesCarrosselSettings } from "@/lib/posts.functions";
 import { TIMES_CARROSSEL_PADRAO } from "@/lib/posts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -42,7 +42,7 @@ export function TimesCarrossel({
                     draggable={false}
                     className="group relative flex h-full w-full flex-col overflow-hidden rounded-md [container-type:size] border border-border bg-background"
                   >
-                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="eager" draggable={false} style={nhlLogoCoverStyle(t.slug)} className={nhlLogoCoverStyle(t.slug) ? "transition-transform duration-200 group-hover:scale-110" : "absolute inset-0 h-full w-full object-cover object-center"} />
+                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="eager" draggable={false} className="absolute inset-0 h-full w-full object-contain object-center p-2 transition-transform duration-200 group-hover:scale-110" />
                     <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/55 to-transparent px-2 pb-1 pt-5 text-center text-[10px] font-semibold uppercase tracking-wide text-white">{t.nome}</span>
                   </Link>
                 </li>
@@ -149,8 +149,7 @@ export function TimesCarrossel({
                       src={logo}
                       alt={`Logo ${t.nome}`}
                       loading="eager"
-                      style={nhlLogoCoverStyle(t.slug)}
-                      className={nhlLogoCoverStyle(t.slug) ? "transition-transform duration-200 group-hover:scale-110" : "absolute inset-0 h-full w-full object-cover object-center"}
+                      className="absolute inset-0 h-full w-full object-contain object-center p-2 transition-transform duration-200 group-hover:scale-110"
                     />
                     <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/55 to-transparent px-2 pb-1 pt-5 text-center text-[10px] font-semibold uppercase tracking-wide text-white group-hover:text-primary">
                       {t.nome}
