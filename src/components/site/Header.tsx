@@ -165,6 +165,16 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               Entrar
             </Link>
           )}
+          {logado && (isAdmin || isEditor) && (
+            <Link
+              to="/admin"
+              aria-label="Painel administrativo"
+              title="Painel administrativo"
+              className="hidden items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
           {m.fale_conosco && (
             <Link
               to="/fale-conosco"
@@ -280,7 +290,7 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                     <PenSquare className="h-4 w-4" /> Incluir matéria
                   </Link>
                 )}
-                {logado && isAdmin && (
+                {logado && (isAdmin || isEditor) && (
                   <Link
                     to="/admin"
                     onClick={() => setOpen(false)}
