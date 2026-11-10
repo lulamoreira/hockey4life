@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { listUsuarios, listPapeis, atribuirPapel, savePapel, deletePapel, PERMISSOES, type Permissao } from "@/lib/equipe.functions";
+import { listUsuarios, listPapeis, atribuirPapel, savePapel, deletePapel, listAutoresVinculo, vincularAutor, PERMISSOES, type Permissao } from "@/lib/equipe.functions";
 import { Users, Shield, Trash2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/admin/usuarios")({
@@ -44,6 +44,13 @@ function ListaUsuarios() {
   });
   const papeisQ = useQuery({ queryKey: ["papeis"], queryFn: () => listPapeis() });
   const atribuir = useServerFn(atribuirPapel);
+  const vincular = useServerFn(vincularAutor);
+  const autoresQ = useQuery({ queryKey: ["autores-vinculo"], queryFn: () => listAutoresVinculo() });
+  const ligarAutor = async (userId: string, autorId: string | null) => {
+    await vincular({ data: { user_id: userId, autor_id: autorId } });
+    qc.invalidateQueries({ queryKey: ["usuarios"] });
+    qc.invalidateQueries({ queryKey: ["autores-vinculo"] });
+  };
 
   const trocar = async (userId: string, papelId: string | null) => {
     await atribuir({ data: { user_id: userId, papel_id: papelId } });
@@ -72,6 +79,7 @@ function ListaUsuarios() {
               <th className="px-4 py-3 text-left">E-mail</th>
               <th className="px-4 py-3 text-left">Papel atual</th>
               <th className="px-4 py-3 text-left">Trocar</th>
+              <th className="px-4 py-3 text-left">Autor</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -97,6 +105,9 @@ function ListaUsuarios() {
                     papeis={papeisQ.data ?? []}
                     onChange={(pid) => trocar(u.id, pid)}
                   />
+                </td>
+                <td className="px-4 py-3">
+                  <SeletorAutor userId={u.id} valorAtual={u.autor_id} autores={autoresQ.data ?? []} onChange={(aid) => ligarAutor(u.id, aid)} />
                 </td>
               </tr>
             ))}
@@ -126,11 +137,44 @@ function ListaUsuarios() {
                 papeis={papeisQ.data ?? []}
                 onChange={(pid) => trocar(u.id, pid)}
               />
+              <label className="mt-2 block text-xs uppercase tracking-wide text-muted-foreground">Autor</label>
+              <SeletorAutor userId={u.id} valorAtual={u.autor_id} autores={autoresQ.data ?? []} onChange={(aid) => ligarAutor(u.id, aid)} />
             </div>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+function SeletorAutor({
+  userId, valorAtual, autores, onChange,
+}: {
+  userId: string;
+  valorAtual: string | null;
+  autores: Array<{ id: string; nome: string; user_id: string | null }>;
+  onChange: (id: string | null) => void;
+}) {
+  return (
+    <select
+      aria-label="Autor associado"
+      value={valorAtual ?? "__nenhum__"}
+      onChange={(e) => {
+        const v = e.target.value;
+        const alvo = autores.find((a) => a.id === v);
+        if (alvo?.user_id && alvo.user_id !== userId &&
+          !confirm(`${alvo.nome} já está ligado a outra pessoa. Passar para este usuário?`)) return;
+        onChange(v === "__nenhum__" ? null : v);
+      }}
+      className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+    >
+      <option value="__nenhum__">Nenhum autor</option>
+      {autores.map((a) => (
+        <option key={a.id} value={a.id}>
+          {a.nome}{a.user_id && a.user_id !== userId ? " (já ligado)" : ""}
+        </option>
+      ))}
+    </select>
   );
 }
 

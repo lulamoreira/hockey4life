@@ -119,6 +119,9 @@ export const listUsuarios = createServerFn({ method: "GET" })
       .from("profiles").select("id,nome,foto_url").in("id", ids);
     const { data: roles } = await supabaseAdmin
       .from("user_roles").select("user_id,role,papel_id, papeis:papel_id(slug,nome)").in("user_id", ids);
+    const { data: auts } = await supabaseAdmin
+      .from("autores").select("id,user_id").in("user_id", ids);
+    const autorByUser = new Map((auts ?? []).map((a: any) => [a.user_id, a.id as string]));
     const profById = new Map((profs ?? []).map((p: any) => [p.id, p]));
     const roleById = new Map((roles ?? []).map((r: any) => [r.user_id, r]));
     let items = (users?.users ?? []).map((u) => {
@@ -134,6 +137,7 @@ export const listUsuarios = createServerFn({ method: "GET" })
         nome: p?.nome ?? null,
         foto_url: p?.foto_url ?? null,
         papel_slug: slug,
+        autor_id: autorByUser.get(u.id) ?? null,
         papel_nome: papel?.nome ?? (slug === "administrador" ? "Administrador" : slug === "editor" ? "Editor" : slug ? slug : "Leitor"),
       };
     });
@@ -189,6 +193,37 @@ export const atribuirPapel = createServerFn({ method: "POST" })
           .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80) || `autor-${data.user_id.slice(0, 8)}`;
         await supabaseAdmin.from("autores").insert({ nome, slug, user_id: data.user_id } as any);
       }
+    }
+    return { ok: true };
+  });
+
+// -------------------- Vínculo usuário ↔ autor --------------------
+export const listAutoresVinculo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("autores").select("id,nome,user_id").order("nome");
+    if (error) throw error;
+    return (data ?? []) as Array<{ id: string; nome: string; user_id: string | null }>;
+  });
+
+/** Liga um usuário a um autor (ou desliga, com autor_id null). Um usuário tem no máximo um autor. */
+export const vincularAutor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({ user_id: z.string().uuid(), autor_id: z.string().uuid().nullable() }).parse(v),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: perm } = await context.supabase.rpc("tem_permissao" as any, {
+      _user_id: context.userId, _permissao: "gerenciar_usuarios",
+    });
+    if (!perm) throw new Error("Sem permissão.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const solta = await supabaseAdmin.from("autores").update({ user_id: null } as any).eq("user_id", data.user_id);
+    if (solta.error) throw solta.error;
+    if (data.autor_id) {
+      const liga = await supabaseAdmin.from("autores").update({ user_id: data.user_id } as any).eq("id", data.autor_id);
+      if (liga.error) throw liga.error;
     }
     return { ok: true };
   });
