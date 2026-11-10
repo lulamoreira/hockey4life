@@ -613,7 +613,7 @@ const autorInput = z.object({
   linha_do_tempo: z.array(z.object({ ano: z.string().max(20), texto: z.string().max(500) })).default([]),
 });
 
-const AUTOR_COLS = "id,nome,slug,bio,bio_curta,bio_media,bio_longa,cargo,formacao,competencias,linkedin_url,foto_url,links,outros_links,fotos,linha_do_tempo,criado_em";
+const AUTOR_COLS = "id,nome,slug,bio,bio_curta,bio_media,bio_longa,cargo,formacao,competencias,linkedin_url,foto_url,links,outros_links,fotos,linha_do_tempo,criado_em,user_id";
 
 export const listAutores = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
