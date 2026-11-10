@@ -104,8 +104,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "Hockey4Life — histórias de vida, superação e gentileza" },
       { property: "og:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
       { name: "twitter:description", content: "Portal Hockey4Life: histórias de vida, superação e gentileza com o hóquei no gelo como pano de fundo. Matérias, times e HFC." },
-      { property: "og:image", content: logoEscuroAsset.url },
-      { name: "twitter:image", content: logoEscuroAsset.url },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
