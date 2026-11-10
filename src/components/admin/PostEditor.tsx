@@ -63,6 +63,17 @@ export function PostEditor({ id }: { id?: string }) {
     }
   }, [isNew, postQ.data]);
 
+  // Matéria nova: já começa assinada pelo autor ligado ao usuário (Admin → Usuários).
+  const autorPreenchidoRef = useRef(false);
+  useEffect(() => {
+    if (!isNew || autorPreenchidoRef.current || !autoresQ.data) return;
+    autorPreenchidoRef.current = true;
+    supabase.auth.getUser().then(({ data }) => {
+      const meu = (autoresQ.data as any[]).find((a) => a.user_id && a.user_id === data.user?.id);
+      if (meu) { ignorarProximaMudancaRef.current = true; setAutorId(meu.id); }
+    });
+  }, [isNew, autoresQ.data]);
+
   // Marca como sujo quando qualquer campo editável muda depois da hidratação inicial.
   useEffect(() => {
     if (ignorarProximaMudancaRef.current) {
