@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { nhlLogoUrl, nhlLogoCoverStyle } from "@/lib/nhl-logos";
+import { nhlLogoUrl } from "@/lib/nhl-logos";
 import type { TimesCarrosselSettings } from "@/lib/posts.functions";
 import { TIMES_CARROSSEL_PADRAO } from "@/lib/posts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";

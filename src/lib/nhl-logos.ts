@@ -1,4 +1,3 @@
-import type React from "react";
 // Mapeia slug (temas.tipo='time') → tricode oficial da NHL.
 // Logos servidos pelo CDN oficial: https://assets.nhle.com/logos/nhl/svg/{TRI}_light.svg
 export const NHL_TRICODE_BY_SLUG: Record<string, string> = {
