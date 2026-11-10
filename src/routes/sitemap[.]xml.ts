@@ -14,7 +14,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           urls.push(`  <url><loc>${base}${p}</loc><changefreq>weekly</changefreq></url>`);
         }
         for (const post of posts) {
-          const last = post.atualizado_em ?? post.publicado_em;
+          // Matérias importadas do WP: atualizado_em marca a hora da importação, não uma edição real.
+          const last = post.wp_id != null ? post.publicado_em : (post.atualizado_em ?? post.publicado_em);
           urls.push(
             `  <url><loc>${base}/${post.slug}</loc>${last ? `<lastmod>${new Date(last).toISOString()}</lastmod>` : ""}<changefreq>monthly</changefreq></url>`,
           );

@@ -882,13 +882,13 @@ export const listAllPublishedSlugs = createServerFn({ method: "GET" }).handler(a
   const sb = publicClient();
   const nowIso = new Date().toISOString();
   const PAG = 1000;
-  const todos: { slug: string; publicado_em: string | null; atualizado_em: string | null }[] = [];
+  const todos: { slug: string; publicado_em: string | null; atualizado_em: string | null; wp_id: number | null }[] = [];
   let from = 0;
   // Paginado com .range() — a Data API corta em 1000 sem avisar.
   while (true) {
     const { data, error } = await sb
       .from("posts")
-      .select("slug,publicado_em,atualizado_em")
+      .select("slug,publicado_em,atualizado_em,wp_id")
       .eq("status", "publicado")
       .lte("publicado_em", nowIso)
       .order("publicado_em", { ascending: false })
