@@ -98,8 +98,8 @@ export const CARROSSEL_PADRAO: CarrosselSettings = {
   intervalo: 7,
   duracaoMs: 600,
   fixadaComRodizio: true,
-  tituloPx: 20,
-  tituloPxLg: 30,
+  tituloPx: 40,
+  tituloPxLg: 58,
   resumoPx: 16,
 };
 
