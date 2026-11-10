@@ -42,7 +42,7 @@ export function TimesCarrossel({
                     draggable={false}
                     className="group relative flex h-full w-full flex-col overflow-hidden rounded-md border border-border bg-background"
                   >
-                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-110" />
+                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="lazy" draggable={false} style={{ objectViewBox: nhlLogoViewBox(t.slug) } as React.CSSProperties} className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-110" />
                     <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/55 to-transparent px-2 pb-1 pt-5 text-center text-[10px] font-semibold uppercase tracking-wide text-white">{t.nome}</span>
                   </Link>
                 </li>
