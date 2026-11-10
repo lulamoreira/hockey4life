@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
 import { enviarContato, getSiteConfig } from "@/lib/posts.functions";
+import { SeguirInstagram } from "@/components/site/SeguirInstagram";
 import { SiteLayout } from "@/components/site/SiteLayout";
 
 const cfg = () =>
@@ -92,6 +93,8 @@ function ContatoPage() {
             {state === "sending" ? "Enviando…" : "Enviar mensagem"}
           </button>
         </form>
+
+        <SeguirInstagram className="mt-10" />
       </div>
     </SiteLayout>
   );

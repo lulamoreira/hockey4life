@@ -13,6 +13,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { ContinueLendo } from "@/components/site/ContinueLendo";
+import { SeguirInstagram } from "@/components/site/SeguirInstagram";
 import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
 import { OuvirMateria } from "@/components/site/OuvirMateria";
 import { MeSurpreenda } from "@/components/site/MeSurpreenda";
@@ -272,6 +273,8 @@ function PostPage() {
                 </div>
               </aside>
             )}
+
+            <SeguirInstagram className="mt-8" />
 
             {(anterior || proximo) && (
               <nav className="mt-8 grid gap-3 sm:grid-cols-2">
