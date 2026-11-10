@@ -907,6 +907,19 @@ function TimesEditor({
           <input type="checkbox" checked={t.pausarNoHover} onChange={(e) => set({ pausarNoHover: e.target.checked })} />
           <span>Pausar ao passar o mouse</span>
         </label>
+
+        <div className="rounded-md border border-border p-3 space-y-3">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Somente no celular</div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={t.mobileAuto} onChange={(e) => set({ mobileAuto: e.target.checked })} />
+            <span>Rolar automaticamente (o leitor também pode arrastar com o dedo)</span>
+          </label>
+          <NumField
+            label={`Velocidade no celular (${t.mobileVelocidade} px/s)`}
+            value={t.mobileVelocidade} min={10} max={150} def={40}
+            onChange={(val) => set({ mobileVelocidade: val })}
+          />
+        </div>
       </div>
 
       <div>
@@ -1007,6 +1020,19 @@ function PlacaresEditor({
           def={PLACARES_PADRAO.velocidade}
           onChange={(v) => set({ velocidade: v })}
         />
+
+        <div className="rounded-md border border-border p-3 space-y-3">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Somente no celular</div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={p.mobileAuto} onChange={(e) => set({ mobileAuto: e.target.checked })} />
+            <span>Rolar automaticamente (o leitor também pode arrastar com o dedo)</span>
+          </label>
+          <NumField
+            label={`Velocidade no celular (${p.mobileVelocidade} px/s)`}
+            value={p.mobileVelocidade} min={10} max={150} def={40}
+            onChange={(val) => set({ mobileVelocidade: val })}
+          />
+        </div>
 
         <div>
           <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Onde exibir</div>

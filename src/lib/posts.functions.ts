@@ -46,6 +46,8 @@ export type TimesCarrosselSettings = {
   quantidadeVisivel: number; // 2..12
   alturaPx: number;        // 60..200 altura do item
   pausarNoHover: boolean;
+  mobileAuto: boolean;       // celular: rolar sozinho
+  mobileVelocidade: number;  // celular: pixels por segundo (10..150)
 };
 
 export type PlacaresPosicao = "apos_ultimas" | "acima_rodape";
@@ -59,6 +61,8 @@ export type PlacaresSettings = {
   direcao: PlacaresDirecao;    // rtl | ltr
   velocidade: number;          // segundos por volta (10..120)
   posicao: PlacaresPosicao;    // onde exibir na home
+  mobileAuto: boolean;         // celular: rolar sozinho
+  mobileVelocidade: number;    // celular: pixels por segundo (10..150)
 };
 
 export type HomeSettings = {
@@ -110,6 +114,8 @@ export const TIMES_CARROSSEL_PADRAO: TimesCarrosselSettings = {
   quantidadeVisivel: 8,
   alturaPx: 120,
   pausarNoHover: true,
+  mobileAuto: true,
+  mobileVelocidade: 40,
 };
 
 export const PLACARES_PADRAO: PlacaresSettings = {
@@ -121,6 +127,8 @@ export const PLACARES_PADRAO: PlacaresSettings = {
   direcao: "rtl",
   velocidade: 40,
   posicao: "apos_ultimas",
+  mobileAuto: true,
+  mobileVelocidade: 40,
 };
 
 export const HOME_SETTINGS_PADRAO: HomeSettings = {
@@ -181,6 +189,8 @@ function normalizeTimes(raw: any): TimesCarrosselSettings {
     quantidadeVisivel: clamp(t.quantidadeVisivel, 2, 12, TIMES_CARROSSEL_PADRAO.quantidadeVisivel),
     alturaPx: clamp(t.alturaPx, 60, 200, TIMES_CARROSSEL_PADRAO.alturaPx),
     pausarNoHover: t.pausarNoHover !== false,
+    mobileAuto: t.mobileAuto !== false,
+    mobileVelocidade: clamp(t.mobileVelocidade, 10, 150, TIMES_CARROSSEL_PADRAO.mobileVelocidade),
   };
 }
 
@@ -197,6 +207,8 @@ function normalizePlacares(raw: any): PlacaresSettings {
     direcao: dir as PlacaresDirecao,
     velocidade: clamp(p.velocidade, 10, 120, PLACARES_PADRAO.velocidade),
     posicao: pos as PlacaresPosicao,
+    mobileAuto: p.mobileAuto !== false,
+    mobileVelocidade: clamp(p.mobileVelocidade, 10, 150, PLACARES_PADRAO.mobileVelocidade),
   };
 }
 

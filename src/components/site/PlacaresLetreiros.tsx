@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { getNhlGames, type NhlJogo } from "@/lib/nhl.functions";
 import type { PlacaresSettings } from "@/lib/posts.functions";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { TouchMarquee } from "@/components/site/TouchMarquee";
 
 /* ------------------------------------------------------------------
  * Formatação compacta
@@ -312,12 +314,17 @@ function FaixaNaoPerca({
   items,
   direcao,
   velocidade,
+  mobileAuto = true,
+  mobileVelocidade = 40,
 }: {
   rotulo: string;
   items: Item[];
   direcao: "rtl" | "ltr";
   velocidade: number;
+  mobileAuto?: boolean;
+  mobileVelocidade?: number;
 }) {
+  const isMobile = useIsMobile();
   const [paused, setPaused] = useState(false);
   const visible = usePageVisible();
   const reduced = usePrefersReducedMotion();
@@ -354,7 +361,25 @@ function FaixaNaoPerca({
         </span>
       </div>
       <div className="relative min-w-0 flex-1 overflow-hidden" style={{ fontSize: "12px" }}>
-        {reduced ? (
+        {isMobile ? (
+          <TouchMarquee auto={mobileAuto} pxPorSegundo={mobileVelocidade} reverso={direcao === "ltr"} className="h-full">
+            <div className="flex h-full w-max items-center whitespace-nowrap">
+              {dup.map((it, idx) => {
+                const clone = idx >= items.length;
+                return (
+                  <span key={`${it.key}-${idx}`} className="flex items-center" aria-hidden={clone ? "true" : undefined}>
+                    {it.href ? (
+                      <a href={it.href} target="_blank" rel="noopener noreferrer" draggable={false} className="px-4 no-underline tabular-nums" tabIndex={clone ? -1 : 0}>{it.label}</a>
+                    ) : (
+                      <span className="px-4 tabular-nums">{it.label}</span>
+                    )}
+                    <span className="text-white/40">•</span>
+                  </span>
+                );
+              })}
+            </div>
+          </TouchMarquee>
+        ) : reduced ? (
           <FadeItens items={items} intervaloMs={Math.max(3000, velocidade * 200)} running={running} />
         ) : (
           <>
@@ -437,6 +462,8 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             items={ultimos}
             direcao={settings.direcao}
             velocidade={settings.velocidade}
+            mobileAuto={settings.mobileAuto}
+            mobileVelocidade={settings.mobileVelocidade}
           />
         )}
         {temP && (
@@ -445,6 +472,8 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             items={proximos}
             direcao={settings.direcao}
             velocidade={settings.velocidade}
+            mobileAuto={settings.mobileAuto}
+            mobileVelocidade={settings.mobileVelocidade}
           />
         )}
       </div>
