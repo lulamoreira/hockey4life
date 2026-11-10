@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { useState } from "react";
@@ -46,7 +46,7 @@ const temasQ = () => queryOptions({ queryKey: ["temas-filtro"], queryFn: () => l
 const navQ = () => queryOptions({ queryKey: ["arquivo-nav"], queryFn: () => getArchiveNav(), staleTime: 120_000 });
 
 export const Route = createFileRoute("/arquivo")({
-  validateSearch: (v): ArquivoSearch => searchSchema.parse(v ?? {}) as ArquivoSearch,
+  validateSearch: (v: z.input<typeof searchSchema> & SearchSchemaInput): ArquivoSearch => searchSchema.parse(v ?? {}),
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ context, deps }) => {
     await Promise.all([

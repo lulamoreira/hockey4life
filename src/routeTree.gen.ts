@@ -9,97 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TemasRouteImport } from './routes/temas'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
-import { Route as FeedRouteImport } from './routes/feed'
-import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
-import { Route as EntrarRouteImport } from './routes/entrar'
-import { Route as ContaRouteImport } from './routes/conta'
-import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
-import { Route as BuscaRouteImport } from './routes/busca'
-import { Route as ArquivoRouteImport } from './routes/arquivo'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ArquivoRouteImport } from './routes/arquivo'
+import { Route as BuscaRouteImport } from './routes/busca'
+import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
+import { Route as ContaRouteImport } from './routes/conta'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as FaleConoscoRouteImport } from './routes/fale-conosco'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TemasRouteImport } from './routes/temas'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as TimeSlugRouteImport } from './routes/time.$slug'
-import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
-import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
-import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
-import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
-import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
-import { Route as AdminTemasRouteImport } from './routes/admin.temas'
-import { Route as AdminPostsRouteImport } from './routes/admin.posts'
-import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
-import { Route as AdminImportarRouteImport } from './routes/admin.importar'
-import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
-import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
-import { Route as AdminBackupRouteImport } from './routes/admin.backup'
-import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
 import { Route as AdminAprovacoesRouteImport } from './routes/admin.aprovacoes'
-import { Route as AdminPostsIndexRouteImport } from './routes/admin.posts.index'
+import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
+import { Route as AdminBackupRouteImport } from './routes/admin.backup'
+import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
+import { Route as AdminImportarRouteImport } from './routes/admin.importar'
+import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
+import { Route as AdminTemasRouteImport } from './routes/admin.temas'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
+import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
+import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
+import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
+import { Route as TimeSlugRouteImport } from './routes/time.$slug'
 import { Route as AdminMateriasIndexRouteImport } from './routes/admin.materias.index'
-import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
-import { Route as AdminPostsNovoRouteImport } from './routes/admin.posts.novo'
-import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
-import { Route as AdminMateriasNovaRouteImport } from './routes/admin.materias.nova'
 import { Route as AdminMateriasIdRouteImport } from './routes/admin.materias.$id'
+import { Route as AdminMateriasNovaRouteImport } from './routes/admin.materias.nova'
+import { Route as AdminPostsIndexRouteImport } from './routes/admin.posts.index'
+import { Route as AdminPostsIdRouteImport } from './routes/admin.posts.$id'
+import { Route as AdminPostsNovoRouteImport } from './routes/admin.posts.novo'
+import { Route as ArquivoAnoMesRouteImport } from './routes/arquivo.$ano.$mes'
 import { Route as ApiPublicHooksBackupAutomaticoRouteImport } from './routes/api/public/hooks/backup-automatico'
 
-const TemasRoute = TemasRouteImport.update({
-  id: '/temas',
-  path: '/temas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
-  id: '/politica-de-privacidade',
-  path: '/politica-de-privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedRoute = FeedRouteImport.update({
-  id: '/feed',
-  path: '/feed',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaleConoscoRoute = FaleConoscoRouteImport.update({
-  id: '/fale-conosco',
-  path: '/fale-conosco',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EntrarRoute = EntrarRouteImport.update({
-  id: '/entrar',
-  path: '/entrar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContaRoute = ContaRouteImport.update({
-  id: '/conta',
-  path: '/conta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
-  id: '/completar-perfil',
-  path: '/completar-perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuscaRoute = BuscaRouteImport.update({
-  id: '/busca',
-  path: '/busca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArquivoRoute = ArquivoRouteImport.update({
-  id: '/arquivo',
-  path: '/arquivo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -107,9 +57,59 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArquivoRoute = ArquivoRouteImport.update({
+  id: '/arquivo',
+  path: '/arquivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscaRoute = BuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
+  id: '/completar-perfil',
+  path: '/completar-perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaleConoscoRoute = FaleConoscoRouteImport.update({
+  id: '/fale-conosco',
+  path: '/fale-conosco',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemasRoute = TemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -117,69 +117,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const TimeSlugRoute = TimeSlugRouteImport.update({
-  id: '/time/$slug',
-  path: '/time/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AutorSlugRoute = AutorSlugRouteImport.update({
-  id: '/autor/$slug',
-  path: '/autor/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
-  id: '/assunto/$slug',
-  path: '/assunto/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArquivoAnoRoute = ArquivoAnoRouteImport.update({
-  id: '/$ano',
-  path: '/$ano',
-  getParentRoute: () => ArquivoRoute,
-} as any)
-const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
-  id: '/admin_/criar-conta',
-  path: '/admin/criar-conta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminTemasRoute = AdminTemasRouteImport.update({
-  id: '/temas',
-  path: '/temas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPostsRoute = AdminPostsRouteImport.update({
-  id: '/posts',
-  path: '/posts',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMateriasRoute = AdminMateriasRouteImport.update({
-  id: '/materias',
-  path: '/materias',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminImportarRoute = AdminImportarRouteImport.update({
-  id: '/importar',
-  path: '/importar',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminContatosRoute = AdminContatosRouteImport.update({
-  id: '/contatos',
-  path: '/contatos',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBackupRoute = AdminBackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
+const AdminAprovacoesRoute = AdminAprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAutoresRoute = AdminAutoresRouteImport.update({
@@ -187,29 +127,89 @@ const AdminAutoresRoute = AdminAutoresRouteImport.update({
   path: '/autores',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAprovacoesRoute = AdminAprovacoesRouteImport.update({
-  id: '/aprovacoes',
-  path: '/aprovacoes',
+const AdminBackupRoute = AdminBackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminPostsIndexRoute = AdminPostsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminPostsRoute,
+const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContatosRoute = AdminContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminImportarRoute = AdminImportarRouteImport.update({
+  id: '/importar',
+  path: '/importar',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMateriasRoute = AdminMateriasRouteImport.update({
+  id: '/materias',
+  path: '/materias',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemasRoute = AdminTemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
+  id: '/admin_/criar-conta',
+  path: '/admin/criar-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArquivoAnoRoute = ArquivoAnoRouteImport.update({
+  id: '/$ano',
+  path: '/$ano',
+  getParentRoute: () => ArquivoRoute,
+} as any)
+const AssuntoSlugRoute = AssuntoSlugRouteImport.update({
+  id: '/assunto/$slug',
+  path: '/assunto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutorSlugRoute = AutorSlugRouteImport.update({
+  id: '/autor/$slug',
+  path: '/autor/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimeSlugRoute = TimeSlugRouteImport.update({
+  id: '/time/$slug',
+  path: '/time/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminMateriasIndexRoute = AdminMateriasIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminMateriasRoute,
 } as any)
-const ArquivoAnoMesRoute = ArquivoAnoMesRouteImport.update({
-  id: '/$mes',
-  path: '/$mes',
-  getParentRoute: () => ArquivoAnoRoute,
+const AdminMateriasIdRoute = AdminMateriasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminMateriasRoute,
 } as any)
-const AdminPostsNovoRoute = AdminPostsNovoRouteImport.update({
-  id: '/novo',
-  path: '/novo',
+const AdminMateriasNovaRoute = AdminMateriasNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => AdminMateriasRoute,
+} as any)
+const AdminPostsIndexRoute = AdminPostsIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => AdminPostsRoute,
 } as any)
 const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
@@ -217,15 +217,15 @@ const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminPostsRoute,
 } as any)
-const AdminMateriasNovaRoute = AdminMateriasNovaRouteImport.update({
-  id: '/nova',
-  path: '/nova',
-  getParentRoute: () => AdminMateriasRoute,
+const AdminPostsNovoRoute = AdminPostsNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => AdminPostsRoute,
 } as any)
-const AdminMateriasIdRoute = AdminMateriasIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminMateriasRoute,
+const ArquivoAnoMesRoute = ArquivoAnoMesRouteImport.update({
+  id: '/$mes',
+  path: '/$mes',
+  getParentRoute: () => ArquivoAnoRoute,
 } as any)
 const ApiPublicHooksBackupAutomaticoRoute =
   ApiPublicHooksBackupAutomaticoRouteImport.update({
@@ -489,81 +489,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/temas': {
-      id: '/temas'
-      path: '/temas'
-      fullPath: '/temas'
-      preLoaderRoute: typeof TemasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-de-privacidade': {
-      id: '/politica-de-privacidade'
-      path: '/politica-de-privacidade'
-      fullPath: '/politica-de-privacidade'
-      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed': {
-      id: '/feed'
-      path: '/feed'
-      fullPath: '/feed'
-      preLoaderRoute: typeof FeedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fale-conosco': {
-      id: '/fale-conosco'
-      path: '/fale-conosco'
-      fullPath: '/fale-conosco'
-      preLoaderRoute: typeof FaleConoscoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/entrar': {
-      id: '/entrar'
-      path: '/entrar'
-      fullPath: '/entrar'
-      preLoaderRoute: typeof EntrarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conta': {
-      id: '/conta'
-      path: '/conta'
-      fullPath: '/conta'
-      preLoaderRoute: typeof ContaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/completar-perfil': {
-      id: '/completar-perfil'
-      path: '/completar-perfil'
-      fullPath: '/completar-perfil'
-      preLoaderRoute: typeof CompletarPerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/busca': {
-      id: '/busca'
-      path: '/busca'
-      fullPath: '/busca'
-      preLoaderRoute: typeof BuscaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/arquivo': {
-      id: '/arquivo'
-      path: '/arquivo'
-      fullPath: '/arquivo'
-      preLoaderRoute: typeof ArquivoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -573,11 +503,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arquivo': {
+      id: '/arquivo'
+      path: '/arquivo'
+      fullPath: '/arquivo'
+      preLoaderRoute: typeof ArquivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/busca': {
+      id: '/busca'
+      path: '/busca'
+      fullPath: '/busca'
+      preLoaderRoute: typeof BuscaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completar-perfil': {
+      id: '/completar-perfil'
+      path: '/completar-perfil'
+      fullPath: '/completar-perfil'
+      preLoaderRoute: typeof CompletarPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fale-conosco': {
+      id: '/fale-conosco'
+      path: '/fale-conosco'
+      fullPath: '/fale-conosco'
+      preLoaderRoute: typeof FaleConoscoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/temas': {
+      id: '/temas'
+      path: '/temas'
+      fullPath: '/temas'
+      preLoaderRoute: typeof TemasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -587,95 +587,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/time/$slug': {
-      id: '/time/$slug'
-      path: '/time/$slug'
-      fullPath: '/time/$slug'
-      preLoaderRoute: typeof TimeSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/autor/$slug': {
-      id: '/autor/$slug'
-      path: '/autor/$slug'
-      fullPath: '/autor/$slug'
-      preLoaderRoute: typeof AutorSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assunto/$slug': {
-      id: '/assunto/$slug'
-      path: '/assunto/$slug'
-      fullPath: '/assunto/$slug'
-      preLoaderRoute: typeof AssuntoSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/arquivo/$ano': {
-      id: '/arquivo/$ano'
-      path: '/$ano'
-      fullPath: '/arquivo/$ano'
-      preLoaderRoute: typeof ArquivoAnoRouteImport
-      parentRoute: typeof ArquivoRoute
-    }
-    '/admin_/criar-conta': {
-      id: '/admin_/criar-conta'
-      path: '/admin/criar-conta'
-      fullPath: '/admin/criar-conta'
-      preLoaderRoute: typeof AdminCriarContaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/usuarios': {
-      id: '/admin/usuarios'
-      path: '/usuarios'
-      fullPath: '/admin/usuarios'
-      preLoaderRoute: typeof AdminUsuariosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/temas': {
-      id: '/admin/temas'
-      path: '/temas'
-      fullPath: '/admin/temas'
-      preLoaderRoute: typeof AdminTemasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/posts': {
-      id: '/admin/posts'
-      path: '/posts'
-      fullPath: '/admin/posts'
-      preLoaderRoute: typeof AdminPostsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/materias': {
-      id: '/admin/materias'
-      path: '/materias'
-      fullPath: '/admin/materias'
-      preLoaderRoute: typeof AdminMateriasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/importar': {
-      id: '/admin/importar'
-      path: '/importar'
-      fullPath: '/admin/importar'
-      preLoaderRoute: typeof AdminImportarRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/contatos': {
-      id: '/admin/contatos'
-      path: '/contatos'
-      fullPath: '/admin/contatos'
-      preLoaderRoute: typeof AdminContatosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/configuracoes': {
-      id: '/admin/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/admin/configuracoes'
-      preLoaderRoute: typeof AdminConfiguracoesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/backup': {
-      id: '/admin/backup'
-      path: '/backup'
-      fullPath: '/admin/backup'
-      preLoaderRoute: typeof AdminBackupRouteImport
+    '/admin/aprovacoes': {
+      id: '/admin/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/admin/aprovacoes'
+      preLoaderRoute: typeof AdminAprovacoesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/autores': {
@@ -685,19 +601,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAutoresRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/aprovacoes': {
-      id: '/admin/aprovacoes'
-      path: '/aprovacoes'
-      fullPath: '/admin/aprovacoes'
-      preLoaderRoute: typeof AdminAprovacoesRouteImport
+    '/admin/backup': {
+      id: '/admin/backup'
+      path: '/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AdminBackupRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/posts/': {
-      id: '/admin/posts/'
-      path: '/'
-      fullPath: '/admin/posts/'
-      preLoaderRoute: typeof AdminPostsIndexRouteImport
-      parentRoute: typeof AdminPostsRoute
+    '/admin/configuracoes': {
+      id: '/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminConfiguracoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contatos': {
+      id: '/admin/contatos'
+      path: '/contatos'
+      fullPath: '/admin/contatos'
+      preLoaderRoute: typeof AdminContatosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/importar': {
+      id: '/admin/importar'
+      path: '/importar'
+      fullPath: '/admin/importar'
+      preLoaderRoute: typeof AdminImportarRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/materias': {
+      id: '/admin/materias'
+      path: '/materias'
+      fullPath: '/admin/materias'
+      preLoaderRoute: typeof AdminMateriasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/temas': {
+      id: '/admin/temas'
+      path: '/temas'
+      fullPath: '/admin/temas'
+      preLoaderRoute: typeof AdminTemasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin_/criar-conta': {
+      id: '/admin_/criar-conta'
+      path: '/admin/criar-conta'
+      fullPath: '/admin/criar-conta'
+      preLoaderRoute: typeof AdminCriarContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arquivo/$ano': {
+      id: '/arquivo/$ano'
+      path: '/$ano'
+      fullPath: '/arquivo/$ano'
+      preLoaderRoute: typeof ArquivoAnoRouteImport
+      parentRoute: typeof ArquivoRoute
+    }
+    '/assunto/$slug': {
+      id: '/assunto/$slug'
+      path: '/assunto/$slug'
+      fullPath: '/assunto/$slug'
+      preLoaderRoute: typeof AssuntoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/autor/$slug': {
+      id: '/autor/$slug'
+      path: '/autor/$slug'
+      fullPath: '/autor/$slug'
+      preLoaderRoute: typeof AutorSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/time/$slug': {
+      id: '/time/$slug'
+      path: '/time/$slug'
+      fullPath: '/time/$slug'
+      preLoaderRoute: typeof TimeSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/materias/': {
       id: '/admin/materias/'
@@ -706,18 +699,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMateriasIndexRouteImport
       parentRoute: typeof AdminMateriasRoute
     }
-    '/arquivo/$ano/$mes': {
-      id: '/arquivo/$ano/$mes'
-      path: '/$mes'
-      fullPath: '/arquivo/$ano/$mes'
-      preLoaderRoute: typeof ArquivoAnoMesRouteImport
-      parentRoute: typeof ArquivoAnoRoute
+    '/admin/materias/$id': {
+      id: '/admin/materias/$id'
+      path: '/$id'
+      fullPath: '/admin/materias/$id'
+      preLoaderRoute: typeof AdminMateriasIdRouteImport
+      parentRoute: typeof AdminMateriasRoute
     }
-    '/admin/posts/novo': {
-      id: '/admin/posts/novo'
-      path: '/novo'
-      fullPath: '/admin/posts/novo'
-      preLoaderRoute: typeof AdminPostsNovoRouteImport
+    '/admin/materias/nova': {
+      id: '/admin/materias/nova'
+      path: '/nova'
+      fullPath: '/admin/materias/nova'
+      preLoaderRoute: typeof AdminMateriasNovaRouteImport
+      parentRoute: typeof AdminMateriasRoute
+    }
+    '/admin/posts/': {
+      id: '/admin/posts/'
+      path: '/'
+      fullPath: '/admin/posts/'
+      preLoaderRoute: typeof AdminPostsIndexRouteImport
       parentRoute: typeof AdminPostsRoute
     }
     '/admin/posts/$id': {
@@ -727,19 +727,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPostsIdRouteImport
       parentRoute: typeof AdminPostsRoute
     }
-    '/admin/materias/nova': {
-      id: '/admin/materias/nova'
-      path: '/nova'
-      fullPath: '/admin/materias/nova'
-      preLoaderRoute: typeof AdminMateriasNovaRouteImport
-      parentRoute: typeof AdminMateriasRoute
+    '/admin/posts/novo': {
+      id: '/admin/posts/novo'
+      path: '/novo'
+      fullPath: '/admin/posts/novo'
+      preLoaderRoute: typeof AdminPostsNovoRouteImport
+      parentRoute: typeof AdminPostsRoute
     }
-    '/admin/materias/$id': {
-      id: '/admin/materias/$id'
-      path: '/$id'
-      fullPath: '/admin/materias/$id'
-      preLoaderRoute: typeof AdminMateriasIdRouteImport
-      parentRoute: typeof AdminMateriasRoute
+    '/arquivo/$ano/$mes': {
+      id: '/arquivo/$ano/$mes'
+      path: '/$mes'
+      fullPath: '/arquivo/$ano/$mes'
+      preLoaderRoute: typeof ArquivoAnoMesRouteImport
+      parentRoute: typeof ArquivoAnoRoute
     }
     '/api/public/hooks/backup-automatico': {
       id: '/api/public/hooks/backup-automatico'
@@ -859,3 +859,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

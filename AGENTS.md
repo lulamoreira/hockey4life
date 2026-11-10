@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Type search validators with `SearchSchemaInput` and the schema's input type when defaults produce required outputs; navigation must still allow omitted filters.

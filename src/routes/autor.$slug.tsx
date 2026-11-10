@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, type SearchSchemaInput } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getAutorPublico, getSiteConfig } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -23,7 +23,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/autor/$slug")({
-  validateSearch: (s) => searchSchema.parse(s),
+  validateSearch: (s: z.input<typeof searchSchema> & SearchSchemaInput) => searchSchema.parse(s),
   loaderDeps: ({ search }) => ({ todas: !!search.todas, page: search.page }),
   loader: async ({ context, params, deps }) => {
     const result = await context.queryClient.ensureQueryData(autorQuery(params.slug, deps.todas, deps.page));
