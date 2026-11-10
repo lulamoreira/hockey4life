@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostListItem, CarrosselSettings } from "@/lib/posts.functions";
 import { formatDataBR } from "@/lib/slugify";
+import { fluidPx } from "@/lib/fluid-type";
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -267,12 +268,9 @@ function Slide({
           >
             <h2
               aria-hidden={chapeu ? "true" : undefined}
-              className={`h4l-title uppercase font-bold text-white line-clamp-2 leading-[1.08] ${
-                chapeu
-                  ? "text-[28px] md:text-[34px] lg:text-[44px] xl:text-[58px]"
-                  : "text-[28px] md:text-[34px] lg:text-[38px]"
-              }`}
+              className="h4l-title uppercase font-bold text-white line-clamp-2 leading-[1.08]"
               style={{
+                fontSize: fluidPx(settings.tituloPx, settings.tituloPxLg),
                 letterSpacing: "0.01em",
                 textShadow: "2px 2px 1px #000",
               }}
@@ -281,8 +279,11 @@ function Slide({
             </h2>
             {post.resumo && (
               <p
-                className="mt-2 line-clamp-2 max-w-3xl font-light text-white text-[16px] md:text-[18px] leading-[1.33]"
-                style={{ textShadow: "2px 2px 1px #000" }}
+                className="mt-2 line-clamp-2 max-w-3xl font-light text-white leading-[1.33]"
+                style={{
+                  fontSize: fluidPx(settings.resumoPx, Math.min(24, settings.resumoPx + 2)),
+                  textShadow: "2px 2px 1px #000",
+                }}
               >
                 {post.resumo}
               </p>

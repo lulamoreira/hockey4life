@@ -8,6 +8,7 @@ import { Letreiro } from "@/components/site/Letreiro";
 import { TimesCarrossel } from "@/components/site/TimesCarrossel";
 import { PlacaresLetreiros } from "@/components/site/PlacaresLetreiros";
 import { parseYouTube } from "@/lib/youtube";
+import { fluidPx } from "@/lib/fluid-type";
 import { YouTubeFacade } from "@/components/site/YouTubeFacade";
 
 import { formatDataBR } from "@/lib/slugify";
