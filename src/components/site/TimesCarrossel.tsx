@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { nhlLogoUrl } from "@/lib/nhl-logos";
 import type { TimesCarrosselSettings } from "@/lib/posts.functions";
 import { TIMES_CARROSSEL_PADRAO } from "@/lib/posts.functions";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { TouchMarquee } from "@/components/site/TouchMarquee";
 
 type Time = { slug: string; nome: string };
 
@@ -15,11 +17,42 @@ export function TimesCarrossel({
   standalone?: boolean;
 }) {
   const s = settings ?? TIMES_CARROSSEL_PADRAO;
+  const isMobile = useIsMobile();
   const items = [...times]
     .filter((t) => nhlLogoUrl(t.slug))
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
   if (items.length === 0 || !s.ativo) return null;
+
+  // Celular: faixa horizontal que rola sozinha e aceita arrasto com o dedo
+  if (isMobile && !standalone) {
+    const loopM = [...items, ...items];
+    return (
+      <section className="border-y border-border bg-card" aria-label="Times da NHL">
+        <div className="py-4">
+          <TouchMarquee auto={s.mobileAuto} pxPorSegundo={s.mobileVelocidade} reverso={s.direcao === "ltr"}>
+            <ul className="flex w-max gap-3 px-4">
+              {loopM.map((t, i) => (
+                <li key={`${t.slug}-${i}`} className="w-[30vw] min-w-[96px] shrink-0" style={{ height: `${s.alturaPx}px` }} aria-hidden={i >= items.length ? "true" : undefined}>
+                  <Link
+                    to="/time/$slug"
+                    params={{ slug: t.slug }}
+                    aria-label={`Ver matérias de ${t.nome}`}
+                    tabIndex={i >= items.length ? -1 : 0}
+                    draggable={false}
+                    className="flex h-full flex-col items-center justify-center gap-2 rounded-md border border-border bg-background p-3"
+                  >
+                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="lazy" draggable={false} className="max-h-[60%] max-w-[60%] object-contain" />
+                    <span className="line-clamp-1 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t.nome}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </TouchMarquee>
+        </div>
+      </section>
+    );
+  }
 
   const vertical = s.direcao === "up" || s.direcao === "down";
   const reverse = s.direcao === "ltr" || s.direcao === "down";
