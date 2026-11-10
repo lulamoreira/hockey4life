@@ -753,7 +753,7 @@ function CarrosselEditor({
             value={c.tituloPx}
             min={16}
             max={48}
-            def={20}
+            def={40}
             onChange={(v) => set({ tituloPx: v })}
           />
           <NumField
@@ -761,7 +761,7 @@ function CarrosselEditor({
             value={c.tituloPxLg}
             min={20}
             max={72}
-            def={30}
+            def={58}
             onChange={(v) => set({ tituloPxLg: v })}
           />
           <NumField
@@ -791,14 +791,14 @@ function CarrosselEditor({
             <h1
               className="h4l-title leading-tight text-foreground"
               style={{
-                fontSize: `clamp(${c.tituloPx}px, ${c.tituloPx + (c.tituloPxLg - c.tituloPx) * 0.5}px, ${c.tituloPxLg}px)`,
+                fontSize: fluidPx(c.tituloPx, c.tituloPxLg),
               }}
             >
               Título da matéria em destaque no carrossel
             </h1>
             <p
               className="mt-2 line-clamp-2 max-w-2xl text-muted-foreground"
-              style={{ fontSize: `${c.resumoPx}px` }}
+              style={{ fontSize: fluidPx(c.resumoPx, Math.min(24, c.resumoPx + 2)) }}
             >
               Resumo curto que aparece abaixo do título — ajuste os controles acima e veja a prévia atualizar em tempo real.
             </p>
