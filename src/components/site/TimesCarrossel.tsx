@@ -1,165 +1,178 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import type { TemaListItem, TimesCarrosselSettings } from "@/lib/posts.functions";
 import { nhlLogoUrl } from "@/lib/nhl-logos";
-import type { TimesCarrosselSettings } from "@/lib/posts.functions";
-import { TIMES_CARROSSEL_PADRAO } from "@/lib/posts.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { TouchMarquee } from "@/components/site/TouchMarquee";
+import { TouchMarquee } from "./TouchMarquee";
 
-type Time = { slug: string; nome: string };
+/**
+ * Face do card de time: o logo preenche o frame inteiro (escala na proporção,
+ * centralizado, cortando o que sobrar) e o nome do time flutua sobre a base.
+ * Sem faixas vazias em volta do logo — mobile e desktop usam a mesma regra.
+ */
+function TimeFace({ t }: { t: TemaListItem }) {
+  const logo = nhlLogoUrl(t.slug);
+  return (
+    <span className="relative block h-full w-full overflow-hidden rounded-md border border-border bg-background transition-colors group-hover:border-primary/50">
+      {logo ? (
+        <img
+          src={logo}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-110"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center h4l-title text-lg text-muted-foreground/40">
+          {t.nome.slice(0, 2)}
+        </span>
+      )}
+      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/55 to-transparent px-2 pb-1 pt-5 text-center text-[10px] font-semibold uppercase tracking-wide text-white">
+        {t.nome}
+      </span>
+    </span>
+  );
+}
 
+/**
+ * Carrossel de logos NHL (temas do tipo "time"), acima do letreiro "NÃO PERCA".
+ *
+ * Desktop: marquee contínuo por animação CSS (horizontal ou vertical), com
+ * direção, velocidade, quantidade visível e altura controladas em
+ * /admin/configuracoes.
+ * Mobile: faixa rolada por requestAnimationFrame (TouchMarquee) — rola sozinha
+ * e aceita arrasto com o dedo; liga/desliga e velocidade vêm de
+ * times.mobileAuto / times.mobileVelocidade.
+ */
 export function TimesCarrossel({
   times,
   settings,
-  standalone = false,
 }: {
-  times: Time[];
-  settings?: TimesCarrosselSettings;
-  standalone?: boolean;
+  times: TemaListItem[];
+  settings: TimesCarrosselSettings;
 }) {
-  const s = settings ?? TIMES_CARROSSEL_PADRAO;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const isMobile = useIsMobile();
-  const items = [...times]
-    .filter((t) => nhlLogoUrl(t.slug))
-    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
-  if (items.length === 0 || !s.ativo) return null;
+  if (!mounted || times.length === 0 || !settings.ativo) return null;
 
-  // Celular: faixa horizontal que rola sozinha e aceita arrasto com o dedo
-  if (isMobile && !standalone) {
-    const loopM = [...items, ...items];
+  const s = settings;
+
+  // ── Mobile: rolagem automática + arrasto com o dedo ─────────────────────
+  if (isMobile) {
+    const itens = times.slice(0, Math.max(1, s.quantidade));
+    const lista = s.mobileAuto ? [...itens, ...itens] : itens;
     return (
-      <section className="border-y border-border bg-card" aria-label="Times da NHL">
-        <div className="py-4">
-          <TouchMarquee auto={s.mobileAuto} pxPorSegundo={s.mobileVelocidade} reverso={s.direcao === "ltr"}>
-            <ul className="flex w-max gap-3 px-4">
-              {loopM.map((t, i) => (
-                <li key={`${t.slug}-${i}`} className="w-[30vw] min-w-[96px] shrink-0" style={{ height: `${s.alturaPx}px` }} aria-hidden={i >= items.length ? "true" : undefined}>
-                  <Link
-                    to="/time/$slug"
-                    params={{ slug: t.slug }}
-                    aria-label={`Ver matérias de ${t.nome}`}
-                    tabIndex={i >= items.length ? -1 : 0}
-                    draggable={false}
-                    className="flex h-full flex-col items-center justify-center gap-2 rounded-md border border-border bg-background p-3"
-                  >
-                    <img src={nhlLogoUrl(t.slug)!} alt={`Logo ${t.nome}`} loading="lazy" draggable={false} className="max-h-[60%] max-w-[60%] object-contain" />
-                    <span className="line-clamp-1 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t.nome}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </TouchMarquee>
-        </div>
+      <section aria-label="Times da NHL" className="border-y border-border/60 bg-muted/20 py-2.5">
+        <TouchMarquee
+          auto={s.mobileAuto}
+          pxPorSegundo={s.mobileVelocidade}
+          reverso={s.direcao === "rtl"}
+          className="w-full"
+        >
+          <ul className={`flex w-max gap-2.5 pr-2.5 ${s.mobileAuto ? "" : "overflow-x-auto"}`}>
+            {lista.map((t, i) => (
+              <li
+                key={`${t.slug}-${i}`}
+                className="w-[30vw] min-w-[96px] shrink-0"
+                style={{ height: s.alturaPx }}
+              >
+                <Link
+                  to="/time/$slug"
+                  params={{ slug: t.slug }}
+                  className="group block h-full w-full"
+                >
+                  <TimeFace t={t} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </TouchMarquee>
       </section>
     );
   }
 
+  // ── Desktop: marquee por animação CSS ────────────────────────────────────
   const vertical = s.direcao === "up" || s.direcao === "down";
-  const reverse = s.direcao === "ltr" || s.direcao === "down";
-  const animName = vertical ? "h4l-times-marquee-v" : "h4l-times-marquee-h";
-  // Duplicamos a lista para loop contínuo
-  const loop = [...items, ...items];
   const visiveis = Math.max(2, Math.min(12, s.quantidadeVisivel));
-  
+  const tempo = Math.max(6, (s.quantidadeVisivel * s.alturaPx) / Math.max(1, s.velocidade));
 
-  const trackStyle: React.CSSProperties = vertical
-    ? {
-        animation: `${animName} ${s.velocidade}s linear infinite`,
-        animationDirection: reverse ? "reverse" : "normal",
-        animationPlayState: "running",
-      }
-    : {
-        animation: `${animName} ${s.velocidade}s linear infinite`,
-        animationDirection: reverse ? "reverse" : "normal",
-        animationPlayState: "running",
-      };
+  const anim =
+    s.direcao === "rtl"
+      ? "h4l-times-marquee-h 0s linear infinite"
+      : s.direcao === "ltr"
+        ? "h4l-times-marquee-h-rev 0s linear infinite"
+        : s.direcao === "up"
+          ? "h4l-times-marquee-v 0s linear infinite"
+          : "h4l-times-marquee-v-rev 0s linear infinite";
 
-  const wrapperClass = vertical
-    ? "overflow-hidden"
-    : "overflow-hidden";
-
-  const trackClass = vertical
-    ? "flex flex-col"
-    : "flex";
+  const itens = times.slice(0, Math.max(1, s.quantidade));
+  const lista = [...itens, ...itens];
 
   return (
     <section
-      className={standalone ? "" : "border-y border-border bg-card"}
       aria-label="Times da NHL"
+      className="border-y border-border/60 bg-muted/20 py-3"
     >
       <style>{`
-        @keyframes h4l-times-marquee-h {
-          from { transform: translate3d(0, 0, 0); }
-          to { transform: translate3d(-50%, 0, 0); }
-        }
-        @keyframes h4l-times-marquee-v {
-          from { transform: translate3d(0, 0, 0); }
-          to { transform: translate3d(0, -50%, 0); }
-        }
-        .h4l-times-pause:hover .h4l-times-track,
-        .h4l-times-pause:focus-within .h4l-times-track { animation-play-state: paused !important; }
-        @media (prefers-reduced-motion: reduce) {
-          .h4l-times-track { animation: none !important; }
-        }
-        /* Mobile: no máximo 3 logos visíveis para não cortar o nome do time */
-        @media (max-width: 767px) {
-          .h4l-times-item-h { width: calc(100cqw / 3 - 0.75rem) !important; min-width: 84px; }
-        }
+        @keyframes h4l-times-marquee-h      { from { transform: translate3d(0,0,0); }     to { transform: translate3d(-50%,0,0); } }
+        @keyframes h4l-times-marquee-h-rev  { from { transform: translate3d(-50%,0,0); }  to { transform: translate3d(0,0,0); } }
+        @keyframes h4l-times-marquee-v      { from { transform: translate3d(0,0,0); }     to { transform: translate3d(0,-50%,0); } }
+        @keyframes h4l-times-marquee-v-rev  { from { transform: translate3d(0,-50%,0); }  to { transform: translate3d(0,0,0); } }
       `}</style>
-      <div className={`mx-auto max-w-7xl px-4 ${standalone ? "py-2" : "py-6"} ${s.pausarNoHover ? "h4l-times-pause" : ""}`}>
-        <div
-          className={wrapperClass}
-          style={{
-            containerType: "inline-size",
-            height: vertical ? `${s.alturaPx * visiveis}px` : undefined,
-          } as React.CSSProperties}
-        >
+
+      <div
+        className="relative overflow-hidden"
+        style={{ height: vertical ? Math.min(320, s.alturaPx * 2.5) : s.alturaPx, containerType: "inline-size" }}
+      >
+        {vertical ? (
           <ul
-            className={`${trackClass} h4l-times-track gap-3`}
+            className="flex w-full flex-col gap-3"
             style={{
-              ...trackStyle,
-              width: vertical ? "100%" : "max-content",
+              animation: anim.replace("0s", `${tempo}s`),
             }}
           >
-            {loop.map((t, i) => {
-              const logo = nhlLogoUrl(t.slug)!;
-              const itemStyle: React.CSSProperties = vertical
-                ? { height: `${s.alturaPx}px`, width: "100%" }
-                : {
-                    width: `max(72px, calc(100cqw / ${visiveis} - 0.75rem))`,
-                    height: `${s.alturaPx}px`,
-                  };
-              return (
-                <li
-                  key={`${t.slug}-${i}`}
-                  className={`shrink-0 ${vertical ? "" : "h4l-times-item-h"}`}
-                  style={itemStyle}
+            {lista.map((t, i) => (
+              <li key={`${t.slug}-${i}`} className="w-full" style={{ height: s.alturaPx }}>
+                <Link
+                  to="/time/$slug"
+                  params={{ slug: t.slug }}
+                  className="group block h-full w-full"
                 >
-
-
-                  <Link
-                    to="/time/$slug"
-                    params={{ slug: t.slug }}
-                    title={t.nome}
-                    aria-label={`Ver matérias de ${t.nome}`}
-                    className="group flex h-full flex-col items-center justify-center gap-2 rounded-md border border-border bg-background p-3 transition-colors hover:border-primary"
-                    style={vertical ? undefined : { height: `${s.alturaPx}px` }}
-                  >
-                    <img
-                      src={logo}
-                      alt={`Logo ${t.nome}`}
-                      loading="lazy"
-                      className="max-h-[60%] max-w-[60%] object-contain transition-transform group-hover:scale-110"
-                    />
-                    <span className="line-clamp-1 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground group-hover:text-primary">
-                      {t.nome}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
+                  <TimeFace t={t} />
+                </Link>
+              </li>
+            ))}
           </ul>
-        </div>
+        ) : (
+          <ul
+            className="flex h-full w-max gap-3"
+            style={{ animation: anim.replace("0s", `${tempo}s`) }}
+          >
+            {lista.map((t, i) => (
+              <li
+                key={`${t.slug}-${i}`}
+                className="shrink-0"
+                style={{
+                  width: `max(72px, calc(100cqw / ${visiveis} - 0.75rem))`,
+                  height: s.alturaPx,
+                }}
+              >
+                <Link
+                  to="/time/$slug"
+                  params={{ slug: t.slug }}
+                  className="group block h-full w-full"
+                >
+                  <TimeFace t={t} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* máscara de borda */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
       </div>
     </section>
   );
