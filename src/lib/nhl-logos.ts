@@ -87,3 +87,33 @@ export function nhlLogoViewBox(slug: string): string | undefined {
   return tri ? NHL_LOGO_VIEW_BOX[tri] : undefined;
 }
 
+
+/**
+ * Estilo que faz o desenho do logo cobrir o card inteiro (como object-cover),
+ * recortando as margens transparentes do SVG oficial (tela 960x640).
+ *
+ * Por que não object-view-box: no Safari/iOS, object-view-box + SVG +
+ * object-cover deixa a imagem em branco. Aqui usamos só posicionamento
+ * absoluto + unidades de contêiner (cqw/cqh), suportados no iOS 16+.
+ * O elemento pai precisa ter `container-type: size` e posição relativa.
+ */
+export function nhlLogoCoverStyle(slug: string): React.CSSProperties | undefined {
+  const vb = nhlLogoViewBox(slug);
+  const m = vb?.match(/xywh\((\d+)px (\d+)px (\d+)px (\d+)px\)/);
+  if (!m) return undefined;
+  const [x, y, w, h] = m.slice(1).map(Number);
+  if (!w || !h) return undefined;
+  const cx = ((x + w / 2) / 960) * 100;
+  const cy = ((y + h / 2) / 640) * 100;
+  return {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    // Largura da tela inteira do SVG necessária para o desenho cobrir largura E altura do card.
+    width: `max(${((960 / w) * 100).toFixed(2)}cqw, ${((960 / h) * 100).toFixed(2)}cqh)`,
+    maxWidth: "none",
+    height: "auto",
+    aspectRatio: "960 / 640",
+    transform: `translate(-${cx.toFixed(2)}%, -${cy.toFixed(2)}%)`,
+  };
+}
