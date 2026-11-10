@@ -123,7 +123,7 @@ export function TouchMarquee({
       className={`overflow-hidden select-none ${className}`}
       style={{ touchAction: "pan-y" }}
     >
-      <div ref={trilho} className="w-max will-change-transform" onDragStart={(e) => e.preventDefault()}>
+      <div ref={trilho} className="h-full w-max will-change-transform" onDragStart={(e) => e.preventDefault()}>
         {children}
       </div>
     </div>
