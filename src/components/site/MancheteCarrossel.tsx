@@ -234,24 +234,15 @@ function Slide({
       >
         <div className="relative h-full w-full overflow-hidden bg-black">
           {post.imagem_capa ? (
-            <>
-              {/* Fundo desfocado para fotos verticais/estreitas */}
-              <img
-                src={post.imagem_capa}
-                alt=""
-                aria-hidden="true"
-                loading={eager ? "eager" : "lazy"}
-                className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-50"
-              />
-              {/* Foto principal, contida sem esticar */}
-              <img
-                src={post.imagem_capa}
-                alt={post.titulo}
-                loading={eager ? "eager" : "lazy"}
-                {...({ fetchpriority: eager ? "high" : "auto" } as any)}
-                className="relative h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-              />
-            </>
+            // Foto preenchendo o frame inteiro: escala na proporção,
+            // centralizada, cortando o que sobrar (sem faixas pretas).
+            <img
+              src={post.imagem_capa}
+              alt={post.titulo}
+              loading={eager ? "eager" : "lazy"}
+              {...({ fetchpriority: eager ? "high" : "auto" } as any)}
+              className="relative h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+            />
           ) : (
             <div className="flex h-full items-center justify-center bg-muted">
               <span className="h4l-title text-6xl text-muted-foreground/30">H4L</span>
