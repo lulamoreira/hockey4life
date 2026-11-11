@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, Pause, Play, Square, ArrowDownCircle } from "lucide-react";
+import { Volume2, Pause, Play, Square, ArrowDownCircle, Settings2 } from "lucide-react";
 
 type Props = {
   titulo: string;
@@ -180,6 +180,7 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
   const [velocidade, setVelocidade] = useState<number>(1);
   const [acompanhar, setAcompanhar] = useState<boolean>(true);
   const [mostrarVoltar, setMostrarVoltar] = useState(false);
+  const [opcoesAberto, setOpcoesAberto] = useState(false);
   const [frases, setFrases] = useState<string[]>(() => dividirFrases(`${titulo}. ${extrairTexto(html)}`));
   const preparadoRef = useRef(false);
 
@@ -359,6 +360,11 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idxAtual, estado]);
 
+  // Ao parar de ler, recolhe as opções de novo.
+  useEffect(() => {
+    if (estado === "parado") setOpcoesAberto(false);
+  }, [estado]);
+
   function tocarDe(inicio: number) {
     if (!suportado) return;
     const synth = window.speechSynthesis;
@@ -518,9 +524,11 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     ? Math.min(100, ((idxAtual + (estado === "lendo" ? 1 : 0)) / totalFrases) * 100)
     : 0;
 
+  const lendo = estado !== "parado";
+
   return (
     <>
-      <div className="mt-4 rounded-lg border border-border bg-card/60 p-3 backdrop-blur-sm">
+      <div className="mt-5">
         <div className="flex flex-wrap items-center gap-2">
           {estado === "parado" && (
             <button
@@ -555,79 +563,96 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
               Continuar
             </button>
           )}
-          {estado !== "parado" && (
-            <button
-              type="button"
-              onClick={parar}
-              aria-label="Parar leitura"
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-bold text-foreground hover:border-primary"
-            >
-              <Square className="h-4 w-4" />
-              Parar
-            </button>
-          )}
-
-          <div className="ml-auto flex items-center gap-1" role="group" aria-label="Velocidade da leitura">
-            {VELOCIDADES.map((v) => (
+          {lendo && (
+            <>
               <button
-                key={v}
                 type="button"
-                onClick={() => trocarVelocidade(v)}
-                aria-pressed={velocidade === v}
-                className={`min-h-[44px] min-w-[44px] rounded-md px-2 py-1 text-xs font-bold ${
-                  velocidade === v
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-background text-foreground hover:border-primary"
-                }`}
+                onClick={parar}
+                aria-label="Parar leitura"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-bold text-foreground hover:border-primary"
               >
-                {v}x
+                <Square className="h-4 w-4" />
+                Parar
               </button>
-            ))}
-          </div>
+              <button
+                type="button"
+                onClick={() => setOpcoesAberto((v) => !v)}
+                aria-expanded={opcoesAberto}
+                aria-label={opcoesAberto ? "Fechar opções de leitura" : "Abrir opções de leitura"}
+                title="Opções de leitura"
+                className="ml-auto inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-border bg-background px-3 text-muted-foreground hover:border-primary hover:text-primary"
+              >
+                <Settings2 className="h-5 w-5" />
+              </button>
+            </>
+          )}
         </div>
 
-        <label className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={acompanhar}
-            onChange={alternarAcompanhar}
-            className="h-4 w-4 accent-primary"
-          />
-          Acompanhar a leitura (rolar até a frase atual)
-        </label>
-
-        {vozesPt.length >= 2 && (
-          <label className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>Voz:</span>
-            <select
-              value={vozURI}
-              onChange={(e) => trocarVoz(e.target.value)}
-              aria-label="Escolher a voz da leitura"
-              className="min-h-[36px] max-w-full flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-            >
-              <option value="">Automática (pt-BR)</option>
-              {vozesPt.map((v) => (
-                <option key={v.voiceURI} value={v.voiceURI}>
-                  {v.name} ({v.lang})
-                </option>
-              ))}
-            </select>
-          </label>
+        {lendo && (
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-border" aria-hidden="true">
+            <div className="h-full bg-primary transition-all" style={{ width: `${progresso}%` }} />
+          </div>
         )}
 
-        {estado !== "parado" && (
-          <>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-border" aria-hidden="true">
-              <div className="h-full bg-primary transition-all" style={{ width: `${progresso}%` }} />
+        {lendo && opcoesAberto && (
+          <div className="mt-3 rounded-lg border border-border bg-card/60 p-3 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Velocidade da leitura">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Velocidade
+              </span>
+              {VELOCIDADES.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => trocarVelocidade(v)}
+                  aria-pressed={velocidade === v}
+                  className={`min-h-[44px] min-w-[44px] rounded-md px-2 py-1 text-xs font-bold ${
+                    velocidade === v
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-background text-foreground hover:border-primary"
+                  }`}
+                >
+                  {v}x
+                </button>
+              ))}
             </div>
-            <p
-              className="mt-3 rounded-md bg-primary/15 p-3 text-sm text-foreground"
-              aria-live="polite"
-            >
-              <span className="sr-only">{estado === "lendo" ? "Lendo agora: " : "Pausado em: "}</span>
-              {frases[idxAtual]}
-            </p>
-          </>
+
+            <label className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={acompanhar}
+                onChange={alternarAcompanhar}
+                className="h-4 w-4 accent-primary"
+              />
+              Acompanhar a leitura (rolar até a frase atual)
+            </label>
+
+            {vozesPt.length >= 2 && (
+              <label className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>Voz:</span>
+                <select
+                  value={vozURI}
+                  onChange={(e) => trocarVoz(e.target.value)}
+                  aria-label="Escolher a voz da leitura"
+                  className="min-h-[36px] max-w-full flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                >
+                  <option value="">Automática (pt-BR)</option>
+                  {vozesPt.map((v) => (
+                    <option key={v.voiceURI} value={v.voiceURI}>
+                      {v.name} ({v.lang})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+        )}
+
+        {lendo && (
+          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground" aria-live="polite">
+            <span className="sr-only">{estado === "lendo" ? "Lendo agora: " : "Pausado em: "}</span>
+            {frases[idxAtual]}
+          </p>
         )}
       </div>
 
