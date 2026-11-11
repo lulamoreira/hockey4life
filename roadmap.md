@@ -1,3 +1,3 @@
 - [x] Gerar imagem e legenda de Instagram a partir da matéria no editor.
 - [x] Conferir geração, cópia e download no painel com uma matéria real.
-- [ ] Gerar postagem para o X com a mesma imagem do Instagram e conferir no editor.
+- [x] Gerar postagem para o X com a mesma imagem do Instagram e conferir no editor.
