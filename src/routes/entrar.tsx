@@ -24,14 +24,11 @@ function Pagina() {
   const nav = useNavigate();
   const [modo, setModo] = useState<"opcoes" | "magic" | "senha">("opcoes");
 
-  // Ao logar, decidir destino: perfil incompleto → completar; senão → conta
+  // Ao logar, sempre voltar para a home do site.
+  // O preenchimento de perfil fica a cargo de "Minha conta" (/conta).
   useEffect(() => {
     if (loading || !session) return;
-    (async () => {
-      const { data } = await supabase.rpc("perfil_completo", { _id: session.user.id });
-      if (data === true) nav({ to: "/conta", replace: true });
-      else nav({ to: "/completar-perfil", replace: true });
-    })();
+    nav({ to: "/", replace: true });
   }, [loading, session, nav]);
 
   if (loading) return null;
