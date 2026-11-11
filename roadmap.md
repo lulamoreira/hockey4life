@@ -11,3 +11,8 @@
 - [x] Home: ritmo de espaçamento consistente entre todas as seções e títulos de seção iguais.
 - [x] Manchete: conferir se a foto carrega com prioridade alta e aparece nítida atrás do texto.
 - [x] Conferir no celular primeiro e depois no computador.
+
+## Ajuste fino de espaçamento na home — pedido de 2026-11-11 (18:56 UTC)
+- [x] Folga entre seções: 20px no celular, 32px no computador, igual entre TODAS as seções.
+- [x] Conferir a sequência placar → "Últimas histórias" no celular primeiro.
+- [ ] Publicar o site (espaçamento, login na home, revisão de design ainda não publicados).
