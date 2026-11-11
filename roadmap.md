@@ -1,3 +1,5 @@
 - [x] Gerar imagem e legenda de Instagram a partir da matéria no editor.
 - [x] Conferir geração, cópia e download no painel com uma matéria real.
 - [x] Gerar postagem para o X com a mesma imagem do Instagram e conferir no editor.
+- [ ] Centralizar Instagram e X em Admin → Postagens prontas, sem botões no editor.
+- [ ] Conferir seleção, geração e download com uma matéria real no novo painel.
