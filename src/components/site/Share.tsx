@@ -247,7 +247,9 @@ function StoriesCardDialog(props: {
       if (typeof navigator.canShare === "function" && navigator.canShare({ files: [arquivo] })) {
         await navigator.share({ files: [arquivo] });
         await copia;
-        setAviso("Link copiado! No Stories, toque no adesivo de link e cole.");
+        // Compartilhamento concluído: fecha o cartão para que, ao voltar do
+        // Instagram, o leitor caia direto na matéria, sem a tela de compartilhar.
+        onClose();
         return;
       }
     } catch (e: unknown) {
@@ -255,7 +257,8 @@ function StoriesCardDialog(props: {
     }
     await copia;
     baixar();
-    setAviso("Cartão baixado e link copiado. Abrindo o Instagram…");
+    // Fecha antes de sair para o app do Instagram: ao voltar, a matéria está limpa.
+    onClose();
     window.location.href = "instagram://story-camera";
   };
 
