@@ -190,6 +190,8 @@ function StoriesCardDialog(props: {
   const [gerando, setGerando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [gerado, setGerado] = useState(false);
+  const [blobCartao, setBlobCartao] = useState<Blob | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -199,6 +201,7 @@ function StoriesCardDialog(props: {
         setErro(null);
         const blob = await gerarCartaoStories({ titulo, chapeu, imagemCapa });
         if (cancelado) return;
+        setBlobCartao(blob);
         const objUrl = URL.createObjectURL(blob);
         setPreviewUrl(objUrl);
         setGerado(true);
@@ -226,6 +229,34 @@ function StoriesCardDialog(props: {
     document.body.appendChild(a);
     a.click();
     a.remove();
+  };
+
+  /**
+   * Copia o link da matéria e abre a folha de compartilhamento do celular
+   * já com a imagem — ali o leitor escolhe "Instagram → Stories" e só cola
+   * o link no adesivo. Sites não podem abrir o Stories direto com a imagem
+   * (o Instagram só permite isso a aplicativos), então este é o caminho
+   * mais curto possível. Sem suporte a arquivos: baixa o cartão e abre o app.
+   */
+  const postarNoStories = async () => {
+    if (!blobCartao) return;
+    // Disparado antes do share, ainda dentro do toque do usuário (exigência do Safari).
+    const copia = navigator.clipboard?.writeText(url).catch(() => undefined);
+    const arquivo = new File([blobCartao], "hockey4life-stories.jpg", { type: "image/jpeg" });
+    try {
+      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [arquivo] })) {
+        await navigator.share({ files: [arquivo] });
+        await copia;
+        setAviso("Link copiado! No Stories, toque no adesivo de link e cole.");
+        return;
+      }
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === "AbortError") return; // usuário cancelou
+    }
+    await copia;
+    baixar();
+    setAviso("Cartão baixado e link copiado. Abrindo o Instagram…");
+    window.location.href = "instagram://story-camera";
   };
 
   return (
@@ -273,16 +304,25 @@ function StoriesCardDialog(props: {
 
         {gerado && !erro && (
           <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs text-foreground">
-            Cartão salvo. Publique no seu Stories e cole o link da matéria.
+            {aviso ?? "Toque em “Postar no Stories”, escolha Instagram e cole o link no adesivo — ele já fica copiado."}
           </div>
         )}
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={postarNoStories}
+            disabled={!blobCartao}
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground disabled:opacity-50"
+          >
+            <Instagram className="h-3.5 w-3.5" />
+            Postar no Stories
+          </button>
+          <button
+            type="button"
             onClick={baixar}
             disabled={!previewUrl}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:border-primary/60 hover:text-primary disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             Baixar cartão
