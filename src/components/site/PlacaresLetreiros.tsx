@@ -316,6 +316,7 @@ function FaixaNaoPerca({
   velocidade,
   mobileAuto = true,
   mobileVelocidade = 40,
+  tom = "vermelho",
 }: {
   rotulo: string;
   items: Item[];
@@ -323,7 +324,12 @@ function FaixaNaoPerca({
   velocidade: number;
   mobileAuto?: boolean;
   mobileVelocidade?: number;
+  tom?: "vermelho" | "verde";
 }) {
+  // Vermelho escuro para "Últimos resultados", verde escuro para "Próximos jogos".
+  const cor = tom === "verde"
+    ? { fill: "bg-placar-verde-fill", fg: "text-placar-verde-fg", dot: "text-placar-verde-fg/45", tint: "var(--placar-verde-tint)" }
+    : { fill: "bg-placar-vermelho-fill", fg: "text-placar-vermelho-fg", dot: "text-placar-vermelho-fg/45", tint: "var(--placar-vermelho-tint)" };
   const isMobile = useIsMobile();
   const [paused, setPaused] = useState(false);
   const visible = usePageVisible();
@@ -339,15 +345,15 @@ function FaixaNaoPerca({
 
   return (
     <div
-      className="flex h-[30px] items-stretch overflow-hidden text-white"
-      style={{ backgroundColor: "rgba(119,119,119,0.55)" }}
+      className={`flex h-[30px] items-stretch overflow-hidden ${cor.fg}`}
+      style={{ backgroundColor: cor.tint }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
       <div
-        className="relative flex shrink-0 items-center bg-[#1a1a1a] pl-3 pr-5 text-white"
+        className={`relative flex shrink-0 items-center pl-3 pr-5 ${cor.fill} ${cor.fg}`}
         style={{
           clipPath:
             "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)",
@@ -373,7 +379,7 @@ function FaixaNaoPerca({
                     ) : (
                       <span className="px-4 tabular-nums">{it.label}</span>
                     )}
-                    <span className="text-white/40">•</span>
+                    <span className={cor.dot}>•</span>
                   </span>
                 );
               })}
@@ -412,7 +418,7 @@ function FaixaNaoPerca({
                     ) : (
                       <span className="px-4 tabular-nums">{it.label}</span>
                     )}
-                    <span className="text-white/40">•</span>
+                    <span className={cor.dot}>•</span>
                   </span>
                 );
               })}
@@ -464,6 +470,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             velocidade={settings.velocidade}
             mobileAuto={settings.mobileAuto}
             mobileVelocidade={settings.mobileVelocidade}
+            tom="vermelho"
           />
         )}
         {temP && (
@@ -474,6 +481,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             velocidade={settings.velocidade}
             mobileAuto={settings.mobileAuto}
             mobileVelocidade={settings.mobileVelocidade}
+            tom="verde"
           />
         )}
       </div>
