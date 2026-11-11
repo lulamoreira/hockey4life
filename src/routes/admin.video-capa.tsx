@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/video-capa")({
 interface VideoCapa { video_url: string; video_url_original: string; titulo: string; texto: string }
 
 /** Lê a chave video_capa_ativo; ausente = ligado (comportamento anterior). */
-export function videoCapaAtivo(valor: unknown): boolean {
+function videoCapaAtivo(valor: unknown): boolean {
   if (valor && typeof valor === "object" && "ativo" in valor) return (valor as { ativo: unknown }).ativo !== false;
   return valor !== false;
 }

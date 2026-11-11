@@ -36,6 +36,7 @@ import { Route as AdminPostagensRouteImport } from './routes/admin.postagens'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AdminVideoCapaRouteImport } from './routes/admin.video-capa'
 import { Route as AdminCriarContaRouteImport } from './routes/admin_.criar-conta'
 import { Route as ArquivoAnoRouteImport } from './routes/arquivo.$ano'
 import { Route as AssuntoSlugRouteImport } from './routes/assunto.$slug'
@@ -185,6 +186,11 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminVideoCapaRoute = AdminVideoCapaRouteImport.update({
+  id: '/video-capa',
+  path: '/video-capa',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCriarContaRoute = AdminCriarContaRouteImport.update({
   id: '/admin_/criar-conta',
   path: '/admin/criar-conta',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/video-capa': typeof AdminVideoCapaRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/admin/postagens': typeof AdminPostagensRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/video-capa': typeof AdminVideoCapaRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -361,6 +369,7 @@ export interface FileRoutesById {
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/video-capa': typeof AdminVideoCapaRoute
   '/admin_/criar-conta': typeof AdminCriarContaRoute
   '/arquivo/$ano': typeof ArquivoAnoRouteWithChildren
   '/assunto/$slug': typeof AssuntoSlugRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/usuarios'
+    | '/admin/video-capa'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/admin/postagens'
     | '/admin/temas'
     | '/admin/usuarios'
+    | '/admin/video-capa'
     | '/admin/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/usuarios'
+    | '/admin/video-capa'
     | '/admin_/criar-conta'
     | '/arquivo/$ano'
     | '/assunto/$slug'
@@ -714,6 +726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/video-capa': {
+      id: '/admin/video-capa'
+      path: '/video-capa'
+      fullPath: '/admin/video-capa'
+      preLoaderRoute: typeof AdminVideoCapaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin_/criar-conta': {
       id: '/admin_/criar-conta'
       path: '/admin/criar-conta'
@@ -854,6 +873,7 @@ interface AdminRouteChildren {
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
+  AdminVideoCapaRoute: typeof AdminVideoCapaRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -871,6 +891,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
+  AdminVideoCapaRoute: AdminVideoCapaRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
