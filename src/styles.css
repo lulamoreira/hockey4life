@@ -44,6 +44,8 @@
 
 :root {
   --radius: 0.5rem;
+  --social-background: #16150F;
+  --social-foreground: #FFFFFF;
 
   /* --- Tema claro (padrão) ---
    * Creme suave para leitura longa; dourado escurecido para texto/links
