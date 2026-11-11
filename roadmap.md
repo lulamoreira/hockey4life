@@ -1,0 +1,2 @@
+- [ ] Gerar imagem e legenda de Instagram a partir da matéria no editor.
+- [ ] Conferir geração, cópia e download no painel com uma matéria real.
