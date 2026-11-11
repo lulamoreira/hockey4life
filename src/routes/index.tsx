@@ -61,7 +61,7 @@ function HomePage() {
 
 
 
-      <section className="mx-auto max-w-7xl px-4 py-8">
+      <section className="mx-auto max-w-7xl px-4 py-10 md:py-16">
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Manchete — carrossel */}
           <div className="lg:col-span-2">
@@ -104,10 +104,8 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Placares NHL — estilo "NÃO PERCA", logo acima do vídeo destaque */}
-      <div className="pt-4">
-        <PlacaresNaoPerca settings={placares} />
-      </div>
+      {/* Placares NHL — estilo "NÃO PERCA", com respiro próprio acima e abaixo */}
+      <PlacaresNaoPerca settings={placares} />
 
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
       {(() => {
@@ -117,7 +115,7 @@ function HomePage() {
         if (!ativo || !src || !parseYouTube(src)) return null;
         const titulo = hfc.titulo ?? "Vídeo destaque";
         return (
-          <section className="mx-auto max-w-7xl px-4 py-12">
+          <section className="mx-auto max-w-7xl px-4 py-10 md:py-16">
             <div className="rounded-lg bg-black/40 p-6 backdrop-blur-sm md:p-10">
               <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                 <YouTubeFacade url={src} title={titulo} />
@@ -136,7 +134,7 @@ function HomePage() {
 
       {/* Últimas histórias */}
       {ultimas.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-12">
+        <section className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="mb-6 flex items-end justify-between border-b border-border pb-2">
             <h2 className="h4l-title text-3xl text-foreground md:text-4xl">Últimas histórias</h2>
             <Link to="/arquivo" className="text-xs font-semibold uppercase tracking-wider text-primary hover:underline">
@@ -162,7 +160,7 @@ function HomePage() {
 
 
       {/* Letreiro "NÃO PERCA" logo acima do rodapé */}
-      <div className="mx-auto max-w-7xl px-4 pb-6">
+      <div className="mx-auto max-w-7xl px-4 pb-10 md:pb-16">
         <Letreiro items={naoPerca} settings={letreiro} redes={config?.redes_sociais} />
       </div>
 

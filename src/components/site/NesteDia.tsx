@@ -16,9 +16,9 @@ export function NesteDia({ posts, vizinhos }: { posts: PostNesteDia[]; vizinhos:
     : "Neste dia, em anos anteriores";
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8" aria-label="Neste dia, em anos anteriores">
+    <section className="mx-auto max-w-7xl px-4 py-10 md:py-16" aria-label="Neste dia, em anos anteriores">
       <div className="mb-6 flex items-end justify-between border-b border-border pb-2">
-        <h2 className="h4l-title text-2xl text-foreground md:text-3xl">{titulo}</h2>
+        <h2 className="h4l-title text-3xl text-foreground md:text-4xl">{titulo}</h2>
       </div>
       <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((p) => {

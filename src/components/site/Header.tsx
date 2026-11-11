@@ -1,13 +1,14 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { LogIn, LogOut, Menu, PenSquare, Search, Shield, User, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 import { MeSurpreenda } from "./MeSurpreenda";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth";
 import { getMyRole } from "@/lib/admin.functions";
+import { getMyPermissions } from "@/lib/equipe.functions";
 
 type TemaMenu = { nome: string; slug: string; tipo: "time" | "assunto"; destaque_menu: boolean; ordem: number };
 
@@ -42,6 +43,18 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
   });
   const isAdmin = !!roleQ.data?.isAdmin;
   const isEditor = !!roleQ.data?.isEditor;
+
+  // Permissões do papel (Administrador, Editor, Escritor, Leitor).
+  const permsQ = useQuery({
+    queryKey: ["my-permissions", session?.user.id ?? "anon"],
+    queryFn: () => getMyPermissions(),
+    enabled: logado,
+    retry: false,
+    staleTime: 60_000,
+  });
+  // Equipe = quem pode ver o painel (admin, editor ou escritor).
+  const isStaff = !!roleQ.data?.isStaff || !!permsQ.data?.isStaff;
+  const podeEscrever = permsQ.data?.perms?.escrever === true || isEditor || isAdmin;
 
   const perfilQ = useQuery({
     queryKey: ["header-perfil", session?.user.id ?? "anon"],
@@ -142,19 +155,12 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
           )}
           <ThemeToggle />
           {logado ? (
-            <Link
-              to="/conta"
-              aria-label="Minha conta"
-              title="Minha conta"
-              aria-current={pathname === "/conta" ? "page" : undefined}
-              className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
-            >
-              {fotoUrl ? (
-                <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <User className="h-4 w-4" />
-              )}
-            </Link>
+            <MenuConta
+              fotoUrl={fotoUrl}
+              isStaff={isStaff}
+              podeEscrever={podeEscrever}
+              onSair={sair}
+            />
           ) : (
             <Link
               to="/entrar"
@@ -165,14 +171,14 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
               Entrar
             </Link>
           )}
-          {logado && (isAdmin || isEditor) && (
+          {logado && isStaff && (
             <Link
               to="/admin"
               aria-label="Painel administrativo"
               title="Painel administrativo"
-              className="hidden items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary md:inline-flex"
+              className="hidden items-center gap-1.5 rounded-md border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary/20 md:inline-flex"
             >
-              <Shield className="h-3.5 w-3.5" /> Admin
+              <Shield className="h-3.5 w-3.5" /> Painel
             </Link>
           )}
           {m.fale_conosco && (
@@ -281,22 +287,22 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
                     <User className="h-4 w-4" /> Minha conta
                   </Link>
                 )}
-                {logado && isEditor && (
-                  <Link
-                    to="/admin/posts/novo"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide text-primary hover:bg-muted"
-                  >
-                    <PenSquare className="h-4 w-4" /> Incluir matéria
-                  </Link>
-                )}
-                {logado && (isAdmin || isEditor) && (
+                {logado && isStaff && (
                   <Link
                     to="/admin"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide hover:bg-muted"
                   >
-                    <Shield className="h-4 w-4" /> Admin
+                    <Shield className="h-4 w-4" /> Painel do admin
+                  </Link>
+                )}
+                {logado && podeEscrever && (
+                  <Link
+                    to="/admin/posts/novo"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm uppercase tracking-wide text-primary hover:bg-muted"
+                  >
+                    <PenSquare className="h-4 w-4" /> Nova matéria
                   </Link>
                 )}
                 {logado && (
@@ -323,6 +329,97 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
   );
 }
 
+
+/**
+ * Menu da conta no cabeçalho: avatar que abre "Minha conta", atalhos da
+ * equipe (Painel do admin, Nova matéria) e "Sair". Fecha com clique fora
+ * ou tecla Esc.
+ */
+function MenuConta({
+  fotoUrl,
+  isStaff,
+  podeEscrever,
+  onSair,
+}: {
+  fotoUrl: string | null;
+  isStaff: boolean;
+  podeEscrever: boolean;
+  onSair: () => void;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const raiz = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!aberto) return;
+    const cliqueFora = (e: PointerEvent) => {
+      if (raiz.current && !raiz.current.contains(e.target as Node)) setAberto(false);
+    };
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setAberto(false);
+    };
+    document.addEventListener("pointerdown", cliqueFora);
+    document.addEventListener("keydown", tecla);
+    return () => {
+      document.removeEventListener("pointerdown", cliqueFora);
+      document.removeEventListener("keydown", tecla);
+    };
+  }, [aberto]);
+
+  const itemCls =
+    "flex min-h-11 w-full items-center gap-2 rounded px-3 text-sm uppercase tracking-wide hover:bg-muted";
+
+  return (
+    <div ref={raiz} className="relative">
+      <button
+        type="button"
+        onClick={() => setAberto((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={aberto}
+        aria-label="Menu da conta"
+        className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+      >
+        {fotoUrl ? (
+          <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <User className="h-4 w-4" />
+        )}
+      </button>
+
+      {aberto && (
+        <div
+          role="menu"
+          aria-label="Menu da conta"
+          className="absolute right-0 top-full z-50 mt-2 w-60 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+        >
+          <Link to="/conta" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+            <User className="h-4 w-4" /> Minha conta
+          </Link>
+          {isStaff && (
+            <Link to="/admin" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+              <Shield className="h-4 w-4" /> Painel do admin
+            </Link>
+          )}
+          {isStaff && podeEscrever && (
+            <Link to="/admin/posts/novo" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+              <PenSquare className="h-4 w-4" /> Nova matéria
+            </Link>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setAberto(false);
+              onSair();
+            }}
+            className={`${itemCls} text-destructive`}
+          >
+            <LogOut className="h-4 w-4" /> Sair
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" | "/busca" | "/fale-conosco"; pathname: string; onClick: () => void; children: React.ReactNode }) {
   const ativo = pathname === to || (to === "/arquivo" && pathname.startsWith("/arquivo/"));

@@ -89,7 +89,7 @@ function Faixa({
   items: Item[];
   direcao: "rtl" | "ltr";
   velocidade: number;
-  variante?: "vermelho" | "amarelo";
+  variante?: "vermelho" | "amarelo" | "verde";
 }) {
   const [hoverPaused, setHoverPaused] = useState(false);
   const [focusPaused, setFocusPaused] = useState(false);
@@ -104,23 +104,22 @@ function Faixa({
     @keyframes placares-ltr { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
   `;
 
-  const amarelo = variante === "amarelo";
-  const containerCls = amarelo
-    ? "bg-primary text-black"
-    : "bg-destructive text-destructive-foreground";
-  const rotuloCls = amarelo ? "bg-primary/90" : "bg-destructive/90";
-  const dotCls = amarelo ? "text-black/40" : "text-destructive-foreground/50";
+  const cor = variante === "amarelo"
+    ? { cont: "bg-primary text-black", rot: "bg-primary/90", dot: "text-black/40" }
+    : variante === "verde"
+    ? { cont: "bg-placar-verde-tint text-placar-verde-fg", rot: "bg-placar-verde-fill", dot: "text-placar-verde-fg/45" }
+    : { cont: "bg-placar-vermelho-tint text-placar-vermelho-fg", rot: "bg-placar-vermelho-fill", dot: "text-placar-vermelho-fg/45" };
 
   return (
     <div
-      className={`flex items-stretch overflow-hidden ${containerCls}`}
+      className={`flex items-stretch overflow-hidden ${cor.cont}`}
       style={{ height: ALTURA_FAIXA }}
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
       onFocusCapture={() => setFocusPaused(true)}
       onBlurCapture={() => setFocusPaused(false)}
     >
-      <div className={`flex shrink-0 items-center px-4 ${rotuloCls}`}>
+      <div className={`flex shrink-0 items-center px-4 ${cor.rot}`}>
         <span className="h4l-title text-[12px] uppercase tracking-widest">{rotulo}</span>
       </div>
       <div className="relative min-w-0 flex-1 overflow-hidden text-sm">
@@ -145,7 +144,7 @@ function Faixa({
                     aria-hidden={clone ? "true" : undefined}
                   >
                     <ItemLabel item={it} clone={clone} />
-                    <span className={`px-1 ${dotCls}`} aria-hidden="true">
+                    <span className={`px-1 ${cor.dot}`} aria-hidden="true">
                       •
                     </span>
                   </span>
@@ -247,22 +246,22 @@ export function PlacaresLetreiros({ settings }: { settings: PlacaresSettings }) 
   if (temU && !temP) {
     return (
       <section aria-label="Placares NHL">
-        <Faixa rotulo="ÚLTIMOS RESULTADOS" items={ultimos} direcao={settings.direcao} velocidade={settings.velocidade} />
+        <Faixa rotulo="ÚLTIMOS RESULTADOS" items={ultimos} direcao={settings.direcao} velocidade={settings.velocidade} variante="vermelho" />
       </section>
     );
   }
   if (temP && !temU) {
     return (
       <section aria-label="Placares NHL">
-        <Faixa rotulo="PRÓXIMOS JOGOS" items={proximos} direcao={settings.direcao} velocidade={settings.velocidade} />
+        <Faixa rotulo="PRÓXIMOS JOGOS" items={proximos} direcao={settings.direcao} velocidade={settings.velocidade} variante="verde" />
       </section>
     );
   }
   // Dois lados: empilhado no mobile, lado a lado a partir de sm.
   return (
     <section aria-label="Placares NHL" className="grid grid-cols-1 sm:grid-cols-2">
-      <Faixa rotulo="ÚLTIMOS RESULTADOS" items={ultimos} direcao={settings.direcao} velocidade={settings.velocidade} />
-      <Faixa rotulo="PRÓXIMOS JOGOS" items={proximos} direcao={settings.direcao} velocidade={settings.velocidade} />
+      <Faixa rotulo="ÚLTIMOS RESULTADOS" items={ultimos} direcao={settings.direcao} velocidade={settings.velocidade} variante="vermelho" />
+      <Faixa rotulo="PRÓXIMOS JOGOS" items={proximos} direcao={settings.direcao} velocidade={settings.velocidade} variante="verde" />
     </section>
   );
 }
@@ -316,6 +315,7 @@ function FaixaNaoPerca({
   velocidade,
   mobileAuto = true,
   mobileVelocidade = 40,
+  tom = "vermelho",
 }: {
   rotulo: string;
   items: Item[];
@@ -323,7 +323,12 @@ function FaixaNaoPerca({
   velocidade: number;
   mobileAuto?: boolean;
   mobileVelocidade?: number;
+  tom?: "vermelho" | "verde";
 }) {
+  // Vermelho escuro para "Últimos resultados", verde escuro para "Próximos jogos".
+  const cor = tom === "verde"
+    ? { fill: "bg-placar-verde-fill", fg: "text-placar-verde-fg", dot: "text-placar-verde-fg/45", tint: "var(--placar-verde-tint)" }
+    : { fill: "bg-placar-vermelho-fill", fg: "text-placar-vermelho-fg", dot: "text-placar-vermelho-fg/45", tint: "var(--placar-vermelho-tint)" };
   const isMobile = useIsMobile();
   const [paused, setPaused] = useState(false);
   const visible = usePageVisible();
@@ -339,15 +344,15 @@ function FaixaNaoPerca({
 
   return (
     <div
-      className="flex h-[30px] items-stretch overflow-hidden text-white"
-      style={{ backgroundColor: "rgba(119,119,119,0.55)" }}
+      className={`flex h-[30px] items-stretch overflow-hidden ${cor.fg}`}
+      style={{ backgroundColor: cor.tint }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
       <div
-        className="relative flex shrink-0 items-center bg-[#1a1a1a] pl-3 pr-5 text-white"
+        className={`relative flex shrink-0 items-center pl-3 pr-5 ${cor.fill} ${cor.fg}`}
         style={{
           clipPath:
             "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)",
@@ -373,7 +378,7 @@ function FaixaNaoPerca({
                     ) : (
                       <span className="px-4 tabular-nums">{it.label}</span>
                     )}
-                    <span className="text-white/40">•</span>
+                    <span className={cor.dot}>•</span>
                   </span>
                 );
               })}
@@ -412,7 +417,7 @@ function FaixaNaoPerca({
                     ) : (
                       <span className="px-4 tabular-nums">{it.label}</span>
                     )}
-                    <span className="text-white/40">•</span>
+                    <span className={cor.dot}>•</span>
                   </span>
                 );
               })}
@@ -454,7 +459,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
   if (!temU && !temP) return null;
 
   return (
-    <section aria-label="Placares NHL" className="mx-auto max-w-7xl px-4">
+    <section aria-label="Placares NHL" className="mx-auto my-10 max-w-7xl px-4 md:my-16">
       <div className={`grid grid-cols-1 gap-3 ${temU && temP ? "sm:grid-cols-2 sm:gap-6" : ""}`}>
         {temU && (
           <FaixaNaoPerca
@@ -464,6 +469,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             velocidade={settings.velocidade}
             mobileAuto={settings.mobileAuto}
             mobileVelocidade={settings.mobileVelocidade}
+            tom="vermelho"
           />
         )}
         {temP && (
@@ -474,6 +480,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
             velocidade={settings.velocidade}
             mobileAuto={settings.mobileAuto}
             mobileVelocidade={settings.mobileVelocidade}
+            tom="verde"
           />
         )}
       </div>
