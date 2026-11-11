@@ -1,24 +1,21 @@
 import { origemDe } from "@/lib/origem";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { getPostBySlug, getSiteConfig, getRecentesFallback } from "@/lib/posts.functions";
+import { getPostBySlug, getSiteConfig } from "@/lib/posts.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PostCard, PostCardSmall } from "@/components/site/PostCard";
+import { PostCardSmall } from "@/components/site/PostCard";
 import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import DOMPurify from "isomorphic-dompurify";
 import { EmbedsSociais } from "@/components/site/EmbedsSociais";
-import { Search } from "lucide-react";
-import { useRef, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useRef } from "react";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { ContinueLendo } from "@/components/site/ContinueLendo";
 import { SeguirInstagram } from "@/components/site/SeguirInstagram";
 import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
 import { OuvirMateria } from "@/components/site/OuvirMateria";
 import { MeSurpreenda } from "@/components/site/MeSurpreenda";
-
 
 const postQuery = (slug: string) =>
   queryOptions({
@@ -115,6 +112,9 @@ export const Route = createFileRoute("/$slug")({
   component: PostPage,
 });
 
+/* Folga vertical única entre blocos da matéria. */
+const BLOCO = "mt-10";
+
 function PostPage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(postQuery(slug));
@@ -122,82 +122,90 @@ function PostPage() {
   const articleBodyRef = useRef<HTMLDivElement | null>(null);
   if (!data) return null;
   const { post, autor, recentes, relacionados, anterior, proximo } = data;
-  const dataObj = post.publicado_em ? new Date(post.publicado_em) : null;
-  const ano = dataObj?.getFullYear();
-  const mes = dataObj ? dataObj.getMonth() + 1 : null;
   const url = typeof window !== "undefined" ? window.location.href : `https://hockey4life.com.br/${post.slug}`;
   const videoUrl: string | undefined = siteData.config?.hockey_fights_cancer?.video_url;
   const minutosLeitura = tempoLeitura(post.conteudo);
 
+  // Selos: com chapéu, ele é o único rótulo; sem chapéu, no máximo 3 temas.
+  const chapeu = post.chapeu?.trim();
+  const selos = chapeu ? [] : post.temas.slice(0, 3);
+  const recentesLateral = recentes.slice(0, 4);
+  const leiaTambem = relacionados.slice(0, 3);
+
+  const compartilhar = (variant: "topo" | "fim") => (
+    <ShareButtons
+      url={url}
+      titulo={post.titulo}
+      resumo={post.resumo}
+      chapeu={post.chapeu}
+      imagemCapa={post.imagem_capa}
+      variant={variant}
+      mostrarCartao={variant === "fim"}
+    />
+  );
+
   return (
     <SiteLayout config={siteData.config}>
       <ReadingProgress targetRef={articleBodyRef} />
-      <div className="mx-auto my-6 max-w-7xl rounded-lg bg-white/80 px-3 py-6 backdrop-blur-sm dark:bg-black/50 md:my-10 md:px-6 md:py-10">
-        {/* Breadcrumbs visíveis */}
-        <nav aria-label="Trilha" className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Início</Link>
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">
+        {/* Trilha discreta */}
+        <nav aria-label="Trilha" className="mb-3 text-[11px] text-muted-foreground/70">
+          <Link to="/" className="hover:text-primary">
+            Início
+          </Link>
         </nav>
 
-
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
           {/* Coluna principal */}
-          <article className="min-w-0">
+          <article className="mx-auto w-full min-w-0 max-w-[46rem]">
             <div ref={articleBodyRef}>
-              <div className="mb-3 flex flex-wrap gap-2">
-                {post.temas.map((t) => (
-                  <Link
-                    key={t.slug}
-                    to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
-                    params={{ slug: t.slug }}
-                    className="rounded bg-primary/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-primary/25"
-                  >
-                    {t.nome}
-                  </Link>
-                ))}
-              </div>
+              {(chapeu || selos.length > 0) && (
+                <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {chapeu ? (
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary">{chapeu}</span>
+                  ) : (
+                    selos.map((t) => (
+                      <Link
+                        key={t.slug}
+                        to={t.tipo === "time" ? "/time/$slug" : "/assunto/$slug"}
+                        params={{ slug: t.slug }}
+                        className="text-[11px] font-bold uppercase tracking-wider text-primary/80 hover:text-primary"
+                      >
+                        {t.nome}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
 
               <h1 className="h4l-title text-3xl leading-tight text-foreground md:text-5xl">{post.titulo}</h1>
 
-              {/* Linha do autor — mobile: autor em cima, metadados abaixo; desktop: tudo em linha */}
-              <div className="mt-4 border-y border-border py-3 text-sm text-muted-foreground">
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
-                  {autor && (
-                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="flex min-w-0 items-center gap-2 hover:text-primary">
-                      {autor.foto_url ? (
-                        <img src={autor.foto_url} alt={autor.nome} className="h-8 w-8 shrink-0 rounded-full object-cover" />
-                      ) : (
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
-                          {autor.nome.charAt(0)}
-                        </span>
-                      )}
-                      <span className="truncate font-semibold text-foreground">{autor.nome}</span>
-                    </Link>
-                  )}
-                  {autor && <EditarMateriaLink postId={post.id} />}
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
-                    <span>{formatDataBR(post.publicado_em)}</span>
-                    <span aria-hidden="true" className="text-muted-foreground/50">·</span>
-                    <span className="whitespace-nowrap">{minutosLeitura} min de leitura</span>
-                    {ano && mes && (
-                      <>
-                        <span aria-hidden="true" className="text-muted-foreground/50">·</span>
-                        <Link to="/arquivo/$ano/$mes" params={{ ano: String(ano), mes: String(mes).padStart(2, "0") }} className="text-primary hover:underline">
-                          ver mês
-                        </Link>
-                      </>
+              {/* Linha única: autor · data · tempo de leitura + compartilhar */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+                {autor && (
+                  <Link
+                    to="/autor/$slug"
+                    params={{ slug: autor.slug }}
+                    className="flex min-w-0 items-center gap-2 hover:text-primary"
+                  >
+                    {autor.foto_url ? (
+                      <img src={autor.foto_url} alt={autor.nome} className="h-7 w-7 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                        {autor.nome.charAt(0)}
+                      </span>
                     )}
-                  </div>
-                  <div className="sm:ml-auto">
-                    <ShareButtons
-                      url={url}
-                      titulo={post.titulo}
-                      resumo={post.resumo}
-                      chapeu={post.chapeu}
-                      imagemCapa={post.imagem_capa}
-                    />
-                  </div>
-                </div>
+                    <span className="truncate font-semibold text-foreground">{autor.nome}</span>
+                  </Link>
+                )}
+                {autor && <EditarMateriaLink postId={post.id} />}
+
+                <span aria-hidden="true" className="text-muted-foreground/40">·</span>
+                <span>{formatDataBR(post.publicado_em)}</span>
+                <span aria-hidden="true" className="text-muted-foreground/40">·</span>
+                <span className="whitespace-nowrap">{minutosLeitura} min de leitura</span>
+
+                <div className="w-full sm:ml-auto sm:w-auto">{compartilhar("topo")}</div>
               </div>
 
               {post.conteudo && <OuvirMateria titulo={post.titulo} html={post.conteudo} corpoId="materia-corpo" />}
@@ -222,7 +230,7 @@ function PostPage() {
               {post.conteudo && (
                 <div
                   id="materia-corpo"
-                  className="prose-h4l mt-6"
+                  className="prose-h4l mt-8"
                   // eslint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(post.conteudo, {
@@ -234,29 +242,26 @@ function PostPage() {
               )}
               {post.conteudo && <EmbedsSociais alvoId="materia-corpo" chave={post.id} />}
 
-              <div className="mt-10 border-t border-border pt-6">
-                <ShareButtons
-                  url={url}
-                  titulo={post.titulo}
-                  resumo={post.resumo}
-                  chapeu={post.chapeu}
-                  imagemCapa={post.imagem_capa}
-                />
-              </div>
+              <div className={`${BLOCO} border-t border-border pt-5`}>{compartilhar("fim")}</div>
             </div>
 
+            {/* No celular a lateral não aparece: o autor vem aqui, sem caixa. */}
             {autor && (
-              <aside className="mt-10 rounded-lg border border-primary/40 bg-card/60 p-5 backdrop-blur-sm">
+              <aside className={`${BLOCO} border-t border-border pt-5 lg:hidden`}>
                 <div className="flex items-start gap-4">
                   {autor.foto_url ? (
-                    <img src={autor.foto_url} alt={autor.nome} className="h-16 w-16 shrink-0 rounded-full object-cover" />
+                    <img src={autor.foto_url} alt={autor.nome} className="h-14 w-14 shrink-0 rounded-full object-cover" />
                   ) : (
-                    <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-primary/20 text-xl font-bold text-primary">
+                    <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/20 text-lg font-bold text-primary">
                       {autor.nome.charAt(0)}
                     </span>
                   )}
                   <div className="min-w-0">
-                    <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block text-lg font-bold text-foreground hover:text-primary">
+                    <Link
+                      to="/autor/$slug"
+                      params={{ slug: autor.slug }}
+                      className="block text-base font-bold text-foreground hover:text-primary"
+                    >
                       {autor.nome}
                     </Link>
                     {(autor.bio_media || autor.bio_curta || autor.bio) && (
@@ -267,7 +272,7 @@ function PostPage() {
                     <Link
                       to="/autor/$slug"
                       params={{ slug: autor.slug }}
-                      className="mt-3 inline-block text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+                      className="mt-2 inline-block text-xs font-bold uppercase tracking-wider text-primary hover:underline"
                     >
                       Todas as matérias de {autor.nome} →
                     </Link>
@@ -276,22 +281,26 @@ function PostPage() {
               </aside>
             )}
 
-            <SeguirInstagram className="mt-8" />
+            <SeguirInstagram className={BLOCO} />
 
             {(anterior || proximo) && (
-              <nav className="mt-8 grid gap-3 sm:grid-cols-2">
+              <nav className={`${BLOCO} grid gap-4 border-t border-border pt-5 sm:grid-cols-2`}>
                 {anterior ? (
-                  <Link to="/$slug" params={{ slug: anterior.slug }} className="group rounded-lg border border-border p-4 hover:border-primary">
+                  <Link to="/$slug" params={{ slug: anterior.slug }} className="group block min-w-0">
                     <div className="text-[11px] uppercase tracking-widest text-muted-foreground">← Anterior</div>
                     <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{anterior.titulo}</div>
                   </Link>
-                ) : <div />}
+                ) : (
+                  <div />
+                )}
                 {proximo ? (
-                  <Link to="/$slug" params={{ slug: proximo.slug }} className="group rounded-lg border border-border p-4 text-right hover:border-primary">
+                  <Link to="/$slug" params={{ slug: proximo.slug }} className="group block min-w-0 sm:text-right">
                     <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Próxima →</div>
                     <div className="mt-1 line-clamp-2 font-semibold group-hover:text-primary">{proximo.titulo}</div>
                   </Link>
-                ) : <div />}
+                ) : (
+                  <div />
+                )}
               </nav>
             )}
 
@@ -302,121 +311,90 @@ function PostPage() {
               recentes={recentes as any}
             />
 
-            <div className="mt-6 flex justify-center">
+            <div className={`${BLOCO} flex justify-center`}>
               <MeSurpreenda excluirIdAtual={post.id} variant="link">
                 Ler uma história ao acaso
               </MeSurpreenda>
             </div>
 
-
-            {relacionados.length > 0 && (
-              <section className="mt-12">
-                <div className="overflow-hidden rounded-lg border border-border bg-card/60">
-                  <div className="bg-black/70 py-2 text-center">
-                    <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
-                      Leia também
-                    </span>
-                  </div>
-                  <div>
-                    {relacionados.map((p) => (
-                      <PostCardSmall key={p.id} post={p} />
-                    ))}
-                  </div>
+            {leiaTambem.length > 0 && (
+              <section className={`${BLOCO} border-t border-border pt-5`}>
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Leia também
+                </div>
+                <div>
+                  {leiaTambem.map((p) => (
+                    <PostCardSmall key={p.id} post={p} />
+                  ))}
                 </div>
               </section>
             )}
           </article>
 
-
-          {/* Sidebar */}
-          <aside className="hidden space-y-6 lg:block lg:sticky lg:top-6 lg:self-start">
-            {autor && (
-              <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
-                <div className="h4l-title mb-3 text-sm text-primary">Sobre o autor</div>
-                <div className="flex items-start gap-3">
-                  {autor.foto_url ? (
-                    <img src={autor.foto_url} alt={autor.nome} className="h-14 w-14 shrink-0 rounded-full object-cover" />
-                  ) : (
-                    <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/20 text-lg font-bold text-primary">
-                      {autor.nome.charAt(0)}
-                    </span>
-                  )}
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link to="/autor/$slug" params={{ slug: autor.slug }} className="block font-bold text-foreground hover:text-primary">
+          {/* Lateral: só o essencial */}
+          <aside className="hidden lg:block lg:sticky lg:top-6 lg:self-start">
+            <div className="space-y-8">
+              {autor && (
+                <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+                  <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Sobre o autor
+                  </div>
+                  <div className="flex items-start gap-3">
+                    {autor.foto_url ? (
+                      <img src={autor.foto_url} alt={autor.nome} className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/20 text-base font-bold text-primary">
+                        {autor.nome.charAt(0)}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <Link
+                        to="/autor/$slug"
+                        params={{ slug: autor.slug }}
+                        className="block font-bold text-foreground hover:text-primary"
+                      >
                         {autor.nome}
                       </Link>
-                      <EditarMateriaLink postId={post.id} />
+                      {(autor.bio_curta || autor.bio) && (
+                        <p className="mt-1 line-clamp-4 text-xs text-muted-foreground">{autor.bio_curta ?? autor.bio}</p>
+                      )}
                     </div>
-                    {(autor.bio_curta || autor.bio) && <p className="mt-1 text-xs text-muted-foreground line-clamp-4">{autor.bio_curta ?? autor.bio}</p>}
                   </div>
-
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
-              <div className="h4l-title mb-3 text-sm text-primary">Pesquise</div>
-              <SidebarSearch />
-            </div>
-
-            <div className="overflow-hidden rounded-lg border border-border bg-card/60 backdrop-blur-sm">
-              <div className="bg-black/70 py-2 text-center">
-                <span className="font-list-cond text-[14px] font-bold uppercase tracking-wider text-primary">
-                  Matérias recentes
-                </span>
-              </div>
               <div>
-                {recentes.map((r) => (
-                  <PostCardSmall key={r.id} post={r as any} />
-                ))}
-              </div>
-            </div>
-
-
-            {videoUrl && (
-              <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
-                <div className="h4l-title mb-3 text-sm text-primary">Vídeo destaque</div>
-                <div className="aspect-video overflow-hidden rounded">
-                  <iframe
-                    src={toEmbedUrl(videoUrl)}
-                    title="Vídeo destaque"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="h-full w-full"
-                  />
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Matérias recentes
+                </div>
+                <div>
+                  {recentesLateral.map((r) => (
+                    <PostCardSmall key={r.id} post={r as any} />
+                  ))}
                 </div>
               </div>
-            )}
+
+              {videoUrl && (
+                <div className="rounded-lg border border-border bg-card/60 p-4 backdrop-blur-sm">
+                  <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Vídeo destaque
+                  </div>
+                  <div className="aspect-video overflow-hidden rounded">
+                    <iframe
+                      src={toEmbedUrl(videoUrl)}
+                      title="Vídeo destaque"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="h-full w-full"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </aside>
         </div>
       </div>
     </SiteLayout>
-  );
-}
-
-function SidebarSearch() {
-  const [q, setQ] = useState("");
-  const navigate = useNavigate();
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!q.trim()) return;
-        navigate({ to: "/busca", search: { q: q.trim() } as any });
-      }}
-      className="flex items-center gap-2"
-    >
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Buscar…"
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-      />
-      <button type="submit" className="rounded-md bg-primary p-2 text-primary-foreground hover:opacity-90">
-        <Search className="h-4 w-4" />
-      </button>
-    </form>
   );
 }
 
@@ -434,6 +412,8 @@ function toEmbedUrl(url: string): string {
       const id = u.pathname.replace(/\//g, "");
       if (id) return `https://player.vimeo.com/video/${id}`;
     }
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   return url;
 }

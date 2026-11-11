@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Facebook,
+  Instagram,
   Link as LinkIcon,
   MessageCircle,
-  MoreHorizontal,
   Send,
   Share2,
-  Instagram,
   X as XIcon,
-  Download,
 } from "lucide-react";
 import logoClaroAsset from "@/assets/logo-claro.png.asset.json";
 
@@ -18,13 +16,32 @@ export interface ShareButtonsProps {
   resumo?: string | null;
   chapeu?: string | null;
   imagemCapa?: string | null;
+  /** "topo" = discreto, na linha do autor; "fim" = depois do texto. */
+  variant?: "topo" | "fim";
+  /** Mostra a entrada discreta do cartão de Stories (usada onde a folha nativa esconde o menu). */
+  mostrarCartao?: boolean;
 }
 
-export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareButtonsProps) {
+/**
+ * Compartilhamento enxuto: sempre duas ações diretas — WhatsApp e
+ * "Compartilhar". No celular, "Compartilhar" abre a folha nativa do aparelho;
+ * onde não houver suporte, abre um menu com X, Facebook, Telegram, copiar
+ * link e o cartão para Stories.
+ */
+export function ShareButtons({
+  url,
+  titulo,
+  resumo,
+  chapeu,
+  imagemCapa,
+  variant = "topo",
+  mostrarCartao = false,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const [supportsShare, setSupportsShare] = useState(false);
-  const [maisAberto, setMaisAberto] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
   const [cartaoAberto, setCartaoAberto] = useState(false);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const encoded = encodeURIComponent(url);
   const t = encodeURIComponent(titulo);
 
@@ -33,12 +50,31 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
     setSupportsShare(typeof navigator.share === "function");
   }, []);
 
+  // Fecha o menu com Esc ou clique fora dele.
+  useEffect(() => {
+    if (!menuAberto) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuAberto(false);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setMenuAberto(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [menuAberto]);
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   };
 
   const compartilharNativo = async () => {
@@ -61,100 +97,125 @@ export function ShareButtons({ url, titulo, resumo, chapeu, imagemCapa }: ShareB
   const fb = { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${encoded}`, icon: Facebook };
   const tg = { label: "Telegram", href: `https://t.me/share/url?url=${encoded}&text=${t}`, icon: Send };
 
-  const linkClasses =
-    "inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition-colors hover:border-primary/60 hover:text-primary";
+  const tamanho = variant === "topo" ? "min-h-[32px] px-2 text-[11px]" : "min-h-[36px] px-3 text-xs";
+  const base =
+    "inline-flex items-center gap-1.5 rounded-md border border-border bg-card/70 font-bold uppercase tracking-wider text-foreground transition-colors hover:border-primary/60 hover:text-primary";
 
-  const StoriesBtn = (
-    <button
-      type="button"
-      onClick={() => setCartaoAberto(true)}
-      className={linkClasses}
-      aria-label="Gerar cartão para Stories do Instagram"
-      title="Cartão para Stories"
-    >
-      <Instagram className="h-4 w-4" />
-    </button>
-  );
-
-  const CopiarBtn = (
-    <button
-      type="button"
-      onClick={copy}
-      className={linkClasses}
-      aria-label={copied ? "Link copiado" : "Copiar link"}
-      title={copied ? "Copiado!" : "Copiar link"}
-    >
-      <LinkIcon className="h-4 w-4" />
-    </button>
-  );
-
-  const AncoraBtn = (it: { label: string; href: string; icon: typeof MessageCircle }) => (
-    <a
-      key={it.label}
-      href={it.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={linkClasses}
-      aria-label={`Compartilhar no ${it.label}`}
-      title={it.label}
-    >
-      <it.icon className="h-4 w-4" />
-    </a>
-  );
+  const ItemMenu = ({
+    label,
+    href,
+    icon: Icon,
+    onClick,
+  }: {
+    label: string;
+    href?: string;
+    icon: typeof MessageCircle;
+    onClick?: () => void;
+  }) =>
+    href ? (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        role="menuitem"
+        onClick={onClick}
+        className="flex items-center gap-2 rounded px-2 py-1.5 text-xs font-semibold text-foreground hover:bg-primary/10 hover:text-primary"
+      >
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        {label}
+      </a>
+    ) : (
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onClick}
+        className="flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs font-semibold text-foreground hover:bg-primary/10 hover:text-primary"
+      >
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        {label}
+      </button>
+    );
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs uppercase tracking-wider text-muted-foreground">Compartilhar:</span>
+    <div ref={wrapRef} className="relative flex flex-wrap items-center gap-2">
+      <a
+        href={wa.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Compartilhar no WhatsApp"
+        title="WhatsApp"
+        className={`${base} ${tamanho}`}
+      >
+        <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+        WhatsApp
+      </a>
 
-      {/* Mobile: Compartilhar (nativo) → WhatsApp → Stories → Mais */}
-      <div className="flex flex-wrap items-center gap-2 md:hidden">
-        {supportsShare && (
+      {supportsShare ? (
+        <button
+          type="button"
+          onClick={compartilharNativo}
+          aria-label="Compartilhar"
+          title="Compartilhar"
+          className={`${base} ${tamanho}`}
+        >
+          <Share2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Compartilhar
+        </button>
+      ) : (
+        <>
           <button
             type="button"
-            onClick={compartilharNativo}
-            className={linkClasses}
-            aria-label="Compartilhar via aplicativo do celular"
+            onClick={() => setMenuAberto((v) => !v)}
+            aria-expanded={menuAberto}
+            aria-haspopup="true"
+            aria-label="Abrir opções de compartilhamento"
             title="Compartilhar"
+            className={`${base} ${tamanho}`}
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Compartilhar
           </button>
-        )}
-        {AncoraBtn(wa)}
-        {StoriesBtn}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setMaisAberto((v) => !v)}
-            className={linkClasses}
-            aria-expanded={maisAberto}
-            aria-label="Mais opções de compartilhamento"
-            title="Mais"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-          {maisAberto && (
+          {menuAberto && (
             <div
-              className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-lg"
-              onClick={() => setMaisAberto(false)}
+              role="menu"
+              aria-label="Opções de compartilhamento"
+              className="absolute right-0 z-30 mt-1 flex min-w-[13rem] flex-col gap-0.5 rounded-md border border-border bg-popover p-1.5 shadow-lg"
             >
-              {AncoraBtn(x)}
-              {AncoraBtn(fb)}
-              {AncoraBtn(tg)}
-              {CopiarBtn}
+              <ItemMenu label="X" href={x.href} icon={x.icon} onClick={() => setMenuAberto(false)} />
+              <ItemMenu label="Facebook" href={fb.href} icon={fb.icon} onClick={() => setMenuAberto(false)} />
+              <ItemMenu label="Telegram" href={tg.href} icon={tg.icon} onClick={() => setMenuAberto(false)} />
+              <ItemMenu
+                label={copied ? "Link copiado!" : "Copiar link"}
+                icon={LinkIcon}
+                onClick={() => {
+                  setMenuAberto(false);
+                  void copy();
+                }}
+              />
+              <ItemMenu
+                label="Cartão para Stories"
+                icon={Instagram}
+                onClick={() => {
+                  setMenuAberto(false);
+                  setCartaoAberto(true);
+                }}
+              />
             </div>
           )}
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Desktop: WhatsApp, X, Facebook, Telegram, copiar, Stories */}
-      <div className="hidden flex-wrap items-center gap-2 md:flex">
-        {AncoraBtn(wa)}
-        {AncoraBtn(x)}
-        {AncoraBtn(fb)}
-        {AncoraBtn(tg)}
-        {CopiarBtn}
-        {StoriesBtn}
-      </div>
+      {/* Onde a folha nativa esconde o menu (celular), o cartão de Stories
+          continua a um toque, em uma linha discreta. */}
+      {mostrarCartao && supportsShare && (
+        <button
+          type="button"
+          onClick={() => setCartaoAberto(true)}
+          className="w-full text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary"
+        >
+          Cartão para Stories
+        </button>
+      )}
 
       {cartaoAberto && (
         <StoriesCardDialog
