@@ -9,7 +9,7 @@ import {
   Share2,
   X as XIcon,
 } from "lucide-react";
-import logoClaroAsset from "@/assets/logo-claro.png.asset.json";
+import logoClaroAsset from "@/assets/hockey4life-logo-escuro.svg.asset.json";
 
 export interface ShareButtonsProps {
   url: string;
@@ -510,8 +510,8 @@ async function gerarCartaoStories(opts: {
     const logo = await carregarImagem(logoClaroAsset.url);
     // logo escura em fundo escuro? usamos a versão clara (para fundos escuros)
     const alvoAltura = 90;
-    const escala = alvoAltura / logo.height;
-    const alvoLargura = logo.width * escala;
+    const escala = logo.height ? alvoAltura / logo.height : 1;
+    const alvoLargura = logo.width && logo.height ? logo.width * escala : alvoAltura * 3.554;
     ctx.drawImage(logo, paddingX, rodapeY, alvoLargura, alvoAltura);
   } catch {
     // fallback: texto
