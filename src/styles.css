@@ -36,6 +36,12 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
+  /* Placar NHL — "Últimos resultados" (vermelho escuro) e "Próximos jogos" (verde escuro). */
+  --color-placar-vermelho-fill: var(--placar-vermelho-fill);
+  --color-placar-vermelho-fg: var(--placar-vermelho-fg);
+  --color-placar-verde-fill: var(--placar-verde-fill);
+  --color-placar-verde-fg: var(--placar-verde-fg);
+
   --font-display: "Anton", "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-list: "Open Sans", ui-sans-serif, system-ui, sans-serif;
@@ -80,6 +86,14 @@
   --border: #DDD8C4;
   --input: #E2DED2;
   --ring: rgba(154, 117, 0, 0.55);
+
+  /* Placar NHL — tons escuros e sóbrios, legíveis no tema claro. */
+  --placar-vermelho-fill: #7f1d1d;
+  --placar-vermelho-fg: #fdf2f2;
+  --placar-vermelho-tint: rgba(127, 29, 29, 0.34);
+  --placar-verde-fill: #14532d;
+  --placar-verde-fg: #f0fdf4;
+  --placar-verde-tint: rgba(20, 83, 45, 0.34);
 }
 
 .dark {
@@ -106,6 +120,15 @@
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
   --ring: rgba(255, 202, 10, 0.6);
+
+  /* Placar NHL — no escuro o tingimento da faixa sobe um pouco para
+   * continuar legível sobre o fundo de arena. */
+  --placar-vermelho-fill: #7f1d1d;
+  --placar-vermelho-fg: #fdf2f2;
+  --placar-vermelho-tint: rgba(127, 29, 29, 0.5);
+  --placar-verde-fill: #14532d;
+  --placar-verde-fg: #f0fdf4;
+  --placar-verde-tint: rgba(20, 83, 45, 0.5);
 }
 
 /* Transição suave entre temas — até 200ms; anulada com prefers-reduced-motion. */
