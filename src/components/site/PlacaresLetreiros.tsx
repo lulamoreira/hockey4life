@@ -460,7 +460,7 @@ export function PlacaresNaoPerca({ settings }: { settings: PlacaresSettings }) {
   if (!temU && !temP) return null;
 
   return (
-    <section aria-label="Placares NHL" className="mx-auto max-w-7xl px-4">
+    <section aria-label="Placares NHL" className="mx-auto my-10 max-w-7xl px-4 md:my-16">
       <div className={`grid grid-cols-1 gap-3 ${temU && temP ? "sm:grid-cols-2 sm:gap-6" : ""}`}>
         {temU && (
           <FaixaNaoPerca
