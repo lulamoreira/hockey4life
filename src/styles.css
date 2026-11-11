@@ -39,8 +39,10 @@
   /* Placar NHL — "Últimos resultados" (vermelho escuro) e "Próximos jogos" (verde escuro). */
   --color-placar-vermelho-fill: var(--placar-vermelho-fill);
   --color-placar-vermelho-fg: var(--placar-vermelho-fg);
+  --color-placar-vermelho-tint: var(--placar-vermelho-tint);
   --color-placar-verde-fill: var(--placar-verde-fill);
   --color-placar-verde-fg: var(--placar-verde-fg);
+  --color-placar-verde-tint: var(--placar-verde-tint);
 
   --font-display: "Anton", "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
