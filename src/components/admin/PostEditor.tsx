@@ -104,6 +104,11 @@ export function PostEditor({ id }: { id?: string }) {
     enableBeforeUnload: false,
   });
 
+  // Hooks must run even while the saved article is loading.
+  const permsQ = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions() });
+  const enviarFn = useServerFn(enviarParaRevisao);
+  const aprovarFn = useServerFn(aprovarPost);
+  const rejeitarFn = useServerFn(rejeitarPost);
 
   // Estados de carregamento e "não encontrada"
   if (!isNew && postQ.isLoading) {
@@ -177,16 +182,11 @@ export function PostEditor({ id }: { id?: string }) {
     } finally { setSaving(false); }
   };
 
-  const permsQ = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions() });
   const perms = permsQ.data?.perms;
   const meuPost = !isNew && (postQ.data?.post as any)?.criado_por === permsQ.data?.userId;
   const podePublicar = !!perms?.publicar_qualquer || (meuPost && !!perms?.publicar_propria);
   const podeAprovar = !!perms?.aprovar;
   const podeEditarQualquer = !!perms?.editar_qualquer;
-
-  const enviarFn = useServerFn(enviarParaRevisao);
-  const aprovarFn = useServerFn(aprovarPost);
-  const rejeitarFn = useServerFn(rejeitarPost);
 
   const acaoRevisao = async (fn: () => Promise<any>, novo: StatusPost) => {
     setSaving(true); setMsg("");
