@@ -54,8 +54,7 @@ function limparConteudo(html: string): string {
   h = h.replace(/<!--\s*wp:[\s\S]*?-->/g, "").replace(/<!--\s*\/wp:[\s\S]*?-->/g, "");
   // Remove atributos de layout do WP, mas preserva blockquotes/iframes de embeds.
   h = h.replace(/<(?!\/?(?:blockquote|iframe)\b)[a-z][^>]*>/gi, (tag) =>
-    tag.replace(/\s(srcset|sizes|width|height|class)=("[^"]*"|'[^']*')/gi, ""));|sizes|width|height|class)="[^"]*"/gi, "");
-  h = h.replace(/\s(srcset|sizes|width|height|class)='[^']*'/gi, "");
+    tag.replace(/\s(srcset|sizes|width|height|class)=("[^"]*"|'[^']*')/gi, ""));
   return h;
 }
 
