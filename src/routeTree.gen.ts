@@ -32,6 +32,7 @@ import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
 import { Route as AdminLegendasRouteImport } from './routes/admin.legendas'
 import { Route as AdminMateriasRouteImport } from './routes/admin.materias'
+import { Route as AdminPostagensRouteImport } from './routes/admin.postagens'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminTemasRouteImport } from './routes/admin.temas'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
@@ -164,6 +165,11 @@ const AdminMateriasRoute = AdminMateriasRouteImport.update({
   path: '/materias',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPostagensRoute = AdminPostagensRouteImport.update({
+  id: '/postagens',
+  path: '/postagens',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPostsRoute = AdminPostsRouteImport.update({
   id: '/posts',
   path: '/posts',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/admin/importar': typeof AdminImportarRoute
   '/admin/legendas': typeof AdminLegendasRoute
   '/admin/materias': typeof AdminMateriasRouteWithChildren
+  '/admin/postagens': typeof AdminPostagensRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
   '/admin/legendas': typeof AdminLegendasRoute
+  '/admin/postagens': typeof AdminPostagensRoute
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/criar-conta': typeof AdminCriarContaRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/admin/importar': typeof AdminImportarRoute
   '/admin/legendas': typeof AdminLegendasRoute
   '/admin/materias': typeof AdminMateriasRouteWithChildren
+  '/admin/postagens': typeof AdminPostagensRoute
   '/admin/posts': typeof AdminPostsRouteWithChildren
   '/admin/temas': typeof AdminTemasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/admin/importar'
     | '/admin/legendas'
     | '/admin/materias'
+    | '/admin/postagens'
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/usuarios'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/admin/contatos'
     | '/admin/importar'
     | '/admin/legendas'
+    | '/admin/postagens'
     | '/admin/temas'
     | '/admin/usuarios'
     | '/admin/criar-conta'
@@ -471,6 +482,7 @@ export interface FileRouteTypes {
     | '/admin/importar'
     | '/admin/legendas'
     | '/admin/materias'
+    | '/admin/postagens'
     | '/admin/posts'
     | '/admin/temas'
     | '/admin/usuarios'
@@ -674,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMateriasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/postagens': {
+      id: '/admin/postagens'
+      path: '/postagens'
+      fullPath: '/admin/postagens'
+      preLoaderRoute: typeof AdminPostagensRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/posts': {
       id: '/admin/posts'
       path: '/posts'
@@ -831,6 +850,7 @@ interface AdminRouteChildren {
   AdminImportarRoute: typeof AdminImportarRoute
   AdminLegendasRoute: typeof AdminLegendasRoute
   AdminMateriasRoute: typeof AdminMateriasRouteWithChildren
+  AdminPostagensRoute: typeof AdminPostagensRoute
   AdminPostsRoute: typeof AdminPostsRouteWithChildren
   AdminTemasRoute: typeof AdminTemasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
@@ -847,6 +867,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminImportarRoute: AdminImportarRoute,
   AdminLegendasRoute: AdminLegendasRoute,
   AdminMateriasRoute: AdminMateriasRouteWithChildren,
+  AdminPostagensRoute: AdminPostagensRoute,
   AdminPostsRoute: AdminPostsRouteWithChildren,
   AdminTemasRoute: AdminTemasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
