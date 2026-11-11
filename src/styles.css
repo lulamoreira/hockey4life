@@ -247,3 +247,11 @@ iframe[src*="lovable.dev/badge"] {
   height: 0 !important;
 }
 /* NEXUS-PRO:WATERMARK-HIDE:END */
+
+/* Embeds sociais: o script de cada rede define a altura — não forçar 16:9 */
+.prose-h4l iframe.instagram-media,
+.prose-h4l iframe[id^="twitter-widget"],
+.prose-h4l iframe[src*="tiktok.com"] { aspect-ratio: auto; margin-left: auto !important; margin-right: auto !important; }
+.prose-h4l blockquote.instagram-media,
+.prose-h4l blockquote.twitter-tweet,
+.prose-h4l blockquote.tiktok-embed { border-left: 0; font-style: normal; padding-left: 0; }
