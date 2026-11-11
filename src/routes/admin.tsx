@@ -38,6 +38,7 @@ function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/materias", label: "Matérias", icon: FileText, requer: "escrever" },
     { to: "/admin/aprovacoes", label: "Aprovações", icon: CheckSquare, requer: "aprovar" },
+    { to: "/admin/postagens", label: "Postagens prontas", icon: Sparkles, requer: "escrever" },
     { to: "/admin/legendas", label: "Legendas IA", icon: Sparkles, requer: "escrever" },
     { to: "/admin/busca-google", label: "Busca no Google", icon: Search, requer: "ver_painel" },
     { to: "/admin/temas", label: "Temas", icon: Tag, requer: "gerenciar_temas" },

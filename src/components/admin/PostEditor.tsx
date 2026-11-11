@@ -8,7 +8,6 @@ import { getMyPermissions, enviarParaRevisao, aprovarPost, rejeitarPost } from "
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { InstagramPostButton } from "@/components/admin/InstagramPostButton";
 
 type StatusPost = "rascunho" | "publicado" | "em_revisao" | "rejeitado";
 
@@ -238,7 +237,6 @@ export function PostEditor({ id }: { id?: string }) {
           {msg && <p className="mt-2 text-sm text-primary">{msg}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
-          {perms?.escrever && <InstagramPostButton article={{ titulo, resumo, conteudo, imagemCapa, creditoImagem, slug }} />}
           <button onClick={() => onSave("rascunho")} disabled={saving}
             className="rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold uppercase text-foreground disabled:opacity-50">
             Salvar rascunho
