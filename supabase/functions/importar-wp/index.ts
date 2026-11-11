@@ -52,8 +52,9 @@ const stripTags = (s: string) => decodeEntities(s.replace(/<[^>]+>/g, "")).trim(
 function limparConteudo(html: string): string {
   let h = html;
   h = h.replace(/<!--\s*wp:[\s\S]*?-->/g, "").replace(/<!--\s*\/wp:[\s\S]*?-->/g, "");
-  h = h.replace(/\s(srcset|sizes|width|height|class)="[^"]*"/gi, "");
-  h = h.replace(/\s(srcset|sizes|width|height|class)='[^']*'/gi, "");
+  // Remove atributos de layout do WP, mas preserva blockquotes/iframes de embeds.
+  h = h.replace(/<(?!\/?(?:blockquote|iframe)\b)[a-z][^>]*>/gi, (tag) =>
+    tag.replace(/\s(srcset|sizes|width|height|class)=("[^"]*"|'[^']*')/gi, ""));
   return h;
 }
 

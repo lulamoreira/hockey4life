@@ -8,6 +8,7 @@ import { ShareButtons } from "@/components/site/Share";
 import { formatDataBR, tempoLeitura } from "@/lib/slugify";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import DOMPurify from "isomorphic-dompurify";
+import { EmbedsSociais } from "@/components/site/EmbedsSociais";
 import { Search } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -226,11 +227,12 @@ function PostPage() {
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(post.conteudo, {
                       ADD_TAGS: ["iframe"],
-                      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
+                      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target", "loading", "cite"],
                     }),
                   }}
                 />
               )}
+              {post.conteudo && <EmbedsSociais alvoId="materia-corpo" chave={post.id} />}
 
               <div className="mt-10 border-t border-border pt-6">
                 <ShareButtons

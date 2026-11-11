@@ -209,7 +209,7 @@ body, header, footer, aside, main, nav, section, article,
 }
 .prose-h4l ul, .prose-h4l ol { margin: 0 0 1.25rem 1.5rem; }
 .prose-h4l li { margin-bottom: 0.35rem; }
-.prose-h4l iframe {
+.prose-h4l iframe:not(.instagram-media):not([id^="twitter-widget"]):not([src*="tiktok.com"]) {
   max-width: 100%;
   aspect-ratio: 16/9;
   width: 100%;
@@ -247,3 +247,12 @@ iframe[src*="lovable.dev/badge"] {
   height: 0 !important;
 }
 /* NEXUS-PRO:WATERMARK-HIDE:END */
+
+/* Embeds sociais: o script de cada rede define a altura — não forçar 16:9 */
+.prose-h4l iframe.instagram-media,
+.prose-h4l iframe[id^="twitter-widget"],
+.prose-h4l iframe[src*="tiktok.com"] { aspect-ratio: auto; margin-left: auto !important; margin-right: auto !important; }
+.prose-h4l blockquote.instagram-media,
+.prose-h4l blockquote.twitter-tweet,
+.prose-h4l blockquote.tiktok-embed { border-left: 0; font-style: normal; padding-left: 0; }
+.prose-h4l iframe.instagram-media { min-height: 480px; }
