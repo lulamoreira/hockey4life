@@ -4,7 +4,7 @@ import { useAuthSession } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { getMyPermissions, type Permissao } from "@/lib/equipe.functions";
 import { useState } from "react";
-import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare, Search, Sparkles } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Tag, Settings, Mail, Download, Archive, Users, CheckSquare, Search, Sparkles, PlaySquare } from "lucide-react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { LogoImg } from "@/components/site/Logo";
 
@@ -47,6 +47,7 @@ function AdminShell({ perms }: { perms: Record<Permissao, boolean> }) {
     { to: "/admin/contatos", label: "Contatos", icon: Mail, requer: "gerenciar_configuracoes" },
     { to: "/admin/importar", label: "Importar WP", icon: Download, requer: "gerenciar_configuracoes" },
     { to: "/admin/backup", label: "Backup", icon: Archive, requer: "gerenciar_configuracoes" },
+    { to: "/admin/video-capa", label: "Vídeo da capa", icon: PlaySquare, requer: "gerenciar_configuracoes" },
     { to: "/admin/configuracoes", label: "Configurações", icon: Settings, requer: "gerenciar_configuracoes" },
   ] as Array<{ to: string; label: string; icon: any; exact?: boolean; requer?: Permissao }>).filter((n) => !n.requer || perms[n.requer]);
   return (

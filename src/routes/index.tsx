@@ -112,7 +112,9 @@ function HomePage() {
       {/* Vídeo destaque capa (antes: Hockey Fights Cancer) */}
       {(() => {
         const src = hfc.video_url_original || hfc.video_url;
-        if (!src || !parseYouTube(src)) return null;
+        const flag = config?.video_capa_ativo;
+        const ativo = flag && typeof flag === "object" ? flag.ativo !== false : flag !== false;
+        if (!ativo || !src || !parseYouTube(src)) return null;
         const titulo = hfc.titulo ?? "Vídeo destaque";
         return (
           <section className="mx-auto max-w-7xl px-4 py-12">
