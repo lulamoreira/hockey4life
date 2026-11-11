@@ -330,6 +330,97 @@ export function Header({ temasMenu, menu, loading }: { temasMenu: TemaMenu[]; me
 }
 
 
+/**
+ * Menu da conta no cabeçalho: avatar que abre "Minha conta", atalhos da
+ * equipe (Painel do admin, Nova matéria) e "Sair". Fecha com clique fora
+ * ou tecla Esc.
+ */
+function MenuConta({
+  fotoUrl,
+  isStaff,
+  podeEscrever,
+  onSair,
+}: {
+  fotoUrl: string | null;
+  isStaff: boolean;
+  podeEscrever: boolean;
+  onSair: () => void;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const raiz = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!aberto) return;
+    const cliqueFora = (e: PointerEvent) => {
+      if (raiz.current && !raiz.current.contains(e.target as Node)) setAberto(false);
+    };
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setAberto(false);
+    };
+    document.addEventListener("pointerdown", cliqueFora);
+    document.addEventListener("keydown", tecla);
+    return () => {
+      document.removeEventListener("pointerdown", cliqueFora);
+      document.removeEventListener("keydown", tecla);
+    };
+  }, [aberto]);
+
+  const itemCls =
+    "flex min-h-11 w-full items-center gap-2 rounded px-3 text-sm uppercase tracking-wide hover:bg-muted";
+
+  return (
+    <div ref={raiz} className="relative">
+      <button
+        type="button"
+        onClick={() => setAberto((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={aberto}
+        aria-label="Menu da conta"
+        className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+      >
+        {fotoUrl ? (
+          <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <User className="h-4 w-4" />
+        )}
+      </button>
+
+      {aberto && (
+        <div
+          role="menu"
+          aria-label="Menu da conta"
+          className="absolute right-0 top-full z-50 mt-2 w-60 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+        >
+          <Link to="/conta" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+            <User className="h-4 w-4" /> Minha conta
+          </Link>
+          {isStaff && (
+            <Link to="/admin" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+              <Shield className="h-4 w-4" /> Painel do admin
+            </Link>
+          )}
+          {isStaff && podeEscrever && (
+            <Link to="/admin/posts/novo" role="menuitem" onClick={() => setAberto(false)} className={itemCls}>
+              <PenSquare className="h-4 w-4" /> Nova matéria
+            </Link>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setAberto(false);
+              onSair();
+            }}
+            className={`${itemCls} text-destructive`}
+          >
+            <LogOut className="h-4 w-4" /> Sair
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileLink({ to, pathname, onClick, children }: { to: "/" | "/arquivo" | "/busca" | "/fale-conosco"; pathname: string; onClick: () => void; children: React.ReactNode }) {
   const ativo = pathname === to || (to === "/arquivo" && pathname.startsWith("/arquivo/"));
   return (
