@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, Pause, Play, Square, ArrowDownCircle } from "lucide-react";
+import { Volume2, Pause, Play, Square, ArrowDownCircle, Settings2 } from "lucide-react";
 
 type Props = {
   titulo: string;
@@ -180,6 +180,7 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
   const [velocidade, setVelocidade] = useState<number>(1);
   const [acompanhar, setAcompanhar] = useState<boolean>(true);
   const [mostrarVoltar, setMostrarVoltar] = useState(false);
+  const [opcoesAberto, setOpcoesAberto] = useState(false);
   const [frases, setFrases] = useState<string[]>(() => dividirFrases(`${titulo}. ${extrairTexto(html)}`));
   const preparadoRef = useRef(false);
 
@@ -358,6 +359,11 @@ export function OuvirMateria({ titulo, html, corpoId }: Props) {
     rolarPara(idxAtual);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idxAtual, estado]);
+
+  // Ao parar de ler, recolhe as opções de novo.
+  useEffect(() => {
+    if (estado === "parado") setOpcoesAberto(false);
+  }, [estado]);
 
   function tocarDe(inicio: number) {
     if (!suportado) return;
