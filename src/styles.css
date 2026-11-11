@@ -209,7 +209,7 @@ body, header, footer, aside, main, nav, section, article,
 }
 .prose-h4l ul, .prose-h4l ol { margin: 0 0 1.25rem 1.5rem; }
 .prose-h4l li { margin-bottom: 0.35rem; }
-.prose-h4l iframe {
+.prose-h4l iframe:not(.instagram-media):not([id^="twitter-widget"]):not([src*="tiktok.com"]) {
   max-width: 100%;
   aspect-ratio: 16/9;
   width: 100%;
