@@ -8,6 +8,7 @@ import { getMyPermissions, enviarParaRevisao, aprovarPost, rejeitarPost } from "
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { InstagramPostButton } from "@/components/admin/InstagramPostButton";
 
 type StatusPost = "rascunho" | "publicado" | "em_revisao" | "rejeitado";
 
@@ -103,6 +104,11 @@ export function PostEditor({ id }: { id?: string }) {
     enableBeforeUnload: false,
   });
 
+  // Hooks must run even while the saved article is loading.
+  const permsQ = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions() });
+  const enviarFn = useServerFn(enviarParaRevisao);
+  const aprovarFn = useServerFn(aprovarPost);
+  const rejeitarFn = useServerFn(rejeitarPost);
 
   // Estados de carregamento e "não encontrada"
   if (!isNew && postQ.isLoading) {
@@ -176,16 +182,11 @@ export function PostEditor({ id }: { id?: string }) {
     } finally { setSaving(false); }
   };
 
-  const permsQ = useQuery({ queryKey: ["my-perms"], queryFn: () => getMyPermissions() });
   const perms = permsQ.data?.perms;
   const meuPost = !isNew && (postQ.data?.post as any)?.criado_por === permsQ.data?.userId;
   const podePublicar = !!perms?.publicar_qualquer || (meuPost && !!perms?.publicar_propria);
   const podeAprovar = !!perms?.aprovar;
   const podeEditarQualquer = !!perms?.editar_qualquer;
-
-  const enviarFn = useServerFn(enviarParaRevisao);
-  const aprovarFn = useServerFn(aprovarPost);
-  const rejeitarFn = useServerFn(rejeitarPost);
 
   const acaoRevisao = async (fn: () => Promise<any>, novo: StatusPost) => {
     setSaving(true); setMsg("");
@@ -237,6 +238,7 @@ export function PostEditor({ id }: { id?: string }) {
           {msg && <p className="mt-2 text-sm text-primary">{msg}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
+          {perms?.escrever && <InstagramPostButton article={{ titulo, resumo, conteudo, imagemCapa, creditoImagem, slug }} />}
           <button onClick={() => onSave("rascunho")} disabled={saving}
             className="rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold uppercase text-foreground disabled:opacity-50">
             Salvar rascunho
