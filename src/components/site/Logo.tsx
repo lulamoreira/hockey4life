@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import logoEscuro from "@/assets/logo-escuro.png.asset.json";
-import logoClaro from "@/assets/logo-claro.png.asset.json";
+import logoEscuro from "@/assets/hockey4life-logo-escuro.svg.asset.json";
+import logoClaro from "@/assets/hockey4life-logo-claro.svg.asset.json";
 
 /**
  * Logo Hockey4Life. Alterna automaticamente entre a versão para fundo
@@ -29,7 +29,7 @@ export function LogoImg({ height = 40, className = "" }: { height?: number; clas
       <img
         src={logoEscuro.url}
         alt="Hockey4Life"
-        width={height * 3.2}
+        width={Math.round(height * 3.554)}
         height={height}
         style={{ height, width: "auto" }}
         className={`hidden select-none dark:block ${className}`}
@@ -41,7 +41,7 @@ export function LogoImg({ height = 40, className = "" }: { height?: number; clas
       <img
         src={logoClaro.url}
         alt="Hockey4Life"
-        width={height * 3.2}
+        width={Math.round(height * 3.554)}
         height={height}
         style={{ height, width: "auto" }}
         className={`block select-none dark:hidden ${className}`}
