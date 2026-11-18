@@ -80,6 +80,50 @@ export type Database = {
         }
         Relationships: []
       }
+      comentarios: {
+        Row: {
+          criado_em: string
+          id: string
+          moderado_em: string | null
+          moderado_por: string | null
+          nome: string
+          post_id: string
+          status: string
+          texto: string
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          moderado_em?: string | null
+          moderado_por?: string | null
+          nome: string
+          post_id: string
+          status?: string
+          texto: string
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          moderado_em?: string | null
+          moderado_por?: string | null
+          nome?: string
+          post_id?: string
+          status?: string
+          texto?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comentarios_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracoes: {
         Row: {
           atualizado_em: string

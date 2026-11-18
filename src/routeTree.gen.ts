@@ -27,6 +27,7 @@ import { Route as AdminAprovacoesRouteImport } from './routes/admin.aprovacoes'
 import { Route as AdminAutoresRouteImport } from './routes/admin.autores'
 import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 import { Route as AdminBuscaGoogleRouteImport } from './routes/admin.busca-google'
+import { Route as AdminComentariosRouteImport } from './routes/admin.comentarios'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminContatosRouteImport } from './routes/admin.contatos'
 import { Route as AdminImportarRouteImport } from './routes/admin.importar'
@@ -139,6 +140,11 @@ const AdminBackupRoute = AdminBackupRouteImport.update({
 const AdminBuscaGoogleRoute = AdminBuscaGoogleRouteImport.update({
   id: '/busca-google',
   path: '/busca-google',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminComentariosRoute = AdminComentariosRouteImport.update({
+  id: '/comentarios',
+  path: '/comentarios',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
@@ -276,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/busca-google': typeof AdminBuscaGoogleRoute
+  '/admin/comentarios': typeof AdminComentariosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/busca-google': typeof AdminBuscaGoogleRoute
+  '/admin/comentarios': typeof AdminComentariosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/admin/autores': typeof AdminAutoresRoute
   '/admin/backup': typeof AdminBackupRoute
   '/admin/busca-google': typeof AdminBuscaGoogleRoute
+  '/admin/comentarios': typeof AdminComentariosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/contatos': typeof AdminContatosRoute
   '/admin/importar': typeof AdminImportarRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/busca-google'
+    | '/admin/comentarios'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -447,6 +457,7 @@ export interface FileRouteTypes {
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/busca-google'
+    | '/admin/comentarios'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/admin/autores'
     | '/admin/backup'
     | '/admin/busca-google'
+    | '/admin/comentarios'
     | '/admin/configuracoes'
     | '/admin/contatos'
     | '/admin/importar'
@@ -661,6 +673,13 @@ declare module '@tanstack/react-router' {
       path: '/busca-google'
       fullPath: '/admin/busca-google'
       preLoaderRoute: typeof AdminBuscaGoogleRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/comentarios': {
+      id: '/admin/comentarios'
+      path: '/comentarios'
+      fullPath: '/admin/comentarios'
+      preLoaderRoute: typeof AdminComentariosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/configuracoes': {
@@ -864,6 +883,7 @@ interface AdminRouteChildren {
   AdminAutoresRoute: typeof AdminAutoresRoute
   AdminBackupRoute: typeof AdminBackupRoute
   AdminBuscaGoogleRoute: typeof AdminBuscaGoogleRoute
+  AdminComentariosRoute: typeof AdminComentariosRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContatosRoute: typeof AdminContatosRoute
   AdminImportarRoute: typeof AdminImportarRoute
@@ -882,6 +902,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAutoresRoute: AdminAutoresRoute,
   AdminBackupRoute: AdminBackupRoute,
   AdminBuscaGoogleRoute: AdminBuscaGoogleRoute,
+  AdminComentariosRoute: AdminComentariosRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContatosRoute: AdminContatosRoute,
   AdminImportarRoute: AdminImportarRoute,

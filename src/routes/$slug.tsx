@@ -16,6 +16,7 @@ import { SeguirInstagram } from "@/components/site/SeguirInstagram";
 import { EditarMateriaLink } from "@/components/site/EditarMateriaLink";
 import { OuvirMateria } from "@/components/site/OuvirMateria";
 import { MeSurpreenda } from "@/components/site/MeSurpreenda";
+import { Comentarios } from "@/components/site/Comentarios";
 
 const postQuery = (slug: string) =>
   queryOptions({
@@ -282,6 +283,8 @@ function PostPage() {
             )}
 
             <SeguirInstagram className={BLOCO} />
+
+            <Comentarios postId={post.id} className={BLOCO} />
 
             {(anterior || proximo) && (
               <nav className={`${BLOCO} grid gap-4 border-t border-border pt-5 sm:grid-cols-2`}>
